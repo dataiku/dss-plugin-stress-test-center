@@ -1,16 +1,16 @@
 {
-    "id": "your-plugin-id",
+    "id": "stress-test-center",
     "version": "0.1.0",
     "meta": {
-        "label": "Plugin template - Replace by your plugin label",
-        "category": "Your category (optional)",
-        "description": "Your description (keep it short and simple)",
-        "author": "Organization (firstName LASTNAME)",
-        "icon": "icon-font-awesome-3.2.1",
+        "label": "Stress test center",
+        "category": "Machine Learning",
+        "description": "Put your model through a battery of tests and see how it handles the unexpected",
+        "author": "Dataiku",
+        "icon": "icon-stethoscope",
         "licenseInfo": "Apache Software License",
         "url": "https://www.dataiku.com/product/plugins/your-plugin-id/",
         "tags": [
-            "myTag"
+            "MachineLearning"
         ],
         "supportLevel": "NOT_SUPPORTED"
     }
