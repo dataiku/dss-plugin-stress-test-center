@@ -24,7 +24,7 @@ generator = StressTestGenerator(model_handler.clean_x, model_handler.clean_y, li
 generator.run() # wait hours days, memory is filling up with datasets
 
 evaluator = StressTestEvaluator(model_handler.clean_x, model_handler.clean_y, model_handler)
-evaluator.run()
+evaluator.run(list_of_stress_test_config, generator.list_of_perturbed_datasets)
 
 metrics_dict = evaluator.get_metrics()
 critical_samples = evaluator.get_critical_samples()
