@@ -189,33 +189,34 @@
     </div>
     <hr>
     <div class="row">
-        <table class="table table-striped">
-          <thead>
+        <table class="table table-metric">
+            <thead>
             <tr>
-              <th scope="col">#</th>
-              <th scope="col">First</th>
-              <th scope="col">Last</th>
-              <th scope="col">Handle</th>
+              <th scope="col" style="border-bottom: 1px rgba(34, 34, 34, 0.15); border-top: hidden; border-left:hidden; background-color:transparent;"></th>
+              <th scope="col" class="border-left border-right border-bottom" style="border-top: 4px solid #6999C3; text-align: center; vertical-align: middle; background-color:transparent;">Performance Drop</th>
+              <th scope="col" class="border-right border-bottom" style="border-top: 4px solid #F3A268; text-align: center; vertical-align: middle; background-color:transparent;">Attack Success Rate</th>
             </tr>
-          </thead>
+            </thead>
           <tbody>
             <tr>
-              <th scope="row">1</th>
-              <td>Mark</td>
-              <td>Otto</td>
-              <td>@mdo</td>
+                <td class="border">Prior shift</td>
+                <td class="border" style="text-align: center; vertical-align: middle;">-2.9%</td>
+                <td class="border" style="text-align: center; vertical-align: middle;">-12.23%</td>
             </tr>
             <tr>
-              <th scope="row">2</th>
-              <td>Jacob</td>
-              <td>Thornton</td>
-              <td>@fat</td>
+                <td class="border">Adversarial attack</td>
+                <td class="border" style="text-align: center; vertical-align: middle;">1.234%</td>
+                <td class="border" style="text-align: center; vertical-align: middle;">30%</td>
             </tr>
             <tr>
-              <th scope="row">3</th>
-              <td>Larry</td>
-              <td>the Bird</td>
-              <td>@twitter</td>
+                <td class="border">Missing values</td>
+                <td class="border" style="text-align: center; vertical-align: middle;">5.2%</td>
+                <td class="border" style="text-align: center; vertical-align: middle;">Not applicable</td>
+            </tr>
+            <tr>
+                <td class="border">Scaling</td>
+                <td class="border" style="text-align: center; vertical-align: middle;">12.492%</td>
+                <td class="border" style="text-align: center; vertical-align: middle;">0%</td>
             </tr>
           </tbody>
         </table>
@@ -232,7 +233,7 @@
 
     <div class="row">
         <div class="col-sm-6">
-            <div class="card">
+            <div class="card dku-box">
               <div class="card-header bg-white">
                   <div class="row">
                       0.25
@@ -241,20 +242,17 @@
                       Uncertainty score
                   </div>
               </div>
-              <div class="card-body">
+              <div class="card-body" style="padding-left:0px; padding-right:0px">
                 <table class="table table-striped">
                   <tbody>
                     <tr>
-                      <td>Mark</td>
-                      <td>Otto</td>
+                      <td style="padding-left:80px">Sex = Male</td>
                     </tr>
                     <tr>
-                      <td>Jacob</td>
-                      <td>Thornton</td>
+                      <td style="padding-left:80px">Age = 25</td>
                     </tr>
                     <tr>
-                      <td>Larry</td>
-                      <td>the Bird</td>
+                      <td style="padding-left:80px">Job = Data Scientist</td>
                     </tr>
                   </tbody>
                 </table>
