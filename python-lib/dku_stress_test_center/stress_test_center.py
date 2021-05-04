@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import pandas as pd
-import sys
 import copy
-from dku_stress_test_center.utils import DkuStressTestCenterConstants, safe_str
-from dataiku.doctor.posttraining.model_information_handler import PredictionModelInformationHandler
-from drift_dac.perturbation_shared_utils import Shift
+from dku_stress_test_center.utils import DkuStressTestCenterConstants, safe_str, get_stress_test_name
+from drift_dac.perturbation_shared_utils import Shift, PerturbationConstants
 from sklearn.metrics import accuracy_score, f1_score, balanced_accuracy_score
 import logging
 
@@ -13,171 +11,139 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format='Stress Test Center Plugin | %(levelname)s - %(message)s')
 
 
+'''python
+
+# Get test data
+test_df =  model_accessor.get_original_test_df()
+selected_features = ... # either top 10 feats or later given by the user.
+test_df = test_df[selected_features] 
+​
+​
+# Run the stress tests
+config_list = [StressTestConfiguration(PriorShift), StressTestConfiguration(MissingValues)]
+stressor = StressTestGenerator(config_list)
+perturbed_df = stressor.fit_transform(test_df) # perturbed_df is a dataset of schema feat_1 | feat_2 | ... | _STRESS_TEST_TYPE | _DKU_ID_
+​
+perturbed_df_with_prediction = model_accessor.predict(perturbed_df)
+​
+# Compute the performance drop metrics
+metrics_df = build_stress_metric(y_pred = perturbed_df_with_prediction['target'], 
+								stress_test_indicator = perturbed_df_with_prediction['_STRESS_TEST_TYPE'], 
+								row_indicator = perturbed_df_with_prediction['_DKU_ROW_ID_'])
+​
+critical_samples = get_critical_samples(y_pred = perturbed_df_with_prediction['target'], 
+										stress_test_indicator = perturbed_df_with_prediction['_STRESS_TEST_TYPE'], 
+										row_indicator = perturbed_df_with_prediction['_DKU_ROW_ID_']) # sparse format for the pair (orig_x, pert_x) ?
+
+
 '''
-
-# example of how backend would call it
-model_handler = DkuModelHandler(model, version_id)
-model_handler.sample_data_from_dku_saved_model()
-
-# from UI build a list of StressTestConfiguration list_of_stress_test_config
-
-generator = StressTestGenerator(model_handler.clean_x, model_handler.clean_y, list_of_stress_test_config)
-generator.run() # wait hours days, memory is filling up with datasets
-
-evaluator = StressTestEvaluator(model_handler.clean_x, model_handler.clean_y, model_handler)
-evaluator.run(list_of_stress_test_config, generator.list_of_perturbed_datasets)
-
-metrics_dict = evaluator.get_metrics()
-critical_samples = evaluator.get_critical_samples()
-
-'''
-
-
-class DkuModelHandler(object):
-    """
-    DkuStressTestCenter
-    """
-
-    def __init__(self,
-                 model,
-                 version_id=None,
-                 clean_dataset_size=DkuStressTestCenterConstants.CLEAN_DATASET_NUM_ROWS,
-                 max_num_rows=DkuStressTestCenterConstants.MAX_NUM_ROWS,
-                 random_state=65537):
-
-        model_handler = self.get_model_handler(model, version_id)
-
-        if model_handler is None:
-            raise NotImplementedError('You need to define a model handler.')
-
-        self._model_handler = model_handler
-        self._target = model_handler.get_target_variable()
-        # property
-        self.model_predictor = model_handler.get_predictor()
-
-        self._clean_dataset_size = clean_dataset_size
-        self._max_num_rows = max_num_rows
-
-        self._probability_threshold = self.model_predictor.params.model_perf.get('usedThreshold', None)
-        self._feature_names = self.model_predictor.get_features()
-
-        self._random_state = random_state
-
-        # properties
-        self.clean_x = None
-        self.clean_y = None
-
-    def get_model_handler(self, model, version_id=None):
-        try:
-            params = model.get_predictor(version_id).params
-            return PredictionModelInformationHandler(params.split_desc, params.core_params, params.model_folder,
-                                                     params.model_folder)
-        except Exception as e:
-            from future.utils import raise_
-            if "ordinal not in range(128)" in safe_str(e):
-                raise_(Exception, "Stress Test Center requires models built with python3. This one is on python2.",
-                       sys.exc_info()[2])
-            else:
-                raise_(Exception, "Fail to load saved model: {}".format(e), sys.exc_info()[2])
-
-    def get_original_test_df(self):
-        try:
-            return self._model_handler.get_test_df()[0]
-        except Exception as e:
-            logger.warning(
-                'Cannot retrieve original test set: {}. The plugin will take the whole original dataset.'.format(e))
-            return self._model_handler.get_full_df()[0]
-
-    def sample_data_from_dku_saved_model(self):
-        """  """
-        np.random.seed(self._random_state)
-        original_test_df = self.get_original_test_df()[:self._max_num_rows]
-
-        clean_df = original_test_df.sample(n=self._clean_dataset_size, random_state=self._random_state)
-
-        self.clean_y = clean_df[self._target]
-        self.clean_x = clean_df.drop(self._target, axis=1)
-
-    def predict(self, x):
-        return self.model_predictor.predict(x, with_prediction=True, with_probas=False)
-
-    def predict_proba(self, x):
-        return self.model_predictor.predict(x, with_prediction=False, with_probas=True).drop(['prediction'], axis=1) # needed drop
-
-    def classes_(self):
-        return self.model_predictor.classes
-
 
 
 class StressTestConfiguration(object):
     def __init__(self,
                  shift_type: Shift,
-                 list_of_features: list):
+                 list_of_features: list=None):
         self.shift = shift_type
-        self.features = list_of_features
+        self.features = list_of_features # unused then?
         # check valid configurations
 
 
 class StressTestGenerator(object):
     def __init__(self,
-                 clean_x: pd.DataFrame,
-                 clean_y: pd.DataFrame,
-                 config_list: list): # list of StressTestConfiguration
+                 config_list: list, # list of StressTestConfiguration
+                 is_categorical: np.array,
+                 is_text: np.array,
+                 clean_dataset_size=DkuStressTestCenterConstants.CLEAN_DATASET_NUM_ROWS,
+                 random_state=65537):
 
-        self.clean_x = clean_x
-        self.clean_y = clean_y
         self.config_list = config_list
-        self.list_of_perturbed_datasets = None
+        self.is_categorical = is_categorical
+        self.is_text = is_text
+        self.is_numeric = ~is_categorical and ~is_text
+        self.perturbed_datasets_df = None
 
-    def run(self):
-        self.list_of_perturbed_datasets = []
+        self._random_state = random_state
+        self._clean_dataset_size = clean_dataset_size
+
+    def _subsample_clean_df(self, clean_df):
+
+        np.random.seed(self._random_state)
+
+        return clean_df.sample(n=self._clean_dataset_size, random_state=self._random_state)
+
+    def fit_transform(self, clean_df, target_column='target'):
+
+        clean_df = self._subsample_clean_df(clean_df)
+
+        self.perturbed_datasets_df = clean_df.copy()
+        self.perturbed_datasets_df = self.perturbed_datasets_df.reset_index(True)
+
+        self.perturbed_datasets_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] = DkuStressTestCenterConstants.CLEAN
+        self.perturbed_datasets_df[DkuStressTestCenterConstants.DKU_ROW_ID] = self.perturbed_datasets_df.index
+
+        clean_x = clean_df.drop(target_column, axis=1).values
+        clean_y = clean_df[target_column].values
+
         for config in self.config_list:
-            xt = copy.deepcopy(self.clean_x)
-            yt = copy.deepcopy(self.clean_y)
-            xt[:, config.features], yt = config.shift.transform(xt[:, config.features], yt)
-            self.list_of_perturbed_datasets.append((xt, yt))
+            xt = copy.deepcopy(clean_x)
+            yt = copy.deepcopy(clean_y)
+
+            if config.shift.feature_type == PerturbationConstants.NUMERIC:
+                (xt[:, self.is_numeric], yt) = config.shift.transform(xt[:, self.is_numeric].astype(float), yt)
+            elif config.shift.feature_type == PerturbationConstants.CATEGORICAL:
+                (xt[:, self.is_categorical], yt) = config.shift.transform(xt[:, self.is_categorical], yt)
+            #elif config.shift.feature_type == PerturbationConstants.TEXT:
+            #    (xt[:, self.is_text], yt) = config.shift.transform(xt[:, self.is_text], yt)
+            else:
+                (xt[:, self.is_text], yt) = config.shift.transform(xt[:, self.is_text], yt)
+                xt[:, config.features], yt = config.shift.transform(xt[:, config.features], yt)
+
+            pertubed_df = pd.DataFrame(columns=clean_df.columns)
+            pertubed_df[[clean_x.columns]].values = xt
+            pertubed_df[[target_column]].values = yt
+
+            [DkuStressTestCenterConstants.STRESS_TEST_TYPE] = get_stress_test_name(config.shift)
+            pertubed_df[DkuStressTestCenterConstants.DKU_ROW_ID] = pertubed_df.index
+
+            # probably need to store the shifted_indices
+
+            self.perturbed_datasets_df.append(pertubed_df)
 
 
-class StressTestEvaluator(object):
-    def __init__(self,
-                 clean_x,
-                 clean_y,
-                 model): # anything with predict/predict_proba
+def build_stress_metric(y_true,
+                        y_pred,
+                        list_y_proba,
+						stress_test_indicator,
+						row_indicator):
+    # batch evaluation
+    # return average accuracy drop
+    # return average f1 drop
+    # return robustness metrics: 1-ASR or imbalanced accuracy for prior shift
+    self.metrics_clean['accuracy'] = accuracy_score(clean_y, clean_y_pred)
+    self.metrics_clean['f1_score'] = f1_score(clean_y, clean_y_pred)
+    self.metrics_clean['balanced_accuracy'] = balanced_accuracy_score(clean_y, clean_y_pred)
 
-        # compute metrics on clean data here
-        clean_y_proba = model.predict_proba(clean_x)
-        clean_y_pred = model.classes_[np.argmax(clean_y_proba, axis=1)]
-        self.metrics_clean = dict()
-        self.metrics_clean['accuracy'] = accuracy_score(clean_y, clean_y_pred)
-        self.metrics_clean['f1_score'] = f1_score(clean_y, clean_y_pred)
-        self.metrics_clean['balanced_accuracy'] = balanced_accuracy_score(clean_y, clean_y_pred)
+    return metrics_df
+​
 
+def get_critical_samples(y_true,
+                        y_pred,
+                        list_y_proba,
+						stress_test_indicator,
+						row_indicator):
+
+    # sparse format for the pair (orig_x, pert_x)
+
+    if config.shift.shifted_indices is not None:  # it's perturbation based
+
+        # critical samples evaluation
+        # sort by std of uncertainty
         # store proba per sample
         self.sample_predictions = clean_y_pred
         self.sample_true_class_confidence = clean_y_proba[:, [model.classes_.index(true_y) for true_y in clean_y]]
 
-    def run(self, config_list, list_of_perturbed_datasets):
+    return critical_samples
 
-        for config, (perturbed_x, perturbed_y) in zip(config_list, list_of_perturbed_datasets):
-
-            # batch evaluation
-            # return average accuracy drop
-            # return average f1 drop
-            # return robustness metrics: 1-ASR or imbalanced accuracy for prior shift
-
-            if config.shift.shifted_indices is not None: # it's perturbation based
-
-                # critical samples evaluation
-                # sort by std of uncertainty
-
-    def get_critical_samples(self, top_k_samples=5):
-
-        return None
-
-    def get_metrics(self):
-        # return dict with stress test config and its batch-level results
-
-        return dict()
 
 
 
