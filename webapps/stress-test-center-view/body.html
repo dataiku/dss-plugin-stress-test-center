@@ -184,39 +184,39 @@
 <br><br>
 
 <div class="container-fluid">
-    <div class="row title-sb">
+    <div class="row title-sb" style="padding-left:12px">
         Performance metrics
     </div>
     <hr>
     <div class="row">
-        <table class="table table-metric">
+        <table class="table table-metric" >
             <thead>
             <tr>
               <th scope="col" style="border-bottom: 1px rgba(34, 34, 34, 0.15); border-top: hidden; border-left:hidden; background-color:transparent;"></th>
-              <th scope="col" class="border-left border-right border-bottom" style="border-top: 4px solid #6999C3; text-align: center; vertical-align: middle; background-color:transparent;">Performance Drop</th>
-              <th scope="col" class="border-right border-bottom" style="border-top: 4px solid #F3A268; text-align: center; vertical-align: middle; background-color:transparent;">Attack Success Rate</th>
+              <th scope="col" class="small-title-sb border-left border-right border-bottom" style="border-top: 4px solid #6999C3; text-align: center; vertical-align: middle; background-color:transparent;">Performance Drop</th>
+              <th scope="col" class="small-title-sb border-right border-bottom" style="border-top: 4px solid #F3A268; text-align: center; vertical-align: middle; background-color:transparent;">Attack Success Rate</th>
             </tr>
             </thead>
           <tbody>
             <tr>
-                <td class="border">Prior shift</td>
-                <td class="border" style="text-align: center; vertical-align: middle;">-2.9%</td>
-                <td class="border" style="text-align: center; vertical-align: middle;">-12.23%</td>
+                <td class="border text">Prior shift</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">-2.9%</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">-12.23%</td>
             </tr>
             <tr>
-                <td class="border">Adversarial attack</td>
-                <td class="border" style="text-align: center; vertical-align: middle;">1.234%</td>
-                <td class="border" style="text-align: center; vertical-align: middle;">30%</td>
+                <td class="border text">Adversarial attack</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">1.234%</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">30%</td>
             </tr>
             <tr>
-                <td class="border">Missing values</td>
-                <td class="border" style="text-align: center; vertical-align: middle;">5.2%</td>
-                <td class="border" style="text-align: center; vertical-align: middle;">Not applicable</td>
+                <td class="border text">Missing values</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">5.2%</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">Not applicable</td>
             </tr>
             <tr>
-                <td class="border">Scaling</td>
-                <td class="border" style="text-align: center; vertical-align: middle;">12.492%</td>
-                <td class="border" style="text-align: center; vertical-align: middle;">0%</td>
+                <td class="border text">Scaling</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">12.492%</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">0%</td>
             </tr>
           </tbody>
         </table>
@@ -226,59 +226,40 @@
 <br><br>
 
 <div class="container-fluid">
-    <div class="row title-sb">
+    <div class="row title-sb"  style="padding-left:12px">
         Critital samples
     </div>
     <hr>
 
-    <div class="row">
-        <div class="col-sm-6">
-            <div class="card dku-box">
-              <div class="card-header bg-white">
-                  <div class="row">
-                      0.25
-                  </div>
-                  <div class="row">
-                      Uncertainty score
-                  </div>
-              </div>
-              <div class="card-body" style="padding-left:0px; padding-right:0px">
-                <table class="table table-striped">
-                  <tbody>
+    <div class="row dku-grid">
+        <div class="col-sm-6" style="padding-left: 0px;">
+            <table class="table table-metric">
+                <thead>
                     <tr>
-                      <td style="padding-left:80px">Sex = Male</td>
+                        <th class="title-sb border-left border-right border-bottom" style="border-top: 4px solid #6999C3; background-color:transparent;">
+                            0.25 <br>
+                            <span class="text-r" style="opacity: 0.3">Uncertainty score</span>
+                        </th>
                     </tr>
-                    <tr>
-                      <td style="padding-left:80px">Age = 25</td>
-                    </tr>
-                    <tr>
-                      <td style="padding-left:80px">Job = Data Scientist</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-          <div class="col-sm-6">
-            <div class="card">
-                <div class="card-header">
-                  0.30
-              </div>
-              <div class="card-body">
-              </div>
-            </div>
-          </div>
+                </thead>
 
-          <div class="col-sm-6">
-            <div class="card">
-                <div class="card-header">
-                  0.49
-              </div>
-              <div class="card-body">
-              </div>
-            </div>
-          </div>
+                <tbody>
+                    <tr>
+                      <td style="padding-left:80px">Sex <span style="opacity: 0.3">= Male</span></td>
+                    </tr>
+                    <tr>
+                      <td style="padding-left:80px">Age <span style="opacity: 0.3">= 25</span></td>
+                    </tr>
+                    <tr>
+                      <td style="padding-left:80px">Job <span style="opacity: 0.3">= Data Scientist</span></td>
+                    </tr>
+                </tbody>
+
+            </table>
+        </div>
     </div>
+
+    <hr>
 
 </div>
 

@@ -2,11 +2,19 @@
 
 .table-metric {
    border-collapse: collapse;
+   padding-left:32px;
+   margin-left:32px;
+   padding-right:32px;
+   margin-right:32px;
 }
 
-.border-metric {
-    border-top: 10px solid #999 !important;
+.dku-grid {
+    padding-left:32px;
+   margin-left:32px;
+   padding-right:32px;
+   margin-right:32px;
 }
+
 
 .highlight-div{
     background: #E7F3FF;
@@ -196,7 +204,7 @@ html body {
 }
 
 .dku-box {
-    box-shadow: 0px 0px 2px 1px rgba(34, 34, 34, 0.15);
+    box-shadow: 0px 0px 0px 0px #CCCCCC;
 }
 
 .report-box {
@@ -205,8 +213,8 @@ html body {
     margin-right:24px;
     margin-left:8px;
     padding-top:24px;
-    padding-right:24px;
-    padding-left:24px;
+    padding-right:0px;
+    padding-left:0px;
     box-shadow: 0px 0px 2px 1px rgba(34, 34, 34, 0.15);
 }
 
