@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import sys
 import copy
-from dku_model_parser.model_handler_utils import get_original_test_df
 from dku_stress_test_center_utils import DkuStressTestCenterConstants, safe_str
 from dataiku.doctor.posttraining.model_information_handler import PredictionModelInformationHandler
 from drift_dac.perturbation_shared_utils import Shift
@@ -91,7 +90,7 @@ class DkuModelHandler(object):
     def sample_data_from_dku_saved_model(self):
         """  """
         np.random.seed(self._random_state)
-        original_test_df = get_original_test_df(self._model_handler)[:self._max_num_rows]
+        original_test_df = self.get_original_test_df()[:self._max_num_rows]
 
         clean_df = original_test_df.sample(n=self._clean_dataset_size, random_state=self._random_state)
 
