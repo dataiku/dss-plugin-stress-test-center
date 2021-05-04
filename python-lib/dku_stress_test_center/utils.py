@@ -5,15 +5,15 @@ from drift_dac.perturbation_shared_utils import Shift
 
 
 def get_stress_test_name(shift: Shift):
-    if shift == MissingValues:
+    if isinstance(shift, MissingValues):
         return DkuStressTestCenterConstants.MISSING_VALUES
-    elif shift == Scaling:
+    elif isinstance(shift, Scaling):
         return DkuStressTestCenterConstants.SCALING
-    elif shift == Adversarial:
+    elif isinstance(shift, Adversarial):
         return DkuStressTestCenterConstants.ADVERSARIAL
-    elif shift == KnockOut:
+    elif isinstance(shift, KnockOut):
         return DkuStressTestCenterConstants.PRIOR_SHIFT
-    #elif shift == TextAttack:
+    #elif isinstance(shift, TextAttack):
     #    return DkuStressTestCenterConstants.TEXT_ATTACK
     else:
         raise NotImplementedError()

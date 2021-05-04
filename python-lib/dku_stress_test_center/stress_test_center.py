@@ -57,39 +57,42 @@ class StressTestGenerator(object):
 
         clean_df = self._subsample_clean_df(clean_df)
 
-        self.perturbed_datasets_df = clean_df.copy()
-        self.perturbed_datasets_df = self.perturbed_datasets_df.reset_index(True)
+        self.perturbed_datasets_df = clean_df.copy(deep=True)
+        self.perturbed_datasets_df = self.perturbed_datasets_df.reset_index()
 
         self.perturbed_datasets_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] = DkuStressTestCenterConstants.CLEAN
         self.perturbed_datasets_df[DkuStressTestCenterConstants.DKU_ROW_ID] = self.perturbed_datasets_df.index
 
-        clean_x = clean_df.drop(target_column, axis=1).values
-        clean_y = clean_df[target_column].values
+        feature_columns = list(clean_df.columns)
+        feature_columns.remove(target_column)
+
+        clean_x = clean_df[feature_columns]
+        clean_y = clean_df[target_column]
 
         for config in self.config_list:
-            xt = copy.deepcopy(clean_x)
-            yt = copy.deepcopy(clean_y)
+            pertubed_df = clean_df.copy(deep=True).reset_index()
+
+            xt = pertubed_df[feature_columns].values
+            yt = pertubed_df[target_column].values
 
             if config.shift.feature_type == PerturbationConstants.NUMERIC:
                 (xt[:, self.is_numeric], yt) = config.shift.transform(xt[:, self.is_numeric].astype(float), yt)
             elif config.shift.feature_type == PerturbationConstants.CATEGORICAL:
                 (xt[:, self.is_categorical], yt) = config.shift.transform(xt[:, self.is_categorical], yt)
-            #elif config.shift.feature_type == PerturbationConstants.TEXT:
+            # elif config.shift.feature_type == PerturbationConstants.TEXT:
             #    (xt[:, self.is_text], yt) = config.shift.transform(xt[:, self.is_text], yt)
             else:
-                (xt[:, self.is_text], yt) = config.shift.transform(xt[:, self.is_text], yt)
-                xt[:, config.features], yt = config.shift.transform(xt[:, config.features], yt)
+                (xt, yt) = config.shift.transform(xt, yt)
 
-            pertubed_df = pd.DataFrame(columns=clean_df.columns)
-            pertubed_df[[clean_x.columns]].values = xt
-            pertubed_df[[target_column]].values = yt
+            pertubed_df.loc[:, feature_columns] = xt
+            pertubed_df.loc[:, target_column] = yt
 
             pertubed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] = get_stress_test_name(config.shift)
             pertubed_df[DkuStressTestCenterConstants.DKU_ROW_ID] = pertubed_df.index
 
             # probably need to store the shifted_indices
 
-            self.perturbed_datasets_df.append(pertubed_df)
+            self.perturbed_datasets_df = self.perturbed_datasets_df.append(pertubed_df)
 
         return self.perturbed_datasets_df
 
