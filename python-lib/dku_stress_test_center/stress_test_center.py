@@ -6,6 +6,7 @@ import copy
 from dku_stress_test_center.utils import DkuStressTestCenterConstants, safe_str
 from dataiku.doctor.posttraining.model_information_handler import PredictionModelInformationHandler
 from drift_dac.perturbation_shared_utils import Shift
+from sklearn.metrics import accuracy_score, f1_score, balanced_accuracy_score
 import logging
 
 logger = logging.getLogger(__name__)
@@ -103,6 +104,9 @@ class DkuModelHandler(object):
     def predict_proba(self, x):
         return self.model_predictor.predict(x, with_prediction=False, with_probas=True).drop(['prediction'], axis=1) # needed drop
 
+    def classes_(self):
+        return self.model_predictor.classes
+
 
 
 class StressTestConfiguration(object):
@@ -141,8 +145,16 @@ class StressTestEvaluator(object):
                  model): # anything with predict/predict_proba
 
         # compute metrics on clean data here
+        clean_y_proba = model.predict_proba(clean_x)
+        clean_y_pred = model.classes_[np.argmax(clean_y_proba, axis=1)]
+        self.metrics_clean = dict()
+        self.metrics_clean['accuracy'] = accuracy_score(clean_y, clean_y_pred)
+        self.metrics_clean['f1_score'] = f1_score(clean_y, clean_y_pred)
+        self.metrics_clean['balanced_accuracy'] = balanced_accuracy_score(clean_y, clean_y_pred)
+
         # store proba per sample
-        pass
+        self.sample_predictions = clean_y_pred
+        self.sample_true_class_confidence = clean_y_proba[:, [model.classes_.index(true_y) for true_y in clean_y]]
 
     def run(self, config_list, list_of_perturbed_datasets):
 
