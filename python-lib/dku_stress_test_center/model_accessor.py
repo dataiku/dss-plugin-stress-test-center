@@ -77,7 +77,7 @@ class ModelAccessor(object):
                 DkuStressTestCenterConstants.IMPORTANCE: 100 * feat_importance / sum(feature_importances)
             })
 
-        dfx = pd.DataFrame(feature_importance).sort_values(by=ModelDriftConstants.IMPORTANCE,
+        dfx = pd.DataFrame(feature_importance).sort_values(by=DkuStressTestCenterConstants.IMPORTANCE,
                                                            ascending=False).reset_index(drop=True)
         dfx[DkuStressTestCenterConstants.CUMULATIVE_IMPORTANCE] = dfx[DkuStressTestCenterConstants.IMPORTANCE].cumsum()
         dfx_top = dfx.loc[dfx[DkuStressTestCenterConstants.CUMULATIVE_IMPORTANCE] <= cumulative_percentage_threshold]
