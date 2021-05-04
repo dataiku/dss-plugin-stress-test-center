@@ -118,11 +118,15 @@ class StressTestGenerator(object):
     def __init__(self,
                  clean_x: pd.DataFrame,
                  clean_y: pd.DataFrame,
-                 config_list: list[StressTestConfiguration]):
+                 config_list: list): # list of StressTestConfiguration
 
-        self.list_of_perturbed_datasets = []
+        self.clean_x = clean_x
+        self.clean_y = clean_y
+        self.config_list = config_list
+        self.list_of_perturbed_datasets = None
 
     def run(self):
+        self.list_of_perturbed_datasets = []
         for config in self.config_list:
             xt = copy.deepcopy(self.clean_x)
             yt = copy.deepcopy(self.clean_y)
