@@ -76,7 +76,7 @@
             </div>
         </div>
 
-        <div class="col">
+        <div class="col" ng-show="highlightPS">
             <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
                 <div class="row title-sb" style="color: #31708f; margin-left:-8px; padding-bottom:8px">
                     Prior Shift Perturbation
@@ -87,14 +87,83 @@
             </div>
             <div class="row">
                 <label for="fractionToRemove" class="col-6 col-form-label text">
-                    Fraction of samples of one class to remove
+                    Fraction of samples of one class to kick out
                 </label>
                 <div class="col-6 control-group">
                     <input type="number" id="fractionToRemove"  placeholder="0.5">
                 </div>
             </div>
 
+            <div class="row">
+                <label for="fractionToRemove" class="col-6 col-form-label text">
+                    Another param
+                </label>
+                <div class="col-6 control-group">
+                    <input type="number" id="fractionToRemoveToto"  placeholder="0.5">
+                </div>
+            </div>
+
+
         </div>
+
+        <div class="col" ng-show="highlightAA">
+            <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
+                <div class="row title-sb" style="color: #31708f; margin-left:-8px; padding-bottom:8px">
+                    Adversarial Attack
+                </div>
+                <div class="row text-r" style="color: #31708f; margin-left:-8px">
+                    Adversarial attack is blablabla
+                </div>
+            </div>
+            <div class="row">
+                <label for="fractionToRemove" class="col-6 col-form-label text">
+                    Fraction of samples of one class to do adversarial attack
+                </label>
+                <div class="col-6 control-group">
+                    <input type="number" id="fractionToRemove2"  placeholder="0.5">
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col" ng-show="highlightMV">
+            <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
+                <div class="row title-sb" style="color: #31708f; margin-left:-8px; padding-bottom:8px">
+                    Missing values
+                </div>
+                <div class="row text-r" style="color: #31708f; margin-left:-8px">
+                    Missing values are blablabla
+                </div>
+            </div>
+            <div class="row">
+                <label for="fractionToRemove" class="col-6 col-form-label text">
+                    Fraction of samples of one class to remove
+                </label>
+                <div class="col-6 control-group">
+                    <input type="number" id="fractionToRemove3"  placeholder="0.5">
+                </div>
+            </div>
+        </div>
+
+        <div class="col" ng-show="highlightS">
+            <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
+                <div class="row title-sb" style="color: #31708f; margin-left:-8px; padding-bottom:8px">
+                    Scaling
+                </div>
+                <div class="row text-r" style="color: #31708f; margin-left:-8px">
+                    Scaling (or Out of distribution) is blablabla
+                </div>
+            </div>
+            <div class="row">
+                <label for="fractionToRemove" class="col-6 col-form-label text">
+                    Fraction of samples of one class to scale
+                </label>
+                <div class="col-6 control-group">
+                    <input type="number" id="fractionToRemove4"  placeholder="0.5">
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
