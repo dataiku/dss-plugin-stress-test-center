@@ -23,15 +23,16 @@ class StressTestConfiguration(object):
 class StressTestGenerator(object):
     def __init__(self,
                  config_list: list,  # list of StressTestConfiguration
-                 is_categorical: np.array,
-                 is_text: np.array,
+                 is_categorical: np.array = None,
+                 is_text: np.array = None,
                  clean_dataset_size=DkuStressTestCenterConstants.CLEAN_DATASET_NUM_ROWS,
                  random_state=65537):
 
         self.config_list = config_list
         self.is_categorical = is_categorical
         self.is_text = is_text
-        self.is_numeric = ~is_categorical and ~is_text
+        self.is_numeric = None
+
         self.perturbed_datasets_df = None
 
         self._random_state = random_state
@@ -47,6 +48,12 @@ class StressTestGenerator(object):
     def fit_transform(self,
                       clean_df: pd.DataFrame,
                       target_column: str = DkuStressTestCenterConstants.TARGET):
+
+        if self.is_categorical is None:
+            self.is_categorical = np.array(clean_df.shape[1] * [False])
+        if self.is_text is None:
+            self.is_text = np.array(clean_df.shape[1] * [False])
+        self.is_numeric = ~self.is_categorical and ~self.is_text
 
         clean_df = self._subsample_clean_df(clean_df)
 
