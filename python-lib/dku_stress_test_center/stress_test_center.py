@@ -67,8 +67,6 @@ class DkuModelHandler(object):
         self.clean_x = None
         self.clean_y = None
 
-
-
     def get_model_handler(self, model, version_id=None):
         try:
             params = model.get_predictor(version_id).params
@@ -81,6 +79,14 @@ class DkuModelHandler(object):
                        sys.exc_info()[2])
             else:
                 raise_(Exception, "Fail to load saved model: {}".format(e), sys.exc_info()[2])
+
+    def get_original_test_df(self):
+        try:
+            return self._model_handler.get_test_df()[0]
+        except Exception as e:
+            logger.warning(
+                'Cannot retrieve original test set: {}. The plugin will take the whole original dataset.'.format(e))
+            return self._model_handler.get_full_df()[0]
 
     def sample_data_from_dku_saved_model(self):
         """  """
