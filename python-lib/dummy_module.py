@@ -17,7 +17,21 @@ def dummy_backend(model_id, version_id):
 
     # Get test data
     test_df = model_accessor.get_original_test_df()
-    selected_features = ...  # either top 10 feats or later given by the user.
+    # selected_features = ...  # either top 10 feats or later given by the user.
+
+    def undo_preproc_name(f):
+        if ':' in f:
+            return f.split(':')[1]
+        else:
+            return f
+
+    selected_features = set()
+    feature_importance = model_accessor.get_feature_importance().index.tolist()
+
+    feat_id = 0
+    while len(selected_features) < 10:
+        selected_features.add(undo_preproc_name(feature_importance[feat_id]))
+        feat_id += 1
     test_df = test_df[selected_features]
 
     # Run the stress tests
