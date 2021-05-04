@@ -77,7 +77,7 @@ class DkuModelHandler(object):
         except Exception as e:
             from future.utils import raise_
             if "ordinal not in range(128)" in safe_str(e):
-                raise_(Exception, "Model Error Analysis requires models built with python3. This one is on python2.",
+                raise_(Exception, "Stress Test Center requires models built with python3. This one is on python2.",
                        sys.exc_info()[2])
             else:
                 raise_(Exception, "Fail to load saved model: {}".format(e), sys.exc_info()[2])
