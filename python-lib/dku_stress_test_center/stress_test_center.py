@@ -132,7 +132,6 @@ def build_stress_metric(y_true: np.array,
 
 
 def get_critical_samples(y_true: np.array,  # needs to be numeric
-                         y_pred: np.array,
                          y_proba: np.array,  # n_rows x n_classes
                          stress_test_indicator: np.array,
                          row_indicator: np.array,
