@@ -53,7 +53,7 @@ class StressTestGenerator(object):
             self.is_categorical = np.array(clean_df.shape[1] * [False])
         if self.is_text is None:
             self.is_text = np.array(clean_df.shape[1] * [False])
-        self.is_numeric = ~self.is_categorical and ~self.is_text
+        self.is_numeric = ~self.is_categorical & ~self.is_text
 
         clean_df = self._subsample_clean_df(clean_df)
 
