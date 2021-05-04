@@ -17,6 +17,7 @@ def dummy_backend(model_id, version_id):
 
     # Get test data
     test_df = model_accessor.get_original_test_df()
+    target = model_accessor.get_target_variable()
     # selected_features = ...  # either top 10 feats or later given by the user.
 
     def undo_preproc_name(f):
@@ -32,13 +33,16 @@ def dummy_backend(model_id, version_id):
     while len(selected_features) < 10:
         selected_features.add(undo_preproc_name(feature_importance[feat_id]))
         feat_id += 1
-    test_df = test_df[selected_features]
+
+    selected_features = list(selected_features)
+
+    test_df = test_df[selected_features + [target]]
 
     # Run the stress tests
-    config_list = [StressTestConfiguration(KnockOut),
-                   StressTestConfiguration(MissingValues),
-                   StressTestConfiguration(Scaling),
-                   StressTestConfiguration(Adversarial)]
+    config_list = [StressTestConfiguration(KnockOut()),
+                   StressTestConfiguration(MissingValues()),
+                   StressTestConfiguration(Scaling()),
+                   StressTestConfiguration(Adversarial())]
 
     stressor = StressTestGenerator(config_list, is_categorical, is_text)
     perturbed_df = stressor.fit_transform(
