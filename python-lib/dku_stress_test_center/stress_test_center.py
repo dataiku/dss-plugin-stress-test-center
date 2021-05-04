@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import sys
 import copy
-from dku_stress_test_center_utils import DkuStressTestCenterConstants, safe_str
+from dku_stress_test_center.utils import DkuStressTestCenterConstants, safe_str
 from dataiku.doctor.posttraining.model_information_handler import PredictionModelInformationHandler
 from drift_dac.perturbation_shared_utils import Shift
 import logging
