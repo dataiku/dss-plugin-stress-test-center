@@ -40,7 +40,7 @@ def dummy_backend(model_id, version_id):
                    StressTestConfiguration(Scaling),
                    StressTestConfiguration(Adversarial)]
 
-    stressor = StressTestGenerator(config_list)
+    stressor = StressTestGenerator(config_list, is_categorical, is_text)
     perturbed_df = stressor.fit_transform(
         test_df)  # perturbed_df is a dataset of schema feat_1 | feat_2 | ... | _STRESS_TEST_TYPE | _DKU_ID_
 
