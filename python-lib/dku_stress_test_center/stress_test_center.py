@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 import copy
-from dku_stress_test_center.utils import DkuStressTestCenterConstants, safe_str, get_stress_test_name
+from .utils import DkuStressTestCenterConstants, get_stress_test_name
 from drift_dac.perturbation_shared_utils import Shift, PerturbationConstants
 from sklearn.metrics import accuracy_score, f1_score, balanced_accuracy_score
 import logging
@@ -46,7 +46,7 @@ class StressTestGenerator(object):
 
     def fit_transform(self,
                       clean_df: pd.DataFrame,
-                      target_column: str=DkuStressTestCenterConstants.TARGET):
+                      target_column: str = DkuStressTestCenterConstants.TARGET):
 
         clean_df = self._subsample_clean_df(clean_df)
 
@@ -77,7 +77,7 @@ class StressTestGenerator(object):
             pertubed_df[[clean_x.columns]].values = xt
             pertubed_df[[target_column]].values = yt
 
-            [DkuStressTestCenterConstants.STRESS_TEST_TYPE] = get_stress_test_name(config.shift)
+            pertubed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] = get_stress_test_name(config.shift)
             pertubed_df[DkuStressTestCenterConstants.DKU_ROW_ID] = pertubed_df.index
 
             # probably need to store the shifted_indices
@@ -136,7 +136,7 @@ def get_critical_samples(y_true: np.array,  # needs to be numeric
                          y_proba: np.array,  # n_rows x n_classes
                          stress_test_indicator: np.array,
                          row_indicator: np.array,
-                         top_k_samples: int=5):
+                         top_k_samples: int = 5):
 
     # sparse format for the pair (orig_x, pert_x)
 

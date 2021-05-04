@@ -1,16 +1,7 @@
 # -*- coding: utf-8 -*-
-import sys
 from drift_dac.covariate_shift import MissingValues, Scaling, Adversarial
 from drift_dac.prior_shift import KnockOut
 from drift_dac.perturbation_shared_utils import Shift
-
-
-def safe_str(val):
-    if sys.version_info > (3, 0):
-        return str(val)
-    if isinstance(val, unicode):
-        return val.encode("utf-8")
-    return str(val)
 
 
 def get_stress_test_name(shift: Shift):
