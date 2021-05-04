@@ -23,7 +23,7 @@ model_handler.sample_data_from_dku_saved_model()
 generator = StressTestGenerator(model_handler.clean_x, model_handler.clean_y, list_of_stress_test_config)
 generator.run() # wait hours days, memory is filling up with datasets
 
-evaluator = StressTestEvaluator(model_handler.clean_x, model_handler.clean_y, model_handler.model_predictor)
+evaluator = StressTestEvaluator(model_handler.clean_x, model_handler.clean_y, model_handler)
 evaluator.run()
 
 metrics_dict = evaluator.get_metrics()
@@ -96,6 +96,12 @@ class DkuModelHandler(object):
 
         self.clean_y = clean_df[self._target]
         self.clean_x = clean_df.drop(self._target, axis=1)
+
+    def predict(self, x):
+        return self.model_predictor.predict(x, with_prediction=True, with_probas=False)
+
+    def predict_proba(self, x):
+        return self.model_predictor.predict(x, with_prediction=False, with_probas=True).drop(['prediction'], axis=1) # needed drop
 
 
 
