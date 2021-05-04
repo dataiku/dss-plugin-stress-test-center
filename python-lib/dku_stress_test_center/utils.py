@@ -23,17 +23,30 @@ def get_stress_test_name(shift: Shift):
     elif shift == KnockOut:
         return DkuStressTestCenterConstants.PRIOR_SHIFT
     #elif shift == TextAttack:
-    #    return DkuStressTestCenterConstants.TEXTATTACK
+    #    return DkuStressTestCenterConstants.TEXT_ATTACK
     else:
         raise NotImplementedError()
 
 
 class DkuStressTestCenterConstants(object):
     CLEAN_DATASET_NUM_ROWS = 500
+    CLEAN = 'CLEAN'
     MISSING_VALUES = 'MISSING_VALUES'
     SCALING = 'SCALING'
     ADVERSARIAL = 'ADVERSARIAL'
     PRIOR_SHIFT = 'PRIOR_SHIFT'
+
+    PERTURBATION_BASED_STRESS_TYPES = [MISSING_VALUES, SCALING, ADVERSARIAL]
+
+    TARGET = 'target'
+
+    CONFIDENCE = 'confidence'
+    UNCERTAINTY = 'uncertainty'
+    ACCURACY_DROP = 'accuracy_drop'
+    F1_DROP = 'f1_drop'
+    ROBUSTNESS = 'robustness'
+    STRESS_TEST_TYPE = '_dku_stress_test_type'
+    DKU_ROW_ID = '_dku_row_identifier_'
 
     TIMESTAMP = 'timestamp'
     MODEL_ID = 'model_id'
