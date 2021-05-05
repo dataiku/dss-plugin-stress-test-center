@@ -1,9 +1,12 @@
+<<<<<<< HEAD
 flask==1.1.2
 future==0.18.2
 joblib==0.14.1
 numpy==1.16.6
 simplejson==3.17.2
 scikit-learn==0.20.2
-scipy==1.1.0
 xgboost==0.81
-simplejson==3.17.2
+scikit-learn>=0.20,<0.21
+scipy==1.4.1
+imbalanced-learn==0.4.3
+adversarial-robustness-toolbox==1.1.1
