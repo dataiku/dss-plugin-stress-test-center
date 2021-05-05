@@ -104,7 +104,8 @@ class StressTestGenerator(object):
 
 def build_stress_metric(y_true: np.array,
                         y_pred: np.array,
-                        stress_test_indicator: np.array):
+                        stress_test_indicator: np.array,
+                        pos_label: str or int):
     # batch evaluation
     # return average accuracy drop
     # return average f1 drop
@@ -119,16 +120,17 @@ def build_stress_metric(y_true: np.array,
     clean_y_true = y_true[clean_filter]
     clean_y_pred = y_pred[clean_filter]
     clean_accuracy = accuracy_score(clean_y_true, clean_y_pred)
-    clean_f1_score = f1_score(clean_y_true, clean_y_pred)
+    clean_f1_score = f1_score(clean_y_true, clean_y_pred, pos_label=pos_label)
 
-    stress_ids = stress_test_indicator.unique().drop(DkuStressTestCenterConstants.CLEAN)
+    stress_ids = np.unique(stress_test_indicator)
+    stress_ids = np.delete(stress_ids, np.where(stress_ids==DkuStressTestCenterConstants.CLEAN))
     for stress_id in stress_ids:
-        stress_filter = stress_test_indicator==stress_id
+        stress_filter = stress_test_indicator == stress_id
         stress_y_true = y_true[stress_filter]
         stress_y_pred = y_pred[stress_filter]
 
         stress_accuracy = accuracy_score(stress_y_true, stress_y_pred)
-        stress_f1_score = f1_score(stress_y_true, stress_y_pred)
+        stress_f1_score = f1_score(stress_y_true, stress_y_pred, pos_label=pos_label)
 
         stress_acc_drop = stress_accuracy - clean_accuracy
         stress_f1_drop = stress_f1_score - clean_f1_score
@@ -141,7 +143,12 @@ def build_stress_metric(y_true: np.array,
             robustness = accuracy_score(clean_y_pred[clean_correctly_predicted_filter],
                                         stress_y_pred[clean_correctly_predicted_filter])
 
-        metrics_df.append([stress_id, stress_acc_drop, stress_f1_drop, robustness])
+        metrics_df = metrics_df.append({
+            DkuStressTestCenterConstants.STRESS_TEST_TYPE: stress_id,
+            DkuStressTestCenterConstants.ACCURACY_DROP: stress_acc_drop,
+            DkuStressTestCenterConstants.F1_DROP: stress_f1_drop,
+            DkuStressTestCenterConstants.ROBUSTNESS: robustness
+        }, ignore_index=True)
 
     return metrics_df
 
