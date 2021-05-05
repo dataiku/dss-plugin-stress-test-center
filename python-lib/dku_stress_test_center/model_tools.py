@@ -109,13 +109,14 @@ class SurrogateModel(object):
         self.target = None
         self.prediction_type = prediction_type
         #TODO should we define some params of RF to avoid long computation ?
-        if prediction_type == ModelDriftConstants.CLASSIFICATION_TYPE:
+        if prediction_type == DkuStressTestCenterConstants.CLASSIFICATION_TYPE:
             self.clf = RandomForestClassifier(random_state=1407)
         else:
             self.clf = RandomForestRegressor(random_state=1407)
 
     def check(self, prediction_type):
-        if prediction_type not in [ModelDriftConstants.CLASSIFICATION_TYPE, ModelDriftConstants.REGRRSSION_TYPE]:
+        if prediction_type not in [DkuStressTestCenterConstants.CLASSIFICATION_TYPE,
+                                   DkuStressTestCenterConstants.REGRESSION_TYPE]:
             raise ValueError('Prediction type must either be CLASSIFICATION or REGRESSION.')
 
     def get_features(self):
