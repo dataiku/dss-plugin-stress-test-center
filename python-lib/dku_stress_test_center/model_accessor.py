@@ -22,8 +22,8 @@ class ModelAccessor(object):
         """
         if self.model_handler.get_prediction_type() in DkuStressTestCenterConstants.DKU_CLASSIFICATION_TYPE:
             return DkuStressTestCenterConstants.CLASSIFICATION_TYPE
-        elif DkuStressTestCenterConstants.REGRRSSION_TYPE in self.model_handler.get_prediction_type():
-            return DkuStressTestCenterConstants.REGRRSSION_TYPE
+        elif DkuStressTestCenterConstants.REGRESSION_TYPE in self.model_handler.get_prediction_type():
+            return DkuStressTestCenterConstants.REGRESSION_TYPE
         else:
             return DkuStressTestCenterConstants.CLUSTERING_TYPE
 
