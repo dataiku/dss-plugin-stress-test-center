@@ -34,8 +34,6 @@ class StressTestGenerator(object):
         self.is_text = is_text
         self.is_numeric = None
 
-        self.perturbed_datasets_df = None
-
         self._random_state = random_state
         self._clean_dataset_size = clean_dataset_size
 
@@ -61,22 +59,18 @@ class StressTestGenerator(object):
             self.is_text = np.array(len(self.selected_features) * [False])
         self.is_numeric = ~self.is_categorical & ~self.is_text
 
-        self.perturbed_datasets_df = clean_df.copy(deep=True)
+        perturbed_datasets_df = clean_df.copy(deep=True)
 
-        self.perturbed_datasets_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] = DkuStressTestCenterConstants.CLEAN
-        self.perturbed_datasets_df[DkuStressTestCenterConstants.DKU_ROW_ID] = self.perturbed_datasets_df.index
+        perturbed_datasets_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] = DkuStressTestCenterConstants.CLEAN
+        perturbed_datasets_df[DkuStressTestCenterConstants.DKU_ROW_ID] = perturbed_datasets_df.index
 
         for config in self.config_list:
             pertubed_df = clean_df.copy(deep=True)
 
-            if config.shift.feature_type == PerturbationConstants.ANY:
-                xt = pertubed_df[all_features].values
-                yt = pertubed_df[target_column].values
-                (xt, yt) = config.shift.transform(xt, yt)
+            stress_test_id = get_stress_test_name(config.shift)
 
-                pertubed_df.loc[:, all_features] = xt
+            if stress_test_id in DkuStressTestCenterConstants.PERTURBATION_BASED_STRESS_TYPES:
 
-            else:
                 xt = pertubed_df[self.selected_features].values
                 yt = pertubed_df[target_column].values
                 if config.shift.feature_type == PerturbationConstants.NUMERIC:
@@ -85,21 +79,31 @@ class StressTestGenerator(object):
                     (xt[:, self.is_categorical], yt) = config.shift.transform(xt[:, self.is_categorical], yt)
                 # elif config.shift.feature_type == PerturbationConstants.TEXT:
                 #    (xt[:, self.is_text], yt) = config.shift.transform(xt[:, self.is_text], yt)
+                elif config.shift.feature_type == PerturbationConstants.ANY:
+                    (xt, yt) = config.shift.transform(xt, yt)
                 else:
                     raise NotImplementedError()
 
                 pertubed_df.loc[:, self.selected_features] = xt
 
+            else:
+
+                xt = pertubed_df[all_features].values
+                yt = pertubed_df[target_column].values
+                (xt, yt) = config.shift.transform(xt, yt)
+
+                pertubed_df.loc[:, all_features] = xt
+
             pertubed_df.loc[:, target_column] = yt
 
-            pertubed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] = get_stress_test_name(config.shift)
+            pertubed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] = stress_test_id
             pertubed_df[DkuStressTestCenterConstants.DKU_ROW_ID] = pertubed_df.index
 
             # probably need to store the shifted_indices
 
-            self.perturbed_datasets_df = self.perturbed_datasets_df.append(pertubed_df)
+            perturbed_datasets_df = perturbed_datasets_df.append(pertubed_df)
 
-        return self.perturbed_datasets_df
+        return perturbed_datasets_df
 
 
 def build_stress_metric(y_true: np.array,
