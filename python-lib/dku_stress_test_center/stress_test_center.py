@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import pandas as pd
-import copy
-from .utils import DkuStressTestCenterConstants, get_stress_test_name
+from dku_stress_test_center.utils import DkuStressTestCenterConstants, get_stress_test_name
 from drift_dac.perturbation_shared_utils import Shift, PerturbationConstants
 from sklearn.metrics import accuracy_score, f1_score, balanced_accuracy_score
 import logging
@@ -23,12 +22,14 @@ class StressTestConfiguration(object):
 class StressTestGenerator(object):
     def __init__(self,
                  config_list: list,  # list of StressTestConfiguration
-                 is_categorical: np.array = None,
-                 is_text: np.array = None,
+                 selected_features: list,
+                 is_categorical: np.array = None,  # wrt selected features
+                 is_text: np.array = None,  # wrt selected features
                  clean_dataset_size=DkuStressTestCenterConstants.CLEAN_DATASET_NUM_ROWS,
                  random_state=65537):
 
         self.config_list = config_list
+        self.selected_features = selected_features
         self.is_categorical = is_categorical
         self.is_text = is_text
         self.is_numeric = None
@@ -49,42 +50,46 @@ class StressTestGenerator(object):
                       clean_df: pd.DataFrame,
                       target_column: str = DkuStressTestCenterConstants.TARGET):
 
-        if self.is_categorical is None:
-            self.is_categorical = np.array(clean_df.shape[1] * [False])
-        if self.is_text is None:
-            self.is_text = np.array(clean_df.shape[1] * [False])
-        self.is_numeric = ~self.is_categorical & ~self.is_text
-
         clean_df = self._subsample_clean_df(clean_df)
 
+        all_features = list(clean_df.columns)
+        all_features.remove(target_column)
+
+        if self.is_categorical is None:
+            self.is_categorical = np.array(len(self.selected_features) * [False])
+        if self.is_text is None:
+            self.is_text = np.array(len(self.selected_features) * [False])
+        self.is_numeric = ~self.is_categorical & ~self.is_text
+
         self.perturbed_datasets_df = clean_df.copy(deep=True)
-        self.perturbed_datasets_df = self.perturbed_datasets_df.reset_index()
 
         self.perturbed_datasets_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] = DkuStressTestCenterConstants.CLEAN
         self.perturbed_datasets_df[DkuStressTestCenterConstants.DKU_ROW_ID] = self.perturbed_datasets_df.index
 
-        feature_columns = list(clean_df.columns)
-        feature_columns.remove(target_column)
-
-        clean_x = clean_df[feature_columns]
-        clean_y = clean_df[target_column]
-
         for config in self.config_list:
-            pertubed_df = clean_df.copy(deep=True).reset_index()
+            pertubed_df = clean_df.copy(deep=True)
 
-            xt = pertubed_df[feature_columns].values
-            yt = pertubed_df[target_column].values
-
-            if config.shift.feature_type == PerturbationConstants.NUMERIC:
-                (xt[:, self.is_numeric], yt) = config.shift.transform(xt[:, self.is_numeric].astype(float), yt)
-            elif config.shift.feature_type == PerturbationConstants.CATEGORICAL:
-                (xt[:, self.is_categorical], yt) = config.shift.transform(xt[:, self.is_categorical], yt)
-            # elif config.shift.feature_type == PerturbationConstants.TEXT:
-            #    (xt[:, self.is_text], yt) = config.shift.transform(xt[:, self.is_text], yt)
-            else:
+            if config.shift.feature_type == PerturbationConstants.ANY:
+                xt = pertubed_df[all_features].values
+                yt = pertubed_df[target_column].values
                 (xt, yt) = config.shift.transform(xt, yt)
 
-            pertubed_df.loc[:, feature_columns] = xt
+                pertubed_df.loc[:, all_features] = xt
+
+            else:
+                xt = pertubed_df[self.selected_features].values
+                yt = pertubed_df[target_column].values
+                if config.shift.feature_type == PerturbationConstants.NUMERIC:
+                    (xt[:, self.is_numeric], yt) = config.shift.transform(xt[:, self.is_numeric].astype(float), yt)
+                elif config.shift.feature_type == PerturbationConstants.CATEGORICAL:
+                    (xt[:, self.is_categorical], yt) = config.shift.transform(xt[:, self.is_categorical], yt)
+                # elif config.shift.feature_type == PerturbationConstants.TEXT:
+                #    (xt[:, self.is_text], yt) = config.shift.transform(xt[:, self.is_text], yt)
+                else:
+                    raise NotImplementedError()
+
+                pertubed_df.loc[:, self.selected_features] = xt
+
             pertubed_df.loc[:, target_column] = yt
 
             pertubed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] = get_stress_test_name(config.shift)

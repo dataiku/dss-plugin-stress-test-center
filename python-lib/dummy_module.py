@@ -36,7 +36,8 @@ def dummy_backend(model_id, version_id):
 
     selected_features = list(selected_features)
 
-    test_df = test_df[selected_features + [target]]
+    # no we cannot filter before, we need all features to end up in perturbed_df to do the prediction afterwords
+    #test_df = test_df[selected_features + [target]]
 
     # Run the stress tests
     config_list = [StressTestConfiguration(KnockOut()),
@@ -44,7 +45,7 @@ def dummy_backend(model_id, version_id):
                    StressTestConfiguration(Scaling()),
                    StressTestConfiguration(Adversarial())]
 
-    stressor = StressTestGenerator(config_list, is_categorical, is_text)
+    stressor = StressTestGenerator(config_list, selected_features,  is_categorical, is_text)
     perturbed_df = stressor.fit_transform(
         test_df)  # perturbed_df is a dataset of schema feat_1 | feat_2 | ... | _STRESS_TEST_TYPE | _DKU_ID_
 
