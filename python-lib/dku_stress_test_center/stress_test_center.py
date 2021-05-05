@@ -153,40 +153,37 @@ def build_stress_metric(y_true: np.array,
     return metrics_df
 
 
-def get_critical_samples(y_true: np.array,  # needs to be numeric
-                         y_proba: np.array,  # n_rows x n_classes
+def get_critical_samples(y_true_class_confidence: np.array,  # n_rows x 1
                          stress_test_indicator: np.array,
                          row_indicator: np.array,
                          top_k_samples: int = 5):
-
     # sparse format for the pair (orig_x, pert_x)
 
     valid_stress_ids = set(stress_test_indicator.unique()) & set(
         DkuStressTestCenterConstants.PERTURBATION_BASED_STRESS_TYPES)
-    valid_stress_ids |= DkuStressTestCenterConstants.CLEAN
+    valid_stress_ids |= set(DkuStressTestCenterConstants.CLEAN)
 
-    true_class_confidence = y_proba[:, y_true]
-
-    true_class_confidence_df = pd.DataFrame(columns=[DkuStressTestCenterConstants.STRESS_TEST_TYPE,
-                                                     DkuStressTestCenterConstants.DKU_ROW_ID,
-                                                     DkuStressTestCenterConstants.CONFIDENCE],
-                                            data=[stress_test_indicator, row_indicator, true_class_confidence])
+    true_class_confidence_df = pd.DataFrame({
+        DkuStressTestCenterConstants.STRESS_TEST_TYPE: stress_test_indicator,
+        DkuStressTestCenterConstants.DKU_ROW_ID: row_indicator,
+        DkuStressTestCenterConstants.CONFIDENCE: y_true_class_confidence
+    })
 
     true_class_confidence_df = true_class_confidence_df[
-        true_class_confidence_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] in valid_stress_ids]
+        true_class_confidence_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE].isin(valid_stress_ids)]
 
     # critical samples evaluation
     # sort by std of uncertainty
 
     std_confidence_df = true_class_confidence_df.groupby([DkuStressTestCenterConstants.DKU_ROW_ID]).std()
     uncertainty = std_confidence_df[DkuStressTestCenterConstants.CONFIDENCE]
-    grouped_row_indicator = std_confidence_df[DkuStressTestCenterConstants.DKU_ROW_ID]
 
-    critical_samples_df = pd.DataFrame(columns=[DkuStressTestCenterConstants.DKU_ROW_ID,
-                                                DkuStressTestCenterConstants.UNCERTAINTY],
-                                       data=[grouped_row_indicator, uncertainty])
+    critical_samples_df = pd.DataFrame({
+        DkuStressTestCenterConstants.UNCERTAINTY: uncertainty
+    })
 
-    critical_samples_df.sort_values(by=DkuStressTestCenterConstants.UNCERTAINTY, ascending=False)
+    critical_samples_df = critical_samples_df.sort_values(
+        by=DkuStressTestCenterConstants.UNCERTAINTY, ascending=False)
 
     return critical_samples_df.head(top_k_samples)
 

@@ -52,14 +52,17 @@ def dummy_backend(model_id, version_id):
     perturbed_df_with_prediction = model_accessor.predict(perturbed_df)
 
     # Compute the performance drop metrics
-    metrics_df = build_stress_metric(y_true=perturbed_df_with_prediction['target'],
+    metrics_df = build_stress_metric(y_true=perturbed_df[target],
                                      y_pred=perturbed_df_with_prediction['prediction'],
-                                     stress_test_indicator=perturbed_df_with_prediction[
-                                         DkuStressTestCenterConstants.STRESS_TEST_TYPE])
+                                     stress_test_indicator=perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE],
+                                     pos_label='>50K')
 
-    critical_samples_df = get_critical_samples(y_pred=perturbed_df_with_prediction['target'],
-                                               y_proba=perturbed_df_with_prediction[['proba_<=50K', 'proba_>50K']],
-                                               stress_test_indicator=perturbed_df_with_prediction[
+    y_true = perturbed_df[target]
+    y_true_class_confidence = perturbed_df_with_prediction[['proba_<=50K', 'proba_>50K']].values
+    y_true_idx = np.array([[True, False] if y == '>=50K' else [False, True] for y in y_true])
+    y_true_class_confidence = y_true_class_confidence[y_true_idx]
+
+    critical_samples_df = get_critical_samples(y_true_class_confidence=y_true_class_confidence,
+                                               stress_test_indicator=perturbed_df[
                                                    DkuStressTestCenterConstants.STRESS_TEST_TYPE],
-                                               row_indicator=perturbed_df_with_prediction[
-                                                   DkuStressTestCenterConstants.DKU_ROW_ID])
+                                               row_indicator=perturbed_df[DkuStressTestCenterConstants.DKU_ROW_ID])
