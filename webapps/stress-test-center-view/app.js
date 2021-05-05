@@ -82,21 +82,20 @@ let versionId = webAppConfig['versionId'];
        $scope.runAnalysis = function () {
              markRunning(true);
              $('#error_message').html('');
-             // remove old charts
-            for (var j = 0; j < chart_list.length; j++) {
-                    chart_list[j].destroy();
-            };
             $http.get(getWebAppBackendUrl("compute/"+modelId+"/"+versionId))
                 .then(function(response){
-                    $scope.populations = response.data.populations;
-                    $scope.histograms = response.data.histograms;
-                    $scope.disparity = response.data.disparity;
-                    $scope.label_list = response.data.labels;
-                    $scope.population_list = Object.keys($scope.histograms);
-                    $scope.generateChart('default');
-                    $('.result-state').show();
+                    console.log(response.data);
+                    $scope.metrics = {}
+                    $scope.metrics['prior_shift'] = response.data['metrics']['PRIOR_SHIFT'];
+                    $scope.metrics['adversarial'] = response.data['metrics']['ADVERSARIAL'];
+                    $scope.metrics['missing_values'] = response.data['metrics']['MISSING_VALUES'];
+                    $scope.metrics['scaling'] = response.data['metrics']['SCALING'];
+
+                    $scope.table_data = response.data['critical_samples'][0]
+                    $scope.critical_samples = response.data['critical_samples']
                     markRunning(false);
             }, function(e) {
+                console.log(e);
                 markRunning(false);
                 $scope.createModal.error(e.data);
             });

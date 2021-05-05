@@ -13,7 +13,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col grand-title-sb">
-            Tests
+            Types of attack
         </div>
         <div class="col" style="display: inline;">
             <button class="dku-btn dku-btn-primary float-right" id="run-button" type="button" ng-click="runAnalysis()" style="color: #FFFFFF;">COMPUTE</button>
@@ -200,22 +200,22 @@
           <tbody>
             <tr>
                 <td class="border text-highlight">Prior shift</td>
-                <td class="border text-sb" style="text-align: center; vertical-align: middle;">-2.9%</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">{{metrics['prior_shift']}}%</td>
                 <td class="border text-sb" style="text-align: center; vertical-align: middle;">-12.23%</td>
             </tr>
             <tr>
                 <td class="border text-highlight">Adversarial attack</td>
-                <td class="border text-sb" style="text-align: center; vertical-align: middle;">1.234%</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">{{metrics['adversarial']}}%</td>
                 <td class="border text-sb" style="text-align: center; vertical-align: middle;">30%</td>
             </tr>
             <tr>
                 <td class="border text-highlight">Missing values</td>
-                <td class="border text-sb" style="text-align: center; vertical-align: middle;">5.2%</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">{{metrics['missing_values']}}%</td>
                 <td class="border text-sb" style="text-align: center; vertical-align: middle;">Not applicable</td>
             </tr>
             <tr>
                 <td class="border text-highlight">Scaling</td>
-                <td class="border text-sb" style="text-align: center; vertical-align: middle;">12.492%</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">{{metrics['scaling']}}%</td>
                 <td class="border text-sb" style="text-align: center; vertical-align: middle;">0%</td>
             </tr>
           </tbody>
@@ -232,14 +232,14 @@
     <hr>
 
     <div class="row dku-grid">
-        <div class="col-sm-6" style="padding-left: 0px; padding-top: 8px;">
+        <div class="col-sm-6" style="padding-left: 0px; padding-top: 8px;" ng-repeat="sample in critical_samples">
             <table class="table table-metric table-striped">
                 <thead>
                     <tr>
                         <th class="title-sb border-left border-right border-bottom" style="border-top: 4px solid #6999C3; background-color:transparent;">
                             <div class="row">
                                 <div class="col">
-                                        0.25
+                                        {{sample['uncertainty']}}
                                 </div>
                                 <div class="col">
                                         <div class="float-right">0.63</div>
@@ -260,98 +260,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                      <td style="padding-left:100px">sex <span style="opacity: 0.3">= Male</span></td>
-                    </tr>
-                    <tr>
-                      <td style="padding-left:100px">age <span style="opacity: 0.3">= 25</span></td>
-                    </tr>
-                    <tr>
-                      <td style="padding-left:100px">job <span style="opacity: 0.3">= Data Scientist</span></td>
-                    </tr>
-                </tbody>
-
-            </table>
-        </div>
-
-        <div class="col-sm-6" style="padding-left: 0px; padding-top: 8px;">
-            <table class="table table-metric table-striped">
-                <thead>
-                    <tr>
-                        <th class="title-sb border-left border-right border-bottom" style="border-top: 4px solid #6999C3; background-color:transparent;">
-                            <div class="row">
-                                <div class="col">
-                                        0.25
-                                </div>
-                                <div class="col">
-                                        <div class="float-right">0.63</div>
-                                </div>
-                            </div>
-                            <div class="row ">
-                                <div class="col text-r" style="opacity: 0.3">
-                                    Uncertainty score
-                                </div>
-
-                                <div class="col text-r" style="opacity: 0.3">
-                                    <div class="float-right">
-                                        Probability
-                                    </div>
-                                </div>
-                            </div>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                      <td style="padding-left:100px">sex <span style="opacity: 0.3">= Male</span></td>
-                    </tr>
-                    <tr>
-                      <td style="padding-left:100px">age <span style="opacity: 0.3">= 25</span></td>
-                    </tr>
-                    <tr>
-                      <td style="padding-left:100px">job <span style="opacity: 0.3">= Data Scientist</span></td>
-                    </tr>
-                </tbody>
-
-            </table>
-        </div>
-
-        <div class="col-sm-6" style="padding-left: 0px; padding-top: 8px;">
-            <table class="table table-metric table-striped">
-                <thead>
-                    <tr>
-                        <th class="title-sb border-left border-right border-bottom" style="border-top: 4px solid #6999C3; background-color:transparent;">
-                            <div class="row">
-                                <div class="col">
-                                        0.25
-                                </div>
-                                <div class="col">
-                                        <div class="float-right">0.63</div>
-                                </div>
-                            </div>
-                            <div class="row ">
-                                <div class="col text-r" style="opacity: 0.3">
-                                    Uncertainty score
-                                </div>
-
-                                <div class="col text-r" style="opacity: 0.3">
-                                    <div class="float-right">
-                                        Probability
-                                    </div>
-                                </div>
-                            </div>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                      <td style="padding-left:100px">sex <span style="opacity: 0.3">= Male</span></td>
-                    </tr>
-                    <tr>
-                      <td style="padding-left:100px">age <span style="opacity: 0.3">= 25</span></td>
-                    </tr>
-                    <tr>
-                      <td style="padding-left:100px">job <span style="opacity: 0.3">= Data Scientist</span></td>
+                    <tr ng-repeat="(key, value) in sample">
+                      <td style="padding-left:100px">
+                          {{key}}
+                        <span style="opacity: 0.3">= {{value}}</span>
+                      </td>
                     </tr>
                 </tbody>
 
