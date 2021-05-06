@@ -77,8 +77,8 @@ class StressTestGenerator(object):
                     (xt[:, self.is_numeric], yt) = config.shift.transform(xt[:, self.is_numeric].astype(float), yt)
                 elif config.shift.feature_type == PerturbationConstants.CATEGORICAL:
                     (xt[:, self.is_categorical], yt) = config.shift.transform(xt[:, self.is_categorical], yt)
-                # elif config.shift.feature_type == PerturbationConstants.TEXT:
-                #    (xt[:, self.is_text], yt) = config.shift.transform(xt[:, self.is_text], yt)
+                elif config.shift.feature_type == PerturbationConstants.TEXT:
+                    (xt[:, self.is_text], yt) = config.shift.transform(xt[:, self.is_text], yt)
                 elif config.shift.feature_type == PerturbationConstants.ANY:
                     (xt, yt) = config.shift.transform(xt, yt)
                 else:

@@ -3,11 +3,11 @@ from dku_stress_test_center.model_accessor import ModelAccessor
 from dku_stress_test_center.stress_test_center import StressTestConfiguration, StressTestGenerator
 from dku_stress_test_center.stress_test_center import build_stress_metric, get_critical_samples
 from dku_stress_test_center.stress_test_center import DkuStressTestCenterConstants
-from drift_dac.covariate_shift import MissingValues, Scaling, Adversarial
+from drift_dac.covariate_shift import MissingValues, Scaling, Adversarial, ReplaceWord, Typos
 from model_metadata import get_model_handler
 from drift_dac.prior_shift import KnockOut
 import dataiku
-
+import numpy as np
 
 def dummy_backend(model_id, version_id):
     # Access the model
@@ -43,9 +43,11 @@ def dummy_backend(model_id, version_id):
     config_list = [StressTestConfiguration(KnockOut()),
                    StressTestConfiguration(MissingValues()),
                    StressTestConfiguration(Scaling()),
-                   StressTestConfiguration(Adversarial())]
+                   StressTestConfiguration(Adversarial()),
+                   StressTestConfiguration(ReplaceWord()),
+                   StressTestConfiguration(Typos())]
 
-    stressor = StressTestGenerator(config_list, selected_features,  is_categorical, is_text)
+    stressor = StressTestGenerator(config_list, selected_features, is_categorical, is_text)
     perturbed_df = stressor.fit_transform(
         test_df)  # perturbed_df is a dataset of schema feat_1 | feat_2 | ... | _STRESS_TEST_TYPE | _DKU_ID_
 
