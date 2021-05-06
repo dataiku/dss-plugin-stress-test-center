@@ -56,31 +56,10 @@
             "mandatory": true,
             "columnRole": "input_dataset"
         },
-         {
-            "name": "severity_parameter_separator",
-            "label": "Severity",
-            "type": "SEPARATOR"
-        },
-        {
-            "type": "DOUBLE",
-            "name": "severity",
-            "label": "Corruption severity",
-            "minD": 0.0,
-            "maxD": 1.0,
-            "description": "Fraction of samples to corrupt"
-        },
         {
             "name": "type_of_attacks_separator",
             "label": "Type of Attacks",
             "type": "SEPARATOR"
-        },
-        {
-            "name": "prior_shift",
-            "label": "Prior Shift",
-            "type": "BOOLEAN",
-            "description": "Create imbalanced dataset",
-            "mandatory": true,
-            "defaultValue": false
         },
         {
             "name": "typos",
@@ -91,6 +70,15 @@
             "defaultValue": false
         },
         {
+            "type": "DOUBLE",
+            "name": "typos_severity",
+            "label": "Severity",
+            "minD": 0.0,
+            "maxD": 1.0,
+            "description": "Fraction of samples to corrupt",
+            "visibilityCondition": "model.typos == true"
+        },
+        {
             "name": "word_swap",
             "label": "Word replacement",
             "type": "BOOLEAN",
@@ -99,12 +87,31 @@
             "defaultValue": false
         },
         {
+            "type": "DOUBLE",
+            "name": "word_swap_severity",
+            "label": "Severity",
+            "minD": 0.0,
+            "maxD": 1.0,
+            "description": "Fraction of samples to corrupt",
+            "visibilityCondition": "model.word_swap == true"
+        },
+        {
             "name": "word_deletion",
             "label": "Word deletion",
             "type": "BOOLEAN",
             "description": "Delete random words",
             "defaultValue": false
+        },
+        {
+            "type": "DOUBLE",
+            "name": "word_deletion_severity",
+            "label": "Severity",
+            "minD": 0.0,
+            "maxD": 1.0,
+            "description": "Fraction of samples to corrupt",
+            "visibilityCondition": "model.word_deletion == true"
         }
+        
     ],
     "resourceKeys": []
 }
