@@ -23,19 +23,6 @@ def compute(model_id, version_id):
     try:
 
         print('PARAM ', request.args)
-        config_list = []
-        if float(request.args.get('paramPS')) > 0:
-            config_list.append(StressTestConfiguration(KnockOut()))
-
-        if float(request.args.get('paramAA')) > 0:
-            config_list.append(StressTestConfiguration(Adversarial()))
-
-        if float(request.args.get('paramMV')) > 0:
-            config_list.append(StressTestConfiguration(MissingValues()))
-
-        if float(request.args.get('paramS')) > 0:
-            config_list.append(StressTestConfiguration(Scaling()))
-
         print('Compute starts ...')
 
         model = dataiku.Model(model_id)
@@ -67,11 +54,26 @@ def compute(model_id, version_id):
         is_text = np.array([False] * len(selected_features))
 
         # Run the stress tests
+
         config_list = [StressTestConfiguration(KnockOut()),
                        StressTestConfiguration(MissingValues()),
                        StressTestConfiguration(Scaling()),
                        StressTestConfiguration(Adversarial())]
 
+        config_list = []
+        if float(request.args.get('paramPS')) > 0:
+            config_list.append(StressTestConfiguration(KnockOut()))
+
+        if float(request.args.get('paramAA')) > 0:
+            config_list.append(StressTestConfiguration(Adversarial()))
+
+        if float(request.args.get('paramMV')) > 0:
+            config_list.append(StressTestConfiguration(MissingValues()))
+
+        if float(request.args.get('paramS')) > 0:
+            config_list.append(StressTestConfiguration(Scaling()))
+
+        print('CONFIG LIST', config_list)
         stressor = StressTestGenerator(config_list, selected_features, is_categorical, is_text)
         perturbed_df = stressor.fit_transform(test_df, target_column=target)  # perturbed_df is a dataset of schema feat_1 | feat_2 | ... | _STRESS_TEST_TYPE | _DKU_ID_
 
@@ -87,12 +89,12 @@ def compute(model_id, version_id):
             'ADVERSARIAL': 'Adversarial attack',
             'MISSING_VALUES': 'Missing values',
             'PRIOR_SHIFT': 'Prior shift',
-            'SCALING': 'scaling'
+            'SCALING': 'Scaling'
         }
 
         metrics_list = []
         for index, row in metrics_df.iterrows():
-            dct = {}
+            dct = dict()
             dct['attack_type'] = name_mapping.get(row['_dku_stress_test_type'])
             dct['accuracy_drop'] = 100 * round(row['accuracy_drop'], 3)
             dct['robustness'] = 100 * round(row['robustness'], 3)

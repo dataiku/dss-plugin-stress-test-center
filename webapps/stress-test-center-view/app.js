@@ -19,6 +19,13 @@ let versionId = webAppConfig['versionId'];
        $scope.highlightT1 = false;
        $scope.highlightT2 = false;
 
+       var param_ps = 0;
+       var param_aa = 0;
+       var param_mv = 0;
+       var param_s = 0;
+       var paramT1 = 0;
+       var paramT2 = 0;
+
        $scope.activateBoxPS = function(){
             if ($scope.priorShiftActive) {
                 $scope.activatePS = false;
@@ -119,20 +126,36 @@ let versionId = webAppConfig['versionId'];
              markRunning(true);
 
              if ($scope.activatePS) {
-                console.log('Prior shift is chosen with param ', $scope.paramPS);
+                param_ps = $scope.paramPS;
+                console.log('Prior shift is chosen with param ', param_ps);
+             }
+             else {
+                param_ps = 0;
              };
 
              if ($scope.activateAA) {
-                console.log('Adversarial attack is chosen with param ', $scope.paramAA);
+                param_aa = $scope.paramAA
+                console.log('Adversarial attack is chosen with param ', param_aa);
+             }
+             else {
+                param_aa = 0;
              };
 
              if ($scope.activateMV) {
-                console.log('Missing values is chosen with param ', $scope.paramMV);
-             };
+                param_mv = $scope.paramMV
+                console.log('Missing values is chosen with param ', param_mv);
+             }
+             else {
+                param_mv = 0;
+             }
 
             if ($scope.activateS) {
-                console.log('Scaling is chosen with param ', $scope.paramS);
-             };
+                param_s = $scope.paramS;
+                console.log('Scaling is chosen with param ', param_s);
+             }
+             else {
+                param_s = 0;
+             }
 
             if ($scope.activateST1) {
                 console.log('Text attack type 1 is chosen with param ', $scope.paramT1);
@@ -144,15 +167,7 @@ let versionId = webAppConfig['versionId'];
 
              $('#error_message').html('');
 
-            var paramPS = 0.2;
-            var paramAA = 0.1;
-            var paramMV = 0.45;
-            var paramS = 0.55;
-            var paramT1 = 0.8;
-            var paramT2 = 0.25;
-
-
-            $http.get(getWebAppBackendUrl("compute/"+modelId+"/"+versionId+"?paramPS="+paramPS+"&paramAA="+paramAA+"&paramMV="+paramMV+"&paramS="+paramS))
+            $http.get(getWebAppBackendUrl("compute/"+modelId+"/"+versionId+"?paramPS="+param_ps+"&paramAA="+param_aa+"&paramMV="+param_mv+"&paramS="+param_s))
                 .then(function(response){
                     console.log(response.data);
                     $scope.metrics = response.data['metrics'];
