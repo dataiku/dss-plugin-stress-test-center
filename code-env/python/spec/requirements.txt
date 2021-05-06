@@ -1,1 +1,5 @@
+-c constraints.txt
+imbalanced-learn==0.4.3
+adversarial-robustness-toolbox==1.1.1
+textattack
 
