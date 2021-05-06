@@ -1,0 +1,117 @@
+{
+    "meta": {
+        "label": "Stress test with NLP models",
+        "description": "Evaluate the robustness of an NLP model",
+        "icon": "icon-puzzle-piece"
+    },
+    "selectableFromDataset": "input_dataset",
+    "kind": "PYTHON",
+    "inputRoles": [
+        {
+            "name": "model",
+            "label": "Deployed model",
+            "arity": "UNARY",
+            "required": true,
+            "acceptsDataset": false,
+            "acceptsSavedModel": true
+        },
+        {
+            "name": "input_dataset",
+            "label": "Test Dataset",
+            "description": "The dataset you want to corrupt" ,
+            "arity": "UNARY",
+            "required": true,
+            "acceptsDataset": true
+        }
+    ],
+    "outputRoles": [
+        {
+            "name": "metrics_dataset",
+            "label": "Metrics",
+            "description": "Metrics will be stored in this dataset",
+            "arity": "UNARY",
+            "required": true,
+            "acceptsDataset": true
+        },
+        {
+            "name":"critical_samples_dataset",
+            "label":"Critical Samples",
+            "description": "The top critical samples will be stored in this dataset",
+            "arity":"UNARY",
+            "required":true,
+            "acceptsDataset":true
+        }
+    ],
+    "params": [
+        {
+            "name": "input_parameter_separator",
+            "label": "Input parameter",
+            "type": "SEPARATOR"
+        },
+         {
+            "name": "samples_column",
+            "label": "Samples column",
+            "type": "COLUMN",
+            "description": "Column with the samples to corrupt",
+            "mandatory": true,
+            "columnRole": "input_dataset"
+        },
+        {
+            "name": "type_of_attacks_separator",
+            "label": "Type of Attacks",
+            "type": "SEPARATOR"
+        },
+        {
+            "name": "typos",
+            "label": "Typos",
+            "type": "BOOLEAN",
+            "description": "Insert, delete and swap characters",
+            "mandatory": true,
+            "defaultValue": false
+        },
+        {
+            "type": "DOUBLE",
+            "name": "typos_severity",
+            "label": "Severity",
+            "minD": 0.0,
+            "maxD": 1.0,
+            "description": "Fraction of samples to corrupt",
+            "visibilityCondition": "model.typos == true"
+        },
+        {
+            "name": "word_swap",
+            "label": "Word replacement",
+            "type": "BOOLEAN",
+            "description": "Replace words with neighbors. ex : create-> creating",
+            "mandatory": true,
+            "defaultValue": false
+        },
+        {
+            "type": "DOUBLE",
+            "name": "word_swap_severity",
+            "label": "Severity",
+            "minD": 0.0,
+            "maxD": 1.0,
+            "description": "Fraction of samples to corrupt",
+            "visibilityCondition": "model.word_swap == true"
+        },
+        {
+            "name": "word_deletion",
+            "label": "Word deletion",
+            "type": "BOOLEAN",
+            "description": "Delete random words",
+            "defaultValue": false
+        },
+        {
+            "type": "DOUBLE",
+            "name": "word_deletion_severity",
+            "label": "Severity",
+            "minD": 0.0,
+            "maxD": 1.0,
+            "description": "Fraction of samples to corrupt",
+            "visibilityCondition": "model.word_deletion == true"
+        }
+        
+    ],
+    "resourceKeys": []
+}
