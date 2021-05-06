@@ -12,7 +12,7 @@ language-tool-python==2.2.0
 lru-dict==1.1.6
 nltk==3.5
 pyyaml==5.3.1
-scikit-learn==0.20.4
+#scikit-learn==0.20.4
 scipy==1.4.1
 spacy==2.2.4
 torch==1.5.0
@@ -25,4 +25,13 @@ Keras==2.2.4
 Keras-Applications==1.0.8
 Keras-Preprocessing==1.1.2
 keras-resnet==0.1.0
-
+flask==1.1.2
+future==0.18.2
+joblib==0.14.1
+numpy==1.16.6
+simplejson==3.17.2
+scikit-learn==0.20.2
+xgboost==0.81
+#scikit-learn>=0.20,<0.21
+cloudpickle==1.6.0
+ipython==5.5.0
