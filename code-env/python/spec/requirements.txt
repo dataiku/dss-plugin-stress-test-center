@@ -11,6 +11,7 @@ filelock==3.0.12
 language-tool-python==2.2.0
 lru-dict==1.1.6
 nltk==3.5
+nltk_data
 pyyaml==5.3.1
 scikit-learn==0.20.4
 scipy==1.4.1

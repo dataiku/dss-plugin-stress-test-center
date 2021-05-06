@@ -1,7 +1,7 @@
 {
     "meta": {
-        "label": "Stress test text model",
-        "description": "Evaluate the robustness of a model",
+        "label": "Stress test with NLP models",
+        "description": "Evaluate the robustness of an NLP model",
         "icon": "icon-puzzle-piece"
     },
     "selectableFromDataset": "input_dataset",
