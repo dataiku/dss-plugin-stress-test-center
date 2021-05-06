@@ -69,7 +69,7 @@ app.directive("modalBackground", function($compile) {
     return {
         scope: true,
         restrict: "C",
-        templateUrl: "/plugins/model-fairness-report/resource/templates/modal.html",
+        templateUrl: "/plugins/stress-test-center/resource/templates/modal.html",
         link: function(scope, element) {
             if (scope.modal.conditions) {
                 const inputField = element.find("input");
@@ -88,6 +88,8 @@ function markRunning(running) {
         $('.landing-page').hide();
         $('#run-button').hide();
         $('.result-state').hide();
+        $('.critical-sample-container').show();
+        $('.metric-container').show();
     } else {
         $('.running-state').hide();
         $('#run-button').show();
@@ -95,13 +97,6 @@ function markRunning(running) {
 }
 
 
-var metricOpacityMapping = {
-    'default': [1,1,1,1],
-    'demographicParity': [1,1,1,1],
-    'equalizedOdds': [1,1,1,1],
-    'equalityOfOpportunity': [1, 0.1, 1, 0.1],
-    'predictiveRateParity':  [0.1, 0.1, 1, 1]
-};
 
 function draw(element, chosenMetric, data, label_list){
     // Return with commas in between

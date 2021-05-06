@@ -17,7 +17,7 @@
         </div>
         <div class="col" style="display: inline;">
             <button class="dku-btn dku-btn-primary float-right" id="run-button" type="button" ng-click="runAnalysis()" style="color: #FFFFFF;">COMPUTE</button>
-            <span class="running-state" style="display: none;">Computing ...</span>
+            <span class="running-state float-right" style="display: none;">Computing ...</span>
         </div>
     </div>
 </div>
@@ -41,7 +41,7 @@
 
             <div class="row border-bottom" ng-class="{'highlight-div': highlightAA, 'unhighlight-div': !highlightAA}">
                 <div class="col-8 text-sb my-auto" ng-class="{'normalText': activateAA, 'grayoutText': !activateAA }">
-                    Adversarial attach
+                    Adversarial attack
                 </div>
                 <div class="col-4">
                     <label class="switch float-right">
@@ -115,7 +115,7 @@
                     Fraction of samples of one class to kick out
                 </label>
                 <div class="col-6 control-group">
-                    <input type="number" id="paramPS"  ng-model="paramPS" placeholder=0.5 step=0.01 min=0>
+                    <input type="number" id="paramPS"  ng-model="paramPS" placeholder="0.5"  step=0.01 min=0>
                 </div>
             </div>
         </div>
@@ -134,11 +134,10 @@
                     Fraction of samples of one class to do adversarial attack
                 </label>
                 <div class="col-6 control-group">
-                    <input type="number" id="paramAA" ng-model="paramAA" placeholder=0.5 step=0.01 min=0>
+                    <input type="number" id="paramAA" ng-model="paramAA" value="0.5" placeholder=0.5 step=0.01 min=0>
                 </div>
             </div>
         </div>
-
 
         <div class="col" ng-show="highlightMV">
             <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
@@ -155,7 +154,7 @@
                     Fraction of samples of one class to remove
                 </label>
                 <div class="col-6 control-group">
-                    <input type="number" id="paramMV" ng-model="paramMV" placeholder=0.5 step=0.01 min=0>
+                    <input type="number" id="paramMV" ng-model="paramMV" value="0.5" placeholder=0.5 step=0.01 min=0>
                 </div>
             </div>
         </div>
@@ -174,7 +173,7 @@
                     Fraction of samples of one class to scale
                 </label>
                 <div class="col-6 control-group">
-                    <input type="number" id="paramS" ng-model="paramS" placeholder=0.5 step=0.01 min=0>
+                    <input type="number" id="paramS" ng-model="paramS" value="0.5" placeholder=0.5 step=0.01 min=0>
                 </div>
             </div>
         </div>
@@ -193,7 +192,7 @@
                     Fraction of samples
                 </label>
                 <div class="col-6 control-group">
-                    <input type="number" id="paramT1" ng-model="paramT1" placeholder=0.5 step=0.01 min=0>
+                    <input type="number" id="paramT1" ng-model="paramT1" value="0.5" placeholder=0.5 step=0.01 min=0>
                 </div>
             </div>
         </div>
@@ -212,7 +211,7 @@
                     Fraction of samples
                 </label>
                 <div class="col-6 control-group">
-                    <input type="number" id="paramT2" ng-model="paramT2" placeholder=0.5 step=0.01 min=0>
+                    <input type="number" id="paramT2" ng-model="paramT2" value="0.5" placeholder=0.5 step=0.01 min=0>
                 </div>
             </div>
         </div>
@@ -236,7 +235,7 @@
 
 <br><br>
 
-<div class="container-fluid">
+<div class="container-fluid metric-container" style="display: none;">
     <div class="row grand-title-sb" style="padding-left:12px">
         Performance metrics
     </div>
@@ -263,14 +262,14 @@
 
 <br><br>
 
-<div class="container-fluid">
+<div class="container-fluid critical-sample-container" style="display: none;">
     <div class="row grand-title-sb"  style="padding-left:12px;">
         Critical samples
     </div>
     <hr>
 
     <div class="row dku-grid">
-        <div class="col-sm-6" style="padding-left: 0px; padding-top: 0px;" ng-repeat="sample in critical_samples">
+        <div class="col-sm-6" style="padding-left: 0px; padding-top: 0px; padding-bottom: 8px" ng-repeat="sample in critical_samples">
             <table class="table table-metric table-striped">
                 <thead>
                     <tr>
@@ -298,7 +297,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="(key, value) in sample">
+                    <tr ng-repeat="(key, value) in filterUncertainty(sample)">
                       <td style="padding-left:100px">
                           {{key}}
                         <span style="opacity: 0.3">= {{value}}</span>

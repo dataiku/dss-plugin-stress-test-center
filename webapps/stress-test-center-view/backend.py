@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 def compute(model_id, version_id):
     try:
 
-        print('PARAM ', request.args)
         print('Compute starts ...')
 
         model = dataiku.Model(model_id)
@@ -50,7 +49,14 @@ def compute(model_id, version_id):
 
         selected_features = list(selected_features)
         logger.info('List of selected features for the stress test: {}'.format(selected_features))
-        is_categorical = np.array([False] * len(selected_features))
+
+        feature_handling_dict = model_accessor.get_per_feature()
+        is_categorical = []
+        for feature in selected_features:
+            feature_params = feature_handling_dict.get(feature)
+            is_categorical.append(feature_params.get('type') == 'CATEGORY')
+
+        is_categorical = np.array(is_categorical)
         is_text = np.array([False] * len(selected_features))
 
         # Run the stress tests
@@ -61,17 +67,18 @@ def compute(model_id, version_id):
                        StressTestConfiguration(Adversarial())]
 
         config_list = []
+
         if float(request.args.get('paramPS')) > 0:
-            config_list.append(StressTestConfiguration(KnockOut()))
+            config_list.append(StressTestConfiguration(KnockOut(float(request.args.get('paramPS')))))
 
         if float(request.args.get('paramAA')) > 0:
-            config_list.append(StressTestConfiguration(Adversarial()))
+            config_list.append(StressTestConfiguration(Adversarial(float(request.args.get('paramAA')))))
 
         if float(request.args.get('paramMV')) > 0:
-            config_list.append(StressTestConfiguration(MissingValues()))
+            config_list.append(StressTestConfiguration(MissingValues(float(request.args.get('paramMV')))))
 
         if float(request.args.get('paramS')) > 0:
-            config_list.append(StressTestConfiguration(Scaling()))
+            config_list.append(StressTestConfiguration(Scaling(float(request.args.get('paramS')))))
 
         print('CONFIG LIST', config_list)
         stressor = StressTestGenerator(config_list, selected_features, is_categorical, is_text)
@@ -114,6 +121,7 @@ def compute(model_id, version_id):
 
         clean_df_with_id = perturbed_df.loc[perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] == DkuStressTestCenterConstants.CLEAN].drop(DkuStressTestCenterConstants.STRESS_TEST_TYPE, axis=1)
         critical_samples_df = critical_samples_id_df.merge(clean_df_with_id, on=DkuStressTestCenterConstants.DKU_ROW_ID, how='left').drop(DkuStressTestCenterConstants.DKU_ROW_ID, axis=1)
+        critical_samples_df['uncertainty'] = np.round(critical_samples_df['uncertainty'], 3)
         critical_samples_list = critical_samples_df.to_dict('records')
 
         data = {

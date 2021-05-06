@@ -19,6 +19,14 @@ let versionId = webAppConfig['versionId'];
        $scope.highlightT1 = false;
        $scope.highlightT2 = false;
 
+       $scope.paramPS = 0.5;
+       $scope.paramAA = 0.5;
+       $scope.paramMV = 0.5;
+       $scope.paramS = 0.5;
+       $scope.paramT1 = 0.5;
+       $scope.paramT2 = 0.5;
+
+
        var param_ps = 0;
        var param_aa = 0;
        var param_mv = 0;
@@ -179,6 +187,17 @@ let versionId = webAppConfig['versionId'];
                 markRunning(false);
                 $scope.createModal.error(e.data);
             });
+
+            $scope.filterUncertainty = function(item) {
+                var result = {};
+                for (let k in item) {
+                    if (k != 'uncertainty') {
+                        result[k] = item[k];
+                    }
+                }
+
+                return result;
+            }
         }
 
 
