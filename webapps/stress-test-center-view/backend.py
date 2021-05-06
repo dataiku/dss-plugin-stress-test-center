@@ -62,15 +62,11 @@ def compute(model_id, version_id):
         is_categorical = []
         for feature in selected_features:
             feature_params = feature_handling_dict.get(feature)
-            logger.info(feature)
-            logger.info(feature_params.get('type'))
             is_categorical.append(feature_params.get('type') == 'CATEGORY')
             is_text.append(feature_params.get('type') == 'TEXT')
 
         is_categorical = np.array(is_categorical)
         is_text = np.array(is_text)
-        logger.info(is_text)
-        #is_text = np.array([False] * len(selected_features))
 
         # Run the stress tests
 
