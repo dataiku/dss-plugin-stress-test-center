@@ -1,10 +1,9 @@
-
 # -*- coding: utf-8 -*-
 import numpy as np
 import logging
 import simplejson
 import traceback
-
+from flask import request
 import dataiku
 
 from dku_stress_test_center.model_accessor import ModelAccessor
@@ -22,6 +21,21 @@ logger = logging.getLogger(__name__)
 @app.route('/compute/<model_id>/<version_id>')
 def compute(model_id, version_id):
     try:
+
+        print('PARAM ', request.args)
+        config_list = []
+        if float(request.args.get('paramPS')) > 0:
+            config_list.append(StressTestConfiguration(KnockOut()))
+
+        if float(request.args.get('paramAA')) > 0:
+            config_list.append(StressTestConfiguration(Adversarial()))
+
+        if float(request.args.get('paramMV')) > 0:
+            config_list.append(StressTestConfiguration(MissingValues()))
+
+        if float(request.args.get('paramS')) > 0:
+            config_list.append(StressTestConfiguration(Scaling()))
+
         print('Compute starts ...')
 
         model = dataiku.Model(model_id)
@@ -48,7 +62,7 @@ def compute(model_id, version_id):
                 break
 
         selected_features = list(selected_features)
-        logger.info('List of selected features for the stress test: ', selected_features)
+        logger.info('List of selected features for the stress test: {}'.format(selected_features))
         is_categorical = np.array([False] * len(selected_features))
         is_text = np.array([False] * len(selected_features))
 
@@ -69,9 +83,20 @@ def compute(model_id, version_id):
                                          stress_test_indicator=perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE],
                                          pos_label='1') # TODO this is hardcoding
 
-        metrics_dict = {}
+        name_mapping = {
+            'ADVERSARIAL': 'Adversarial attack',
+            'MISSING_VALUES': 'Missing values',
+            'PRIOR_SHIFT': 'Prior shift',
+            'SCALING': 'scaling'
+        }
+
+        metrics_list = []
         for index, row in metrics_df.iterrows():
-            metrics_dict[row[DkuStressTestCenterConstants.STRESS_TEST_TYPE]] = 100*round(row[DkuStressTestCenterConstants.ACCURACY_DROP], 3)
+            dct = {}
+            dct['attack_type'] = name_mapping.get(row['_dku_stress_test_type'])
+            dct['accuracy_drop'] = 100 * round(row['accuracy_drop'], 3)
+            dct['robustness'] = 100 * round(row['robustness'], 3)
+            metrics_list.append(dct)
 
         y_true = perturbed_df[target]
         y_true_class_confidence = perturbed_df_with_prediction[['proba_0', 'proba_1']].values
@@ -90,7 +115,7 @@ def compute(model_id, version_id):
         critical_samples_list = critical_samples_df.to_dict('records')
 
         data = {
-            'metrics': metrics_dict,
+            'metrics': metrics_list,
             'critical_samples': critical_samples_list
         }
         return simplejson.dumps(pretty_floats(data), ignore_nan=True, default=convert_numpy_int64_to_int)

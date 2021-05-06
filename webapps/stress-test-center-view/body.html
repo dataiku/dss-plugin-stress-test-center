@@ -13,7 +13,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col grand-title-sb">
-            Types of attack
+            Stress tests
         </div>
         <div class="col" style="display: inline;">
             <button class="dku-btn dku-btn-primary float-right" id="run-button" type="button" ng-click="runAnalysis()" style="color: #FFFFFF;">COMPUTE</button>
@@ -63,7 +63,7 @@
                 </div>
             </div>
 
-            <div class="row" ng-class="{'highlight-div': highlightS, 'unhighlight-div': !highlightS}">
+            <div class="row border-bottom" ng-class="{'highlight-div': highlightS, 'unhighlight-div': !highlightS}">
                 <div class="col-8 text-sb my-auto" ng-class="{'normalText': activateS, 'grayoutText': !activateS }">
                     Scaling
                 </div>
@@ -74,6 +74,31 @@
                     </label>
                 </div>
             </div>
+
+            <div class="row border-bottom" ng-class="{'highlight-div': highlightT1, 'unhighlight-div': !highlightT1}">
+                <div class="col-8 text-sb my-auto" ng-class="{'normalText': activateT1, 'grayoutText': !activateT1 }">
+                    Text attack type 1
+                </div>
+                <div class="col-4">
+                    <label class="switch float-right">
+                        <input type="checkbox" ng-model="t1Active" ng-click="activateBoxT1()">
+                        <div class="slider round"></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="row" ng-class="{'highlight-div': highlightT2, 'unhighlight-div': !highlightT2}">
+                <div class="col-8 text-sb my-auto" ng-class="{'normalText': activateT2, 'grayoutText': !activateT2 }">
+                    Text attack type 2
+                </div>
+                <div class="col-4">
+                    <label class="switch float-right">
+                        <input type="checkbox" ng-model="t2Active" ng-click="activateBoxT2()">
+                        <div class="slider round"></div>
+                    </label>
+                </div>
+            </div>
+
         </div>
 
         <div class="col" ng-show="highlightPS">
@@ -86,24 +111,13 @@
                 </div>
             </div>
             <div class="row">
-                <label for="fractionToRemove" class="col-6 col-form-label text">
+                <label for="paramPS" class="col-6 col-form-label text">
                     Fraction of samples of one class to kick out
                 </label>
                 <div class="col-6 control-group">
-                    <input type="number" id="fractionToRemove"  placeholder="0.5">
+                    <input type="number" id="paramPS"  ng-model="paramPS" placeholder=0.5 step=0.01 min=0>
                 </div>
             </div>
-
-            <div class="row">
-                <label for="fractionToRemove" class="col-6 col-form-label text">
-                    Another param
-                </label>
-                <div class="col-6 control-group">
-                    <input type="number" id="fractionToRemoveToto"  placeholder="0.5">
-                </div>
-            </div>
-
-
         </div>
 
         <div class="col" ng-show="highlightAA">
@@ -116,11 +130,11 @@
                 </div>
             </div>
             <div class="row">
-                <label for="fractionToRemove" class="col-6 col-form-label text">
+                <label for="paramAA" class="col-6 col-form-label text">
                     Fraction of samples of one class to do adversarial attack
                 </label>
                 <div class="col-6 control-group">
-                    <input type="number" id="fractionToRemove2"  placeholder="0.5">
+                    <input type="number" id="paramAA" ng-model="paramAA" placeholder=0.5 step=0.01 min=0>
                 </div>
             </div>
         </div>
@@ -135,12 +149,13 @@
                     Missing values are blablabla
                 </div>
             </div>
+
             <div class="row">
-                <label for="fractionToRemove" class="col-6 col-form-label text">
+                <label for="paramMV" class="col-6 col-form-label text">
                     Fraction of samples of one class to remove
                 </label>
                 <div class="col-6 control-group">
-                    <input type="number" id="fractionToRemove3"  placeholder="0.5">
+                    <input type="number" id="paramMV" ng-model="paramMV" placeholder=0.5 step=0.01 min=0>
                 </div>
             </div>
         </div>
@@ -155,11 +170,49 @@
                 </div>
             </div>
             <div class="row">
-                <label for="fractionToRemove" class="col-6 col-form-label text">
+                <label for="paramS" class="col-6 col-form-label text">
                     Fraction of samples of one class to scale
                 </label>
                 <div class="col-6 control-group">
-                    <input type="number" id="fractionToRemove4"  placeholder="0.5">
+                    <input type="number" id="paramS" ng-model="paramS" placeholder=0.5 step=0.01 min=0>
+                </div>
+            </div>
+        </div>
+
+        <div class="col" ng-show="highlightT1">
+            <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
+                <div class="row title-sb" style="color: #31708f; margin-left:-8px; padding-bottom:8px">
+                    Text attack type 1
+                </div>
+                <div class="row text-r" style="color: #31708f; margin-left:-8px">
+                    Text attack type 1
+                </div>
+            </div>
+            <div class="row">
+                <label for="paramT1" class="col-6 col-form-label text">
+                    Fraction of samples
+                </label>
+                <div class="col-6 control-group">
+                    <input type="number" id="paramT1" ng-model="paramT1" placeholder=0.5 step=0.01 min=0>
+                </div>
+            </div>
+        </div>
+
+        <div class="col" ng-show="highlightT2">
+            <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
+                <div class="row title-sb" style="color: #31708f; margin-left:-8px; padding-bottom:8px">
+                    Text attack type 2
+                </div>
+                <div class="row text-r" style="color: #31708f; margin-left:-8px">
+                    Text attack type 2
+                </div>
+            </div>
+            <div class="row">
+                <label for="paramT2" class="col-6 col-form-label text">
+                    Fraction of samples
+                </label>
+                <div class="col-6 control-group">
+                    <input type="number" id="paramT2" ng-model="paramT2" placeholder=0.5 step=0.01 min=0>
                 </div>
             </div>
         </div>
@@ -198,25 +251,10 @@
             </tr>
             </thead>
           <tbody>
-            <tr>
-                <td class="border text-highlight">Prior shift</td>
-                <td class="border text-sb" style="text-align: center; vertical-align: middle;">{{metrics['prior_shift']}}%</td>
-                <td class="border text-sb" style="text-align: center; vertical-align: middle;">-12.23%</td>
-            </tr>
-            <tr>
-                <td class="border text-highlight">Adversarial attack</td>
-                <td class="border text-sb" style="text-align: center; vertical-align: middle;">{{metrics['adversarial']}}%</td>
-                <td class="border text-sb" style="text-align: center; vertical-align: middle;">30%</td>
-            </tr>
-            <tr>
-                <td class="border text-highlight">Missing values</td>
-                <td class="border text-sb" style="text-align: center; vertical-align: middle;">{{metrics['missing_values']}}%</td>
-                <td class="border text-sb" style="text-align: center; vertical-align: middle;">Not applicable</td>
-            </tr>
-            <tr>
-                <td class="border text-highlight">Scaling</td>
-                <td class="border text-sb" style="text-align: center; vertical-align: middle;">{{metrics['scaling']}}%</td>
-                <td class="border text-sb" style="text-align: center; vertical-align: middle;">0%</td>
+            <tr ng-repeat="metric in metrics">
+                <td class="border text-highlight">{{metric['attack_type']}}</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">{{metric['accuracy_drop']}}%</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">{{metric['robustness']}}%</td>
             </tr>
           </tbody>
         </table>
@@ -227,12 +265,12 @@
 
 <div class="container-fluid">
     <div class="row grand-title-sb"  style="padding-left:12px;">
-        Critital samples
+        Critical samples
     </div>
     <hr>
 
     <div class="row dku-grid">
-        <div class="col-sm-6" style="padding-left: 0px; padding-top: 8px;" ng-repeat="sample in critical_samples">
+        <div class="col-sm-6" style="padding-left: 0px; padding-top: 0px;" ng-repeat="sample in critical_samples">
             <table class="table table-metric table-striped">
                 <thead>
                     <tr>
