@@ -31,8 +31,8 @@ let versionId = webAppConfig['versionId'];
        var param_aa = 0;
        var param_mv = 0;
        var param_s = 0;
-       var paramT1 = 0;
-       var paramT2 = 0;
+       var param_t1 = 0;
+       var param_t2 = 0;
 
         $scope.modal = {};
         $scope.removeModal = function(event) {
@@ -173,17 +173,25 @@ let versionId = webAppConfig['versionId'];
                 param_s = 0;
              }
 
-            if ($scope.activateST1) {
-                console.log('Text attack type 1 is chosen with param ', $scope.paramT1);
-             };
+            if ($scope.activateT1) {
+                param_t1 = $scope.paramT1;
+                console.log('Replace Word is chosen with param ', param_t1);
+             }
+             else {
+                param_s = 0;
+             }
 
-            if ($scope.activateST2) {
-                console.log('Text attack type 2 is chosen with param ', $scope.paramT2);
-             };
+            if ($scope.activateT2) {
+                param_t2 = $scope.paramT2;
+                console.log('Typos is chosen with param ', param_t2);
+             }
+             else {
+                param_t2 = 0;
+             }
 
              $('#error_message').html('');
 
-            $http.get(getWebAppBackendUrl("compute/"+modelId+"/"+versionId+"?paramPS="+param_ps+"&paramAA="+param_aa+"&paramMV="+param_mv+"&paramS="+param_s))
+            $http.get(getWebAppBackendUrl("compute/"+modelId+"/"+versionId+"?paramPS="+param_ps+"&paramAA="+param_aa+"&paramMV="+param_mv+"&paramS="+param_s+"&paramT1="+param_t1+"&paramT2="+param_t2))
                 .then(function(response){
                     console.log(response.data);
                     $scope.metrics = response.data['metrics'];
