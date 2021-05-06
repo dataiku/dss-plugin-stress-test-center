@@ -87,7 +87,7 @@ class DkuConfigLoadingStressTestCenter(DkuConfigLoading):
                 name=parameter, value=self.config[parameter], required=True
             )
 
-    def _add_severity_(self, attack_severity):
+    def _add_severity(self):
         for parameter in self.ATTACKS_SEVERITY_PARAMETERS:
             self.dku_config.add_param(
                 name=parameter,
@@ -119,10 +119,10 @@ class DkuConfigLoadingStressTestCenter(DkuConfigLoading):
             required=True,
         )
 
-    def load_settings():
+    def load_settings(self):
         self._add_samples_column()
         self._add_attacks()
         self._add_severity()
         self._add_output_metrics_dataset()
         self._add_output_critical_samples_dataset()
-        return self.dku_config()
+        return self.dku_config

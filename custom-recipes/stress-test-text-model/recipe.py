@@ -9,6 +9,7 @@ from dku_stress_test_center.stress_test_center import (
     get_critical_samples,
 )
 from dku_stress_test_center.model_accessor import ModelAccessor
+
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
 from model_metadata import get_model_handler
 import numpy as np
@@ -54,12 +55,17 @@ samples_df = settings.input_dataset.get_dataframe()
 perturbed_df = stressor.fit_transform(samples_df, target)
 perturbed_df_with_prediction = model_accessor.predict(perturbed_df)
 
+g = samples_df.groupby(target).count()
+classes = g.index.tolist()
+counts = g[g.columns[0]].tolist()
+pos_label = classes[np.argmax(counts)]
+
 # compute metrics
 metrics_df = build_stress_metric(
     y_true=perturbed_df[target],
     y_pred=perturbed_df_with_prediction["prediction"],
     stress_test_indicator=perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE],
-    pos_label="positive",
+    pos_label=pos_label,
 )  # TODO this is hardcoding
 
 # compute critical samples
@@ -78,8 +84,8 @@ for index, row in metrics_df.iterrows():
     metrics_list.append(dct)
 
 y_true = perturbed_df[target]
-y_true_class_confidence = perturbed_df_with_prediction[["proba_0", "proba_1"]].values
-y_true_idx = np.array([[True, False] if y == "1" else [False, True] for y in y_true])
+y_true_class_confidence = perturbed_df_with_prediction[perturbed_df_with_prediction.columns[1:]].values
+y_true_idx = np.array([[True, False] if 'proba_' + str(y) == perturbed_df_with_prediction.columns[1] else [False, True] for y in y_true])
 y_true_class_confidence = y_true_class_confidence[y_true_idx]
 
 critical_samples_id_df = get_critical_samples(
@@ -100,5 +106,5 @@ critical_samples_df = critical_samples_id_df.merge(
 ).drop(DkuStressTestCenterConstants.DKU_ROW_ID, axis=1)
 
 # write output datasets
-settings.metrics_output_dataset.write_with_schema(metrics_df)
+settings.metrics_dataset.write_with_schema(metrics_df)
 settings.critical_samples_dataset.write_with_schema(critical_samples_df)
