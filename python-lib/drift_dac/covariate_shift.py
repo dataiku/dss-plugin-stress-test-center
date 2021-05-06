@@ -1133,6 +1133,8 @@ def adversarial_attack_shift(x, y, delta=1.0, model=RandomForestClassifier(), at
     # because the first half as a minimum has to be used to train a model against which generate the attacks
     assert (attack_type in ['zoo', 'boundary', 'hop-skip-jump'])
 
+    y_final = copy.deepcopy(y)
+
     le = preprocessing.LabelEncoder()
     le.fit(np.squeeze(y))
     y = le.transform(y)
@@ -1211,8 +1213,6 @@ def adversarial_attack_shift(x, y, delta=1.0, model=RandomForestClassifier(), at
     adv_row_indices, adv_col_indices = np.transpose(np.array(adv_indices)[np.newaxis]), np.array(feat_indices)[
         np.newaxis]
     x_final[adv_row_indices, adv_col_indices] = x_adv
-
-    y_final = copy.deepcopy(y)
 
     return x_final, y_final, adv_indices, feat_indices
 
