@@ -233,6 +233,13 @@
     </div>
 </div>
 
+<div ng-if="modal.type"
+     class="modal-background"
+     tabindex=0
+     ng-keyup="$event.keyCode == 27 && removeModal()"
+     ng-click="removeModal($event)">
+</div>
+
 <br><br>
 
 <div class="container-fluid metric-container" style="display: none;">
@@ -246,7 +253,7 @@
             <tr>
               <th scope="col" style="border-bottom: 1px rgba(34, 34, 34, 0.15); border-top: hidden; border-left:hidden; background-color:transparent;"></th>
               <th scope="col" class="small-title-sb border-left border-right border-bottom" style="border-top: 4px solid #6999C3; text-align: center; vertical-align: middle; background-color:transparent;">Performance Drop</th>
-              <th scope="col" class="small-title-sb border-right border-bottom" style="border-top: 4px solid #F3A268; text-align: center; vertical-align: middle; background-color:transparent;">Attack Success Rate</th>
+              <th scope="col" class="small-title-sb border-right border-bottom" style="border-top: 4px solid #F3A268; text-align: center; vertical-align: middle; background-color:transparent;">Robustness</th>
             </tr>
             </thead>
           <tbody>

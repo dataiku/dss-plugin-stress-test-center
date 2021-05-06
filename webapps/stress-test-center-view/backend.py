@@ -4,7 +4,10 @@ import logging
 import simplejson
 import traceback
 from flask import request
-import dataiku
+
+from dataiku import api_client, Model
+from dataiku.customwebapp import get_webapp_config
+from dataiku.doctor.posttraining.model_information_handler import PredictionModelInformationHandler
 
 from dku_stress_test_center.model_accessor import ModelAccessor
 from dku_stress_test_center.stress_test_center import StressTestConfiguration, StressTestGenerator
@@ -22,11 +25,15 @@ logger = logging.getLogger(__name__)
 def compute(model_id, version_id):
     try:
 
-        print('Compute starts ...')
-
-        model = dataiku.Model(model_id)
-        model_handler = get_model_handler(model=model, version_id=version_id)
-        model_accessor = ModelAccessor(model_handler)
+        fmi = get_webapp_config().get("trainedModelFullModelId")
+        if fmi is None:
+            model = Model(get_webapp_config()["modelId"])
+            version_id = get_webapp_config().get("versionId")
+            original_model_handler = get_model_handler(model, version_id)
+            model_accessor = ModelAccessor(original_model_handler)
+        else:
+            original_model_handler = PredictionModelInformationHandler.from_full_model_id(fmi)
+            model_accessor = ModelAccessor(original_model_handler)
 
         # Get test data
         logger.info('Retrieving model data...')
@@ -85,12 +92,13 @@ def compute(model_id, version_id):
         perturbed_df = stressor.fit_transform(test_df, target_column=target)  # perturbed_df is a dataset of schema feat_1 | feat_2 | ... | _STRESS_TEST_TYPE | _DKU_ID_
 
         perturbed_df_with_prediction = model_accessor.predict(perturbed_df)
+        reversed_target_mapping = {v: k for k, v in model_accessor.model_handler.get_target_map().items()}
 
         # Compute the performance drop metrics
         metrics_df = build_stress_metric(y_true=perturbed_df[target],
                                          y_pred=perturbed_df_with_prediction['prediction'],
                                          stress_test_indicator=perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE],
-                                         pos_label='1') # TODO this is hardcoding
+                                         pos_label=reversed_target_mapping.get(1))
 
         name_mapping = {
             'ADVERSARIAL': 'Adversarial attack',
@@ -108,8 +116,10 @@ def compute(model_id, version_id):
             metrics_list.append(dct)
 
         y_true = perturbed_df[target]
-        y_true_class_confidence = perturbed_df_with_prediction[['proba_0', 'proba_1']].values
-        y_true_idx = np.array([[True, False] if y == '1' else [False, True] for y in y_true])
+
+        original_target_value = list(model_accessor.model_handler.get_target_map().keys())
+        y_true_class_confidence = perturbed_df_with_prediction[['proba_{}'.format(original_target_value[0]), 'proba_{}'.format(original_target_value[1])]].values
+        y_true_idx = np.array([[True, False] if y == reversed_target_mapping.get(1) else [False, True] for y in y_true])
         y_true_class_confidence = y_true_class_confidence[y_true_idx]
 
         critical_samples_id_df = get_critical_samples(y_true_class_confidence=y_true_class_confidence,

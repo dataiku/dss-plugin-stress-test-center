@@ -4,7 +4,7 @@ let versionId = webAppConfig['versionId'];
 
 (function() {
     'use strict';
-    app.controller('vizController', function($scope, $http, $timeout) {
+    app.controller('vizController', function($scope, $http, $timeout, ModalService) {
        $scope.activatePS = false;
        $scope.activateAA = false;
        $scope.activateMV = false;
@@ -33,6 +33,14 @@ let versionId = webAppConfig['versionId'];
        var param_s = 0;
        var paramT1 = 0;
        var paramT2 = 0;
+
+        $scope.modal = {};
+        $scope.removeModal = function(event) {
+            if (ModalService.remove($scope.modal)(event)) {
+                angular.element(".template").focus();
+            }
+        };
+        $scope.createModal = ModalService.create($scope.modal);
 
        $scope.activateBoxPS = function(){
             if ($scope.priorShiftActive) {
@@ -195,7 +203,6 @@ let versionId = webAppConfig['versionId'];
                         result[k] = item[k];
                     }
                 }
-
                 return result;
             }
         }
