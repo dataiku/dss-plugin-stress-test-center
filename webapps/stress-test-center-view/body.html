@@ -81,7 +81,7 @@
 
             <div class="row border-bottom" ng-click="highlightDivT1()" ng-class="{'highlight-div': highlightT1, 'unhighlight-div': !highlightT1}">
                 <div class="col-8 text-sb my-auto" ng-class="{'normalText': activateT1, 'grayoutText': !activateT1 }">
-                    Text attack type 1
+                    Replace Word
                 </div>
                 <div class="col-4">
                     <label class="switch float-right">
@@ -93,7 +93,7 @@
 
             <div class="row" ng-click="highlightDivT2()" ng-class="{'highlight-div': highlightT2, 'unhighlight-div': !highlightT2}">
                 <div class="col-8 text-sb my-auto" ng-class="{'normalText': activateT2, 'grayoutText': !activateT2 }">
-                    Text attack type 2
+                    Typos
                 </div>
                 <div class="col-4">
                     <label class="switch float-right">
@@ -184,11 +184,11 @@
 
         <div class="col" ng-show="highlightT1">
             <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
-                <div class="row title-sb" style="color: #25597C; margin-left:-8px; padding-bottom:8px">
-                    Text attack type 1
+                <div class="row title-sb" style="color: #31708f; margin-left:-8px; padding-bottom:8px">
+                    Replace Word
                 </div>
-                <div class="row text-r" style="color: #25597C; margin-left:-8px">
-                    Dans un récipient, ajoutez le beurre coupé en morceaux, le sucre et le sel, bien les travailler.
+                <div class="row text-r" style="color: #31708f; margin-left:-8px">
+                    Replace Word replaces random words with similar words (close in the embedding space).
                 </div>
             </div>
             <div class="row">
@@ -203,11 +203,11 @@
 
         <div class="col" ng-show="highlightT2">
             <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
-                <div class="row title-sb" style="color: #25597C; margin-left:-8px; padding-bottom:8px">
-                    Text attack type 2
+                <div class="row title-sb" style="color: #31708f; margin-left:-8px; padding-bottom:8px">
+                    Typos in words
                 </div>
-                <div class="row text-r" style="color: #25597C; margin-left:-8px">
-                    Une fois cette pâte bien lisse, tamisez la farine et la levure ensemble, puis ajoutez à la pâte.
+                <div class="row text-r" style="color: #31708f; margin-left:-8px">
+                    Typos inserts/deletes characters to simulate typos in words.
                 </div>
             </div>
             <div class="row">

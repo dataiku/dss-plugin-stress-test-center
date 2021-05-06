@@ -13,7 +13,7 @@ from dku_stress_test_center.model_accessor import ModelAccessor
 from dku_stress_test_center.stress_test_center import StressTestConfiguration, StressTestGenerator
 from dku_stress_test_center.stress_test_center import build_stress_metric, get_critical_samples
 from dku_stress_test_center.stress_test_center import DkuStressTestCenterConstants
-from drift_dac.covariate_shift import MissingValues, Scaling, Adversarial
+from drift_dac.covariate_shift import MissingValues, Scaling, Adversarial, ReplaceWord, Typos
 from model_metadata import get_model_handler
 from drift_dac.prior_shift import KnockOut
 from dku_webapp import convert_numpy_int64_to_int, pretty_floats
@@ -58,20 +58,21 @@ def compute(model_id, version_id):
         logger.info('List of selected features for the stress test: {}'.format(selected_features))
 
         feature_handling_dict = model_accessor.get_per_feature()
+        is_text = []
         is_categorical = []
         for feature in selected_features:
             feature_params = feature_handling_dict.get(feature)
+            logger.info(feature)
+            logger.info(feature_params.get('type'))
             is_categorical.append(feature_params.get('type') == 'CATEGORY')
+            is_text.append(feature_params.get('type') == 'TEXT')
 
         is_categorical = np.array(is_categorical)
-        is_text = np.array([False] * len(selected_features))
+        is_text = np.array(is_text)
+        logger.info(is_text)
+        #is_text = np.array([False] * len(selected_features))
 
         # Run the stress tests
-
-        config_list = [StressTestConfiguration(KnockOut()),
-                       StressTestConfiguration(MissingValues()),
-                       StressTestConfiguration(Scaling()),
-                       StressTestConfiguration(Adversarial())]
 
         config_list = []
 
@@ -86,6 +87,12 @@ def compute(model_id, version_id):
 
         if float(request.args.get('paramS')) > 0:
             config_list.append(StressTestConfiguration(Scaling(float(request.args.get('paramS')))))
+
+        if float(request.args.get('paramT1')) > 0:
+            config_list.append(StressTestConfiguration(ReplaceWord(float(request.args.get('paramT1')))))
+
+        if float(request.args.get('paramT2')) > 0:
+            config_list.append(StressTestConfiguration(Typos(float(request.args.get('paramT2')))))
 
         print('CONFIG LIST', config_list)
         stressor = StressTestGenerator(config_list, selected_features, is_categorical, is_text)
@@ -104,7 +111,9 @@ def compute(model_id, version_id):
             'ADVERSARIAL': 'Adversarial attack',
             'MISSING_VALUES': 'Missing values enforcer',
             'PRIOR_SHIFT': 'Target distribution pertubation',
-            'SCALING': 'Scaling perturbation'
+            'SCALING': 'Scaling perturbation',
+            'REPLACE_WORD': 'Replace Word with similar',
+            'TYPOS': 'Add typos to words'
         }
 
         metrics_list = []
