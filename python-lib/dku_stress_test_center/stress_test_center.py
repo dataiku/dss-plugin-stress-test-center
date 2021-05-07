@@ -77,8 +77,8 @@ class StressTestGenerator(object):
                     (xt[:, self.is_numeric], yt) = config.shift.transform(xt[:, self.is_numeric].astype(float), yt)
                 elif config.shift.feature_type == PerturbationConstants.CATEGORICAL:
                     (xt[:, self.is_categorical], yt) = config.shift.transform(xt[:, self.is_categorical], yt)
-                # elif config.shift.feature_type == PerturbationConstants.TEXT:
-                #    (xt[:, self.is_text], yt) = config.shift.transform(xt[:, self.is_text], yt)
+                elif config.shift.feature_type == PerturbationConstants.TEXT:
+                    (xt[:, self.is_text], yt) = config.shift.transform(xt[:, self.is_text], yt)
                 elif config.shift.feature_type == PerturbationConstants.ANY:
                     (xt, yt) = config.shift.transform(xt, yt)
                 else:
@@ -165,7 +165,7 @@ def get_critical_samples(y_true_class_confidence: np.array,  # n_rows x 1
 
     valid_stress_ids = set(stress_test_indicator.unique()) & set(
         DkuStressTestCenterConstants.PERTURBATION_BASED_STRESS_TYPES)
-    valid_stress_ids |= set(DkuStressTestCenterConstants.CLEAN)
+    valid_stress_ids |= set([DkuStressTestCenterConstants.CLEAN])
 
     true_class_confidence_df = pd.DataFrame({
         DkuStressTestCenterConstants.STRESS_TEST_TYPE: stress_test_indicator,
@@ -180,6 +180,7 @@ def get_critical_samples(y_true_class_confidence: np.array,  # n_rows x 1
     # sort by std of uncertainty
 
     std_confidence_df = true_class_confidence_df.groupby([DkuStressTestCenterConstants.DKU_ROW_ID]).std()
+
     uncertainty = std_confidence_df[DkuStressTestCenterConstants.CONFIDENCE]
 
     critical_samples_df = pd.DataFrame({
@@ -189,5 +190,10 @@ def get_critical_samples(y_true_class_confidence: np.array,  # n_rows x 1
     critical_samples_df = critical_samples_df.sort_values(
         by=DkuStressTestCenterConstants.UNCERTAINTY, ascending=False)
 
-    return critical_samples_df.head(top_k_samples)
+    critical_samples_df = critical_samples_df.dropna()
+
+    if critical_samples_df.shape[0] > 0:
+        return critical_samples_df.head(top_k_samples)
+    else:
+        return None
 

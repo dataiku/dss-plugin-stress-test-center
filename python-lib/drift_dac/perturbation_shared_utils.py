@@ -59,4 +59,5 @@ class PerturbationConstants(object):
     NUMERIC = 0
     CATEGORICAL = 1
     ANY = 2
+    TEXT = 3
 

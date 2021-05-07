@@ -14,12 +14,17 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
 
+from textattack.augmentation import EmbeddingAugmenter, CharSwapAugmenter
+from nltk.tokenize import word_tokenize
+from nltk.tokenize.treebank import TreebankWordDetokenizer
+
 from drift_dac.features_utils import is_integer_feature
 from drift_dac.perturbation_shared_utils import Shift, sample_random_indices, PerturbationConstants, any_other_label
 
 __all__ = ['GaussianNoise', 'SwitchCategorical', 'SubsampleJoint', 'SubsampleNumeric', 'SubsampleCategorical',
            'UnderSample', 'OverSample', 'Adversarial', 'ConstantNumeric', 'ConstantCategorical', 'MissingValues',
-           'PlusMinusSomePercent', 'FlipSign', 'Outliers', 'Scaling', 'SwappedValues', 'ErrorBasedSampling']
+           'PlusMinusSomePercent', 'FlipSign', 'Outliers', 'Scaling', 'SwappedValues', 'ErrorBasedSampling',
+           'ReplaceWord', 'Typos', 'WordDeletion']
 
 
 class GaussianNoise(Shift):
@@ -101,6 +106,169 @@ class SwitchCategorical(Shift):
         Xt, yt, self.shifted_indices, self.shifted_features = switch_categorical_features_shift(Xt, yt,
                                                                                                 self.samples_fraction,
                                                                                                 self.features_fraction)
+        return Xt, yt
+
+
+class Augment(object):
+    """Apply perturbations to a portion of data using textAttack"""
+
+    def __init__(self, augmenter):
+        self.augmenter = augmenter
+
+    def text_shift(self, x, samples_fraction):
+        indices = np.random.choice(
+            x.shape[0], ceil(x.shape[0] * samples_fraction), replace=False
+        )
+        feat_indices = list(range(x.shape[1]))
+
+        for row_idx in indices:
+            for feat_idx in feat_indices:
+                x[row_idx, feat_idx] = self.augmenter.augment(x[row_idx, feat_idx])[0]
+        return x, indices, feat_indices
+
+
+class ReplaceWord(Shift):
+
+    """Replace words with neighbors to a portion of data using textAttack
+    Neighbors are in the counter-fitted embedding space, with a constraint to ensure their cosine similarity is at least 0.8
+    Args:
+              samples_fraction (float): proportion of samples to perturb.
+              pct_words_to_swap (float): proportion of words to replace.
+              max_words (int): max number of words to replace.
+    Attributes:
+              samples_fraction (float): proportion of samples to perturb.
+              pct_words_to_swap (float): proportion of words to replace.
+              name (str): name of the perturbation
+              feature_type (int): identifier of the type of feature for which this perturbation is valid
+              (see PerturbationConstants).
+    """
+
+    def __init__(self, samples_fraction=0.5, pct_words_to_swap=0.1, max_words=10):
+        super(ReplaceWord, self).__init__()
+        self.samples_fraction = samples_fraction
+        self.name = "replace_word_shift_%.2f_%.2f" % (
+            samples_fraction,
+            pct_words_to_swap,
+        )
+        self.feature_type = PerturbationConstants.TEXT
+        self.augmenter = EmbeddingAugmenter()
+        self.augmenter.num_words_to_swap = max(1, int(pct_words_to_swap * max_words))
+
+        self.augmenter.transformations_per_example = 1
+
+    def transform(self, X, y=None):
+        """Apply the perturbation to a dataset.
+        Args:
+            X (numpy.ndarray): feature data.
+            y (numpy.ndarray): target data.
+        """
+        Xt = copy.deepcopy(X)
+        yt = copy.deepcopy(y)
+        Xt, self.shifted_indices, self.shifted_features = Augment(
+            self.augmenter
+        ).text_shift(Xt, self.samples_fraction)
+        return Xt, yt
+
+
+class Typos(Shift):
+
+    """Replace words by swapping characters out for other characters, using textAttack CharSwapAugmenter
+    The swapping operations are :
+    -Swap: swap two adjacent letters in the word
+    -Substitution: Substitute a letter in the word with a random letter.
+    -Deletion: Delete a random letter from a word
+    -Insert a random letter in a word
+
+    Args:
+              samples_fraction (float): proportion of samples to perturb.
+              pct_words_to_swap (float): proportion of words to replace.
+              max_words (int): max number of words to replace.
+    Attributes:
+              samples_fraction (float): proportion of samples to perturb.
+              pct_words_to_swap (float): proportion of words to replace.
+              name (str): name of the perturbation
+              feature_type (int): identifier of the type of feature for which this perturbation is valid
+              (see PerturbationConstants).
+    """
+
+    def __init__(self, samples_fraction=0.5, pct_words_to_swap=0.1, max_words=10):
+        super(Typos, self).__init__()
+        self.samples_fraction = samples_fraction
+        self.name = "typos_shift_%.2f_%.2f" % (
+            samples_fraction,
+            pct_words_to_swap,
+        )
+        self.feature_type = PerturbationConstants.TEXT
+        self.augmenter = CharSwapAugmenter()
+        self.augmenter.num_words_to_swap = max(1, int(pct_words_to_swap * max_words))
+
+        self.augmenter.transformations_per_example = 1
+
+    def transform(self, X, y=None):
+        """Apply the perturbation to a dataset.
+        Args:
+           X (numpy.ndarray): feature data.
+           y (numpy.ndarray): target data.
+        """
+        Xt = copy.deepcopy(X)
+        yt = copy.deepcopy(y)
+        Xt, self.shifted_indices, self.shifted_features = Augment(
+            self.augmenter
+        ).text_shift(Xt, self.samples_fraction)
+        return Xt, yt
+
+
+class WordDeletion(Shift):
+    """Delete a random word in a sentence.
+
+    Args:
+              samples_fraction (float): proportion of samples to perturb.
+    Attributes:
+              samples_fraction (float): proportion of samples to perturb.
+              name (str): name of the perturbation
+              feature_type (int): identifier of the type of feature for which this perturbation is valid
+              (see PerturbationConstants).
+    """
+
+    def __init__(self, samples_fraction=0.5, pct_words_to_swap=0.1):
+        super(WordDeletion, self).__init__()
+        self.samples_fraction = samples_fraction
+        self.name = "word_deletion_shift_%.2f" % (
+            samples_fraction
+        )
+        self.feature_type = PerturbationConstants.TEXT
+
+        self._tokenize = word_tokenize
+        self._detokenize = TreebankWordDetokenizer().detokenize
+
+    def _remove_random_word(self, text):
+        words = self._tokenize(text)
+        n_words = len(words)
+        if n_words == 1:
+            return text
+
+        word_id = random.randint(0, n_words-1)
+        words.pop(word_id)
+        text_less_word = self._detokenize(words)
+        return text_less_word
+
+    def transform(self, X, y=None):
+        """Apply the perturbation to a dataset.
+        Args:
+           X (numpy.ndarray): feature data.
+           y (numpy.ndarray): target data.
+        """
+        Xt = copy.deepcopy(X)
+        yt = copy.deepcopy(y)
+        self.shifted_indices = np.random.choice(
+            Xt.shape[0], ceil(Xt.shape[0] * self.samples_fraction), replace=False
+        )
+        self.shifted_features = list(range(Xt.shape[1]))
+
+        for row_idx in self.shifted_indices:
+            for feat_idx in self.shifted_features:
+                Xt[row_idx, feat_idx] = self._remove_random_word(Xt[row_idx, feat_idx])
+
         return Xt, yt
 
 
@@ -277,7 +445,9 @@ class Adversarial(Shift):
         feature_type (int): identifier of the type of feature for which this perturbation is valid
             (see PerturbationConstants).
     """
-    def __init__(self, samples_fraction=1.0, features_fraction=1.0, attack_type='zoo', model=RandomForestClassifier()):
+
+    def __init__(self, samples_fraction=1.0, features_fraction=1.0, attack_type='boundary',
+                 model=RandomForestClassifier()):
         super(Adversarial, self).__init__()
         self.samples_fraction = samples_fraction
         self.features_fraction = features_fraction
@@ -957,16 +1127,22 @@ def over_sampling_shift(x, y, delta=0.5, mode='smote', n_neighbors=5):
 
 
 # non targeted black box adversarial attacks
-def adversarial_attack_shift(x, y, delta=1.0, model=RandomForestClassifier(), attack_type='zoo', feat_delta=1.0):
+def adversarial_attack_shift(x, y, delta=1.0, model=RandomForestClassifier(), attack_type='boundary', feat_delta=1.0):
     # in this case delta is the portion of half the data on which to generate attacks
     # because the first half as a minimum has to be used to train a model against which generate the attacks
     assert (attack_type in ['zoo', 'boundary', 'hop-skip-jump'])
+
+    y_final = copy.deepcopy(y)
 
     le = preprocessing.LabelEncoder()
     le.fit(np.squeeze(y))
     y = le.transform(y)
 
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=(0.5 * delta))
+    indices = list(range(x.shape[0]))
+    x_train, x_test, y_train, y_test, indices_train, indices_test = train_test_split(x, y, indices, test_size=0.5)
+
+    n_x_test = len(indices_test)
+    indices_test_to_attack = np.random.choice(n_x_test, size=int(np.floor(delta * n_x_test)))
 
     feat_indices = np.random.choice(x.shape[1], ceil(x.shape[1] * feat_delta), replace=False)
 
@@ -1017,25 +1193,25 @@ def adversarial_attack_shift(x, y, delta=1.0, model=RandomForestClassifier(), at
                              init_eval=9,
                              init_size=10)
 
-    x_adv = attack.generate(x=x_test_numerical, y=y_test)
+    x_adv = attack.generate(x=x_test_numerical[indices_test_to_attack, :], y=y_test)
 
     # Evaluate the ART classifier on adversarial test examples
+    #x_test_numerical_adversarial = copy.deepcopy(x_test_numerical)
+    #x_test_numerical_adversarial[indices_test_to_attack, :] = x_adv
 
+    #predictions_adv = classifier.predict(x_test_numerical_adversarial)
     predictions_adv = classifier.predict(x_adv)
     accuracy = np.sum(np.argmax(predictions_adv, axis=1) == y_test) / len(y_test)
     print("Accuracy on adversarial test examples: {}%".format(accuracy * 100))
-    print("Max difference: {}".format(np.max(np.abs(x_test_numerical - x_adv) / x_test_numerical)))
+    #print("Max difference: {}".format(np.max(
+    #    np.abs(x_test_numerical[indices_test_to_attack, :] - x_adv) / x_test_numerical[indices_test_to_attack, :])))
 
-    x_final = np.zeros_like(x)
-    x_final[:, feat_indices] = np.vstack([x_train_numerical, x_adv])
-    x_final[:, other_features] = np.vstack([x_train_other, x_test_other])
+    adv_indices = [indices_test[i] for i in indices_test_to_attack]
+    x_final = copy.deepcopy(x)
 
-    y_final = np.concatenate([y_train, y_test], axis=0)
-    y_final = le.inverse_transform(y_final)
-
-    adv_indices = list(range(len(y_train), len(y)))
-
-    y_final = y_final.reshape((y_final.shape[0], 1))
+    adv_row_indices, adv_col_indices = np.transpose(np.array(adv_indices)[np.newaxis]), np.array(feat_indices)[
+        np.newaxis]
+    x_final[adv_row_indices, adv_col_indices] = x_adv
 
     return x_final, y_final, adv_indices, feat_indices
 
