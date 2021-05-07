@@ -134,6 +134,7 @@ class ReplaceWord(Shift):
     Args:
               samples_fraction (float): proportion of samples to perturb.
               pct_words_to_swap (float): proportion of words to replace.
+              max_words (int): max number of words to replace.
     Attributes:
               samples_fraction (float): proportion of samples to perturb.
               pct_words_to_swap (float): proportion of words to replace.
@@ -142,7 +143,7 @@ class ReplaceWord(Shift):
               (see PerturbationConstants).
     """
 
-    def __init__(self, samples_fraction=0.5, pct_words_to_swap=0.1):
+    def __init__(self, samples_fraction=0.5, pct_words_to_swap=0.1, max_words=10):
         super(ReplaceWord, self).__init__()
         self.samples_fraction = samples_fraction
         self.name = "replace_word_shift_%.2f_%.2f" % (
@@ -151,9 +152,7 @@ class ReplaceWord(Shift):
         )
         self.feature_type = PerturbationConstants.TEXT
         self.augmenter = EmbeddingAugmenter()
-        self.augmenter.pct_words_to_swap = (
-            pct_words_to_swap  # percentage of words in a sample to swap
-        )
+        self.augmenter.num_words_to_swap = max(1, int(pct_words_to_swap * max_words))
 
         self.augmenter.transformations_per_example = 1
 
@@ -183,6 +182,7 @@ class Typos(Shift):
     Args:
               samples_fraction (float): proportion of samples to perturb.
               pct_words_to_swap (float): proportion of words to replace.
+              max_words (int): max number of words to replace.
     Attributes:
               samples_fraction (float): proportion of samples to perturb.
               pct_words_to_swap (float): proportion of words to replace.
@@ -191,7 +191,7 @@ class Typos(Shift):
               (see PerturbationConstants).
     """
 
-    def __init__(self, samples_fraction=0.5, pct_words_to_swap=0.1):
+    def __init__(self, samples_fraction=0.5, pct_words_to_swap=0.1, max_words=10):
         super(Typos, self).__init__()
         self.samples_fraction = samples_fraction
         self.name = "typos_shift_%.2f_%.2f" % (
@@ -200,9 +200,8 @@ class Typos(Shift):
         )
         self.feature_type = PerturbationConstants.TEXT
         self.augmenter = CharSwapAugmenter()
-        self.augmenter.pct_words_to_swap = (
-            pct_words_to_swap  # percentage of words in a sample to swap
-        )
+        self.augmenter.num_words_to_swap = max(1, int(pct_words_to_swap * max_words))
+
         self.augmenter.transformations_per_example = 1
 
     def transform(self, X, y=None):
