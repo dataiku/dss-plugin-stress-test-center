@@ -88,8 +88,8 @@ function markRunning(running) {
         $('.landing-page').hide();
         $('#run-button').hide();
         $('.result-state').hide();
-        $('.critical-sample-container').show();
-        $('.metric-container').show();
+        $('.critical-sample-container').hide();
+        $('.metric-container').hide();
     } else {
         $('.running-state').hide();
         $('#run-button').show();

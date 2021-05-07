@@ -26,7 +26,6 @@ let versionId = webAppConfig['versionId'];
        $scope.paramT1 = 0.5;
        $scope.paramT2 = 0.5;
 
-
        var param_ps = 0;
        var param_aa = 0;
        var param_mv = 0;
@@ -138,7 +137,10 @@ let versionId = webAppConfig['versionId'];
             $scope.highlightT2 = true;
        };
 
+
        $scope.runAnalysis = function () {
+
+             $scope.loadingResult = true;
              markRunning(true);
 
              if ($scope.activatePS) {
@@ -185,13 +187,17 @@ let versionId = webAppConfig['versionId'];
 
             $http.get(getWebAppBackendUrl("compute/"+modelId+"/"+versionId+"?paramPS="+param_ps+"&paramAA="+param_aa+"&paramMV="+param_mv+"&paramS="+param_s))
                 .then(function(response){
+                    $scope.loadingResult = false;
                     console.log(response.data);
                     $scope.metrics = response.data['metrics'];
                     $scope.table_data = response.data['critical_samples'][0]
                     $scope.critical_samples = response.data['critical_samples']
+                    $('.critical-sample-container').show();
+                    $('.metric-container').show();
                     markRunning(false);
             }, function(e) {
                 console.log(e);
+                $scope.loadingResult = false;
                 markRunning(false);
                 $scope.createModal.error(e.data);
             });

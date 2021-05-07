@@ -102,9 +102,9 @@ def compute(model_id, version_id):
 
         name_mapping = {
             'ADVERSARIAL': 'Adversarial attack',
-            'MISSING_VALUES': 'Missing values',
-            'PRIOR_SHIFT': 'Prior shift',
-            'SCALING': 'Scaling'
+            'MISSING_VALUES': 'Missing values enforcer',
+            'PRIOR_SHIFT': 'Target distribution pertubation',
+            'SCALING': 'Scaling perturbation'
         }
 
         metrics_list = []

@@ -18,16 +18,13 @@
 
         <div class="col" style="display: inline;">
             <button class="dku-btn dku-btn-primary float-right" id="run-button" type="button" ng-click="runAnalysis()" style="color: #FFFFFF;">COMPUTE</button>
-            <span class="running-state float-right" style="display: none;">Computing ...</span>
         </div>
+    </div>
 
-        <div class="explanation-box text-r" style="margin-top:8px; margin-left:8px; margin-right:8px; margin-bottom:8px; color: #31708f;">
-            Dans un récipient, ajoutez le beurre coupé en morceaux, le sucre et le sel, bien les travailler.
-            Incorporez les 4 jaunes, puis les 2 oeufs, et travaillez de nouveau.
-            Une fois cette pâte bien lisse, tamisez la farine et la levure ensemble, puis ajoutez à la pâte.
-            La pâte ne doit pas coller.
-            Formez une boule, enveloppez dans du papier cellophane et laissez reposer au réfrigérateur 1/2 heure minimum.
-        </div>
+    <div class="explanation-box text-r" style="margin-top:16px; margin-left:8px; margin-right:8px; margin-bottom:16px; color: #25597C;">
+            The Stress Test Center enables you to evaluate the impact on the model performances of various types of changes and corruptions in your data. <br>
+            You can select the stress tests corresponding to corruptions you expect to have at deployment time, and that you expect your model to be robust to. <br>
+            The robustness metrics score the resilience of your model to the desired perturbations and allows you to compare both accuracy and robustness of multiple models before deployment.<br>
     </div>
 </div>
 
@@ -110,16 +107,16 @@
 
         <div class="col" ng-show="highlightPS">
             <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
-                <div class="row title-sb" style="color: #31708f; margin-left:-8px; padding-bottom:8px">
-                    Prior Shift Perturbation
+                <div class="row title-sb" style="color: #25597C; margin-left:-8px; padding-bottom:8px">
+                    Target Distribution Perturbation
                 </div>
-                <div class="row text-r" style="color: #31708f; margin-left:-8px">
-                    Prior shift is blablabla
+                <div class="row text-r" style="color: #25597C; margin-left:-8px">
+                    Modify the data target distribution by resampling.
                 </div>
             </div>
             <div class="row">
                 <label for="paramPS" class="col-6 col-form-label text">
-                    Fraction of samples of one class to kick out
+                    Positive class frequency after perturbation
                 </label>
                 <div class="col-6 control-group">
                     <input type="number" id="paramPS"  ng-model="paramPS" placeholder="0.5"  step=0.01 min=0>
@@ -129,16 +126,16 @@
 
         <div class="col" ng-show="highlightAA">
             <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
-                <div class="row title-sb" style="color: #31708f; margin-left:-8px; padding-bottom:8px">
+                <div class="row title-sb" style="color: #25597C; margin-left:-8px; padding-bottom:8px">
                     Adversarial Attack
                 </div>
-                <div class="row text-r" style="color: #31708f; margin-left:-8px">
-                    Adversarial attack is blablabla
+                <div class="row text-r" style="color: #25597C; margin-left:-8px">
+                    Adversarial attack is performing minimal feature perturbation to change sample predictions.
                 </div>
             </div>
             <div class="row">
                 <label for="paramAA" class="col-6 col-form-label text">
-                    Fraction of samples of one class to do adversarial attack
+                    Proportion of affected samples
                 </label>
                 <div class="col-6 control-group">
                     <input type="number" id="paramAA" ng-model="paramAA" value="0.5" placeholder=0.5 step=0.01 min=0>
@@ -148,17 +145,17 @@
 
         <div class="col" ng-show="highlightMV">
             <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
-                <div class="row title-sb" style="color: #31708f; margin-left:-8px; padding-bottom:8px">
-                    Missing values
+                <div class="row title-sb" style="color: #25597C; margin-left:-8px; padding-bottom:8px">
+                    Missing Values Enforcer
                 </div>
-                <div class="row text-r" style="color: #31708f; margin-left:-8px">
-                    Missing values are blablabla
+                <div class="row text-r" style="color: #25597C; margin-left:-8px">
+                    The Missing Values Enforcer randomly inserts missing values.
                 </div>
             </div>
 
             <div class="row">
                 <label for="paramMV" class="col-6 col-form-label text">
-                    Fraction of samples of one class to remove
+                    Proportion of affected samples
                 </label>
                 <div class="col-6 control-group">
                     <input type="number" id="paramMV" ng-model="paramMV" value="0.5" placeholder=0.5 step=0.01 min=0>
@@ -168,16 +165,16 @@
 
         <div class="col" ng-show="highlightS">
             <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
-                <div class="row title-sb" style="color: #31708f; margin-left:-8px; padding-bottom:8px">
-                    Scaling
+                <div class="row title-sb" style="color: #25597C; margin-left:-8px; padding-bottom:8px">
+                    Scaling Perturbation
                 </div>
-                <div class="row text-r" style="color: #31708f; margin-left:-8px">
-                    Scaling (or Out of distribution) is blablabla
+                <div class="row text-r" style="color: #25597C; margin-left:-8px">
+                    The Scaling Perturbation changes the order of magnitude of each feature by some random scaling.
                 </div>
             </div>
             <div class="row">
                 <label for="paramS" class="col-6 col-form-label text">
-                    Fraction of samples of one class to scale
+                    Proportion of affected samples
                 </label>
                 <div class="col-6 control-group">
                     <input type="number" id="paramS" ng-model="paramS" value="0.5" placeholder=0.5 step=0.01 min=0>
@@ -187,16 +184,16 @@
 
         <div class="col" ng-show="highlightT1">
             <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
-                <div class="row title-sb" style="color: #31708f; margin-left:-8px; padding-bottom:8px">
+                <div class="row title-sb" style="color: #25597C; margin-left:-8px; padding-bottom:8px">
                     Text attack type 1
                 </div>
-                <div class="row text-r" style="color: #31708f; margin-left:-8px">
+                <div class="row text-r" style="color: #25597C; margin-left:-8px">
                     Text attack type 1
                 </div>
             </div>
             <div class="row">
                 <label for="paramT1" class="col-6 col-form-label text">
-                    Fraction of samples
+                    Proportion of affected samples
                 </label>
                 <div class="col-6 control-group">
                     <input type="number" id="paramT1" ng-model="paramT1" value="0.5" placeholder=0.5 step=0.01 min=0>
@@ -206,16 +203,16 @@
 
         <div class="col" ng-show="highlightT2">
             <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
-                <div class="row title-sb" style="color: #31708f; margin-left:-8px; padding-bottom:8px">
+                <div class="row title-sb" style="color: #25597C; margin-left:-8px; padding-bottom:8px">
                     Text attack type 2
                 </div>
-                <div class="row text-r" style="color: #31708f; margin-left:-8px">
+                <div class="row text-r" style="color: #25597C; margin-left:-8px">
                     Text attack type 2
                 </div>
             </div>
             <div class="row">
                 <label for="paramT2" class="col-6 col-form-label text">
-                    Fraction of samples
+                    Proportion of affected samples
                 </label>
                 <div class="col-6 control-group">
                     <input type="number" id="paramT2" ng-model="paramT2" value="0.5" placeholder=0.5 step=0.01 min=0>
@@ -234,11 +231,20 @@
                 Stress Test Center
             </div>
             <div class="grand-title-r">
-                Put your model through a battery of tests and see how it handles the unexpected
+                Put your model through a battery of tests to see how it handles the unexpected and assess its robustness
             </div>
         </div>
     </div>
 </div>
+
+<div class="container-fluid running-state" style="display: none;">
+    <div class="d-flex justify-content-center" style="padding-top:56px; padding-bottom:40px">
+      <div class="spinner-border text-secondary" role="status" style="width: 3.5rem; height: 3.5rem;">
+        <span class="sr-only">Loading...</span>
+      </div>
+    </div>
+</div>
+
 
 <div ng-if="modal.type"
      class="modal-background"
@@ -247,11 +253,12 @@
      ng-click="removeModal($event)">
 </div>
 
+
 <br><br>
 
 <div class="container-fluid metric-container" style="display: none;">
     <div class="row grand-title-sb" style="padding-left:12px">
-        Performance metrics
+        Robustness metrics
     </div>
     <hr>
     <div class="row">
@@ -280,8 +287,11 @@
     <div class="row grand-title-sb"  style="padding-left:12px;">
         Critical samples
     </div>
-    <hr>
 
+    <div class="explanation-box text-r" style="margin-top:8px; margin-left:8px; margin-right:8px; margin-bottom:0px; color: #25597C;">
+        The critical samples are the most sensitive to perturbations, and highlight regions where the model prediction is highly uncertain (presenting large confidence fluctuations).
+    </div>
+    <hr>
     <div class="row dku-grid">
         <div class="col-sm-6" style="padding-left: 0px; padding-top: 0px; padding-bottom: 8px" ng-repeat="sample in critical_samples">
             <table class="table table-metric table-striped">

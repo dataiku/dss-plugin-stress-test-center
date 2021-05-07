@@ -350,6 +350,15 @@ h3 {
     color: #222222;
 }
 
+.text-explain {
+    font-family: var(--font-family);
+    font-style: normal;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 18px;
+    color: #25597C;
+}
+
 .text-sb {
     font-family: var(--font-family);
     font-style: normal;
