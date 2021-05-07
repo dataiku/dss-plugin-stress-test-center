@@ -230,7 +230,7 @@ class WordDeletion(Shift):
               (see PerturbationConstants).
     """
 
-    def __init__(self, samples_fraction=0.5, pct_words_to_swap=1.0):
+    def __init__(self, samples_fraction=0.5, pct_words_to_swap=1.):
         super(WordDeletion, self).__init__()
         self.samples_fraction = samples_fraction
         self.name = "word_deletion_shift_%.2f" % (
