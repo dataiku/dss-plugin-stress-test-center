@@ -1,3 +1,11 @@
+flask==1.1.2
+future==0.18.2
+joblib==0.14.1
+numpy==1.16.6
+simplejson==3.17.2
+xgboost==0.81
+cloudpickle==1.6.0
+ipython==5.5.0
 imbalanced-learn==0.4.3
 adversarial-robustness-toolbox==1.1.1
 textattack==0.0.2.3
@@ -25,4 +33,3 @@ Keras==2.2.4
 Keras-Applications==1.0.8
 Keras-Preprocessing==1.1.2
 keras-resnet==0.1.0
-

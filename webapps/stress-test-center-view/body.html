@@ -1,0 +1,344 @@
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+
+<script type="text/javascript">
+    var app = angular.module("stressTestCenter", []);
+</script>
+<script src="/plugins/stress-test-center/resource/js/helpers.js" type="text/javascript"></script>
+<link rel="stylesheet" href="/static/public/styles/1.0.0/dku-styles.css"/>
+<link rel="stylesheet" href="/plugins/model-fairness-report/webapps/stress-test-center-view/style.css" />
+
+<body  ng-app = "stressTestCenter" ng-controller = "vizController" class="report-box">
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col grand-title-sb">
+            Stress tests
+        </div>
+
+        <div class="col" style="display: inline;">
+            <button class="dku-btn dku-btn-primary float-right" id="run-button" type="button" ng-click="runAnalysis()" style="color: #FFFFFF;">COMPUTE</button>
+        </div>
+    </div>
+
+    <div class="explanation-box text-r" style="margin-top:16px; margin-left:8px; margin-right:8px; margin-bottom:16px; color: #25597C;">
+            The Stress Test Center enables you to evaluate the impact on the model performances of various types of changes and corruptions in your data. <br>
+            You can select the stress tests corresponding to corruptions you expect to have at deployment time, and that you expect your model to be robust to. <br>
+            The robustness metrics score the resilience of your model to the desired perturbations and allows you to compare both accuracy and robustness of multiple models before deployment.<br>
+    </div>
+</div>
+
+<div class="container-fluid border-top border-bottom">
+    <div class="row">
+        <div class="col-3 border-right" >
+            <div class="row border-bottom" ng-click="highlightDivPS()" ng-class="{'highlight-div': highlightPS, 'unhighlight-div': !highlightPS}">
+                <div class="col-8 text-sb my-auto" ng-class="{'normalText': activatePS, 'grayoutText': !activatePS }">
+                    Target distribution
+                </div>
+                <div class="col-4">
+                    <label class="switch float-right">
+                        <input type="checkbox" ng-model="priorShiftActive" ng-click="activateBoxPS()">
+                        <div class="slider round"></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="row border-bottom" ng-click="highlightDivAA()" ng-class="{'highlight-div': highlightAA, 'unhighlight-div': !highlightAA}">
+                <div class="col-8 text-sb my-auto" ng-class="{'normalText': activateAA, 'grayoutText': !activateAA }">
+                    Adversarial attack
+                </div>
+                <div class="col-4">
+                    <label class="switch float-right">
+                        <input type="checkbox" ng-model="aaActive" ng-click="activateBoxAA()">
+                        <div class="slider round"></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="row border-bottom" ng-click="highlightDivMV()" ng-class="{'highlight-div': highlightMV, 'unhighlight-div': !highlightMV}">
+                <div class="col-8 text-sb my-auto" ng-class="{'normalText': activateMV, 'grayoutText': !activateMV}">
+                    Missing values enforcer
+                </div>
+                <div class="col-4">
+                    <label class="switch float-right">
+                        <input type="checkbox" ng-model="mvActive" ng-click="activateBoxMV()">
+                        <div class="slider round"></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="row border-bottom" ng-click="highlightDivS()" ng-class="{'highlight-div': highlightS, 'unhighlight-div': !highlightS}">
+                <div class="col-8 text-sb my-auto" ng-class="{'normalText': activateS, 'grayoutText': !activateS }">
+                    Scaling perturbation
+                </div>
+                <div class="col-4">
+                    <label class="switch float-right">
+                        <input type="checkbox" ng-model="sActive" ng-click="activateBoxS()">
+                        <div class="slider round"></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="row border-bottom" ng-click="highlightDivT1()" ng-class="{'highlight-div': highlightT1, 'unhighlight-div': !highlightT1}">
+                <div class="col-8 text-sb my-auto" ng-class="{'normalText': activateT1, 'grayoutText': !activateT1 }">
+                    Text attack type 1
+                </div>
+                <div class="col-4">
+                    <label class="switch float-right">
+                        <input type="checkbox" ng-model="t1Active" ng-click="activateBoxT1()">
+                        <div class="slider round"></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="row" ng-click="highlightDivT2()" ng-class="{'highlight-div': highlightT2, 'unhighlight-div': !highlightT2}">
+                <div class="col-8 text-sb my-auto" ng-class="{'normalText': activateT2, 'grayoutText': !activateT2 }">
+                    Text attack type 2
+                </div>
+                <div class="col-4">
+                    <label class="switch float-right">
+                        <input type="checkbox" ng-model="t2Active" ng-click="activateBoxT2()">
+                        <div class="slider round"></div>
+                    </label>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col" ng-show="highlightPS">
+            <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
+                <div class="row title-sb" style="color: #25597C; margin-left:-8px; padding-bottom:8px">
+                    Target Distribution Perturbation
+                </div>
+                <div class="row text-r" style="color: #25597C; margin-left:-8px">
+                    The target distribution perturbation modifies the data target distribution by resampling.
+                </div>
+            </div>
+            <div class="row">
+                <label for="paramPS" class="col-6 col-form-label text">
+                    Positive class frequency after perturbation
+                </label>
+                <div class="col-6 control-group">
+                    <input type="number" id="paramPS"  ng-model="paramPS" placeholder="0.5"  step=0.01 min=0>
+                </div>
+            </div>
+        </div>
+
+        <div class="col" ng-show="highlightAA">
+            <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
+                <div class="row title-sb" style="color: #25597C; margin-left:-8px; padding-bottom:8px">
+                    Adversarial Attack
+                </div>
+                <div class="row text-r" style="color: #25597C; margin-left:-8px">
+                    The adversarial attack performs minimal feature perturbation to change sample predictions.
+                </div>
+            </div>
+            <div class="row">
+                <label for="paramAA" class="col-6 col-form-label text">
+                    Proportion of affected samples
+                </label>
+                <div class="col-6 control-group">
+                    <input type="number" id="paramAA" ng-model="paramAA" value="0.5" placeholder=0.5 step=0.01 min=0>
+                </div>
+            </div>
+        </div>
+
+        <div class="col" ng-show="highlightMV">
+            <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
+                <div class="row title-sb" style="color: #25597C; margin-left:-8px; padding-bottom:8px">
+                    Missing Values Enforcer
+                </div>
+                <div class="row text-r" style="color: #25597C; margin-left:-8px">
+                    The missing values enforcer randomly inserts missing values.
+                </div>
+            </div>
+
+            <div class="row">
+                <label for="paramMV" class="col-6 col-form-label text">
+                    Proportion of affected samples
+                </label>
+                <div class="col-6 control-group">
+                    <input type="number" id="paramMV" ng-model="paramMV" value="0.5" placeholder=0.5 step=0.01 min=0>
+                </div>
+            </div>
+        </div>
+
+        <div class="col" ng-show="highlightS">
+            <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
+                <div class="row title-sb" style="color: #25597C; margin-left:-8px; padding-bottom:8px">
+                    Scaling Perturbation
+                </div>
+                <div class="row text-r" style="color: #25597C; margin-left:-8px">
+                    The scaling perturbation changes the order of magnitude of each feature by some random scaling.
+                </div>
+            </div>
+            <div class="row">
+                <label for="paramS" class="col-6 col-form-label text">
+                    Proportion of affected samples
+                </label>
+                <div class="col-6 control-group">
+                    <input type="number" id="paramS" ng-model="paramS" value="0.5" placeholder=0.5 step=0.01 min=0>
+                </div>
+            </div>
+        </div>
+
+        <div class="col" ng-show="highlightT1">
+            <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
+                <div class="row title-sb" style="color: #25597C; margin-left:-8px; padding-bottom:8px">
+                    Text attack type 1
+                </div>
+                <div class="row text-r" style="color: #25597C; margin-left:-8px">
+                    Dans un récipient, ajoutez le beurre coupé en morceaux, le sucre et le sel, bien les travailler.
+                </div>
+            </div>
+            <div class="row">
+                <label for="paramT1" class="col-6 col-form-label text">
+                    Proportion of affected samples
+                </label>
+                <div class="col-6 control-group">
+                    <input type="number" id="paramT1" ng-model="paramT1" value="0.5" placeholder=0.5 step=0.01 min=0>
+                </div>
+            </div>
+        </div>
+
+        <div class="col" ng-show="highlightT2">
+            <div class="explanation-box" style="margin-left:-10px; margin-right:-10px; margin-top:8px;">
+                <div class="row title-sb" style="color: #25597C; margin-left:-8px; padding-bottom:8px">
+                    Text attack type 2
+                </div>
+                <div class="row text-r" style="color: #25597C; margin-left:-8px">
+                    Une fois cette pâte bien lisse, tamisez la farine et la levure ensemble, puis ajoutez à la pâte.
+                </div>
+            </div>
+            <div class="row">
+                <label for="paramT2" class="col-6 col-form-label text">
+                    Proportion of affected samples
+                </label>
+                <div class="col-6 control-group">
+                    <input type="number" id="paramT2" ng-model="paramT2" value="0.5" placeholder=0.5 step=0.01 min=0>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="landing-page" style="padding-top:16px; padding-bottom:16px ">
+            </br> </br> </br>
+            <div class="ultralarge-title-sb">
+                Stress Test Center
+            </div>
+            <div class="grand-title-r">
+                Put your model through a battery of tests to see how it handles the unexpected and assess its robustness
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid running-state" style="display: none;">
+    <div class="d-flex justify-content-center" style="padding-top:56px; padding-bottom:40px">
+      <div class="spinner-border text-secondary" role="status" style="width: 3.5rem; height: 3.5rem;">
+        <span class="sr-only">Loading...</span>
+      </div>
+    </div>
+</div>
+
+
+<div ng-if="modal.type"
+     class="modal-background"
+     tabindex=0
+     ng-keyup="$event.keyCode == 27 && removeModal()"
+     ng-click="removeModal($event)">
+</div>
+
+
+<br><br>
+
+<div class="container-fluid metric-container" style="display: none;">
+    <div class="row grand-title-sb" style="padding-left:12px">
+        Robustness metrics
+    </div>
+    <hr>
+    <div class="row">
+        <table class="table table-metric" >
+            <thead>
+            <tr>
+              <th scope="col" style="border-bottom: 1px rgba(34, 34, 34, 0.15); border-top: hidden; border-left:hidden; background-color:transparent;"></th>
+              <th scope="col" class="small-title-sb border-left border-right border-bottom" style="border-top: 4px solid #6999C3; text-align: center; vertical-align: middle; background-color:transparent;">Performance Drop</th>
+              <th scope="col" class="small-title-sb border-right border-bottom" style="border-top: 4px solid #F3A268; text-align: center; vertical-align: middle; background-color:transparent;">Robustness</th>
+            </tr>
+            </thead>
+          <tbody>
+            <tr ng-repeat="metric in metrics">
+                <td class="border text-highlight">{{metric['attack_type']}}</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">{{metric['accuracy_drop']}}%</td>
+                <td class="border text-sb" style="text-align: center; vertical-align: middle;">{{metric['robustness']}}%</td>
+            </tr>
+          </tbody>
+        </table>
+    </div>
+</div>
+
+<br><br>
+
+<div class="container-fluid critical-sample-container" style="display: none;">
+    <div class="row grand-title-sb"  style="padding-left:12px;">
+        Critical samples
+    </div>
+
+    <div class="explanation-box text-r" style="margin-top:8px; margin-left:8px; margin-right:8px; margin-bottom:0px; color: #25597C;">
+        The critical samples are the most sensitive to perturbations, and highlight regions where the model prediction is highly uncertain (presenting large confidence fluctuations).
+    </div>
+    <hr>
+    <div class="row dku-grid">
+        <div class="col-sm-6" style="padding-left: 0px; padding-top: 0px; padding-bottom: 8px" ng-repeat="sample in critical_samples">
+            <table class="table table-metric table-striped">
+                <thead>
+                    <tr>
+                        <th class="title-sb border-left border-right border-bottom" style="border-top: 4px solid #6999C3; background-color:transparent;">
+                            <div class="row">
+                                <div class="col">
+                                        {{sample['uncertainty']}}
+                                </div>
+                                <div class="col">
+                                        <div class="float-right">0.63</div>
+                                </div>
+                            </div>
+                            <div class="row ">
+                                <div class="col text-r" style="opacity: 0.3">
+                                    Uncertainty score
+                                </div>
+
+                                <div class="col text-r" style="opacity: 0.3">
+                                    <div class="float-right">
+                                        Probability
+                                    </div>
+                                </div>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="(key, value) in filterUncertainty(sample)">
+                      <td style="padding-left:100px">
+                          {{key}}
+                        <span style="opacity: 0.3">= {{value}}</span>
+                      </td>
+                    </tr>
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+    <hr>
+
+</div>
+
+</body>
+
+
+
