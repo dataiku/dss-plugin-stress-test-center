@@ -41,6 +41,60 @@ let versionId = webAppConfig['versionId'];
         };
         $scope.createModal = ModalService.create($scope.modal);
 
+        $scope.highlightDivPS = function(){
+            $scope.highlightPS = true;
+            $scope.highlightAA = false;
+            $scope.highlightMV = false;
+            $scope.highlightS = false;
+            $scope.highlightT1 = false;
+            $scope.highlightT2 = false;
+        }
+
+        $scope.highlightDivAA = function(){
+            $scope.highlightPS = false;
+            $scope.highlightAA = true;
+            $scope.highlightMV = false;
+            $scope.highlightS = false;
+            $scope.highlightT1 = false;
+            $scope.highlightT2 = false;
+        }
+
+        $scope.highlightDivMV = function(){
+            $scope.highlightPS = false;
+            $scope.highlightAA = false;
+            $scope.highlightMV = true;
+            $scope.highlightS = false;
+            $scope.highlightT1 = false;
+            $scope.highlightT2 = false;
+        }
+
+        $scope.highlightDivS = function(){
+            $scope.highlightPS = false;
+            $scope.highlightAA = false;
+            $scope.highlightMV = false;
+            $scope.highlightS = true;
+            $scope.highlightT1 = false;
+            $scope.highlightT2 = false;
+        }
+
+        $scope.highlightDivT1 = function(){
+            $scope.highlightPS = false;
+            $scope.highlightAA = false;
+            $scope.highlightMV = false;
+            $scope.highlightS = false;
+            $scope.highlightT1 = true;
+            $scope.highlightT2 = false;
+        }
+
+        $scope.highlightDivT2 = function(){
+            $scope.highlightPS = false;
+            $scope.highlightAA = false;
+            $scope.highlightMV = false;
+            $scope.highlightS = false;
+            $scope.highlightT1 = false;
+            $scope.highlightT2 = true;
+        }
+
        $scope.activateBoxPS = function(){
             if ($scope.priorShiftActive) {
                 $scope.activatePS = false;
