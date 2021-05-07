@@ -143,7 +143,7 @@ class ReplaceWord(Shift):
               (see PerturbationConstants).
     """
 
-    def __init__(self, samples_fraction=0.5, pct_words_to_swap=0.1, max_words=10):
+    def __init__(self, samples_fraction=0.5, pct_words_to_swap=1., max_words=10):
         super(ReplaceWord, self).__init__()
         self.samples_fraction = samples_fraction
         self.name = "replace_word_shift_%.2f_%.2f" % (
@@ -191,7 +191,7 @@ class Typos(Shift):
               (see PerturbationConstants).
     """
 
-    def __init__(self, samples_fraction=0.5, pct_words_to_swap=0.1, max_words=10):
+    def __init__(self, samples_fraction=0.5, pct_words_to_swap=1., max_words=10):
         super(Typos, self).__init__()
         self.samples_fraction = samples_fraction
         self.name = "typos_shift_%.2f_%.2f" % (
@@ -230,7 +230,7 @@ class WordDeletion(Shift):
               (see PerturbationConstants).
     """
 
-    def __init__(self, samples_fraction=0.5, pct_words_to_swap=0.1):
+    def __init__(self, samples_fraction=0.5, pct_words_to_swap=1.0):
         super(WordDeletion, self).__init__()
         self.samples_fraction = samples_fraction
         self.name = "word_deletion_shift_%.2f" % (
