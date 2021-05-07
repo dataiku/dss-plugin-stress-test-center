@@ -109,7 +109,7 @@ def compute(model_id, version_id):
         name_mapping = {
             'ADVERSARIAL': 'Adversarial attack',
             'MISSING_VALUES': 'Missing values enforcer',
-            'PRIOR_SHIFT': 'Target distribution pertubation',
+            'PRIOR_SHIFT': 'Target distribution perturbation',
             'SCALING': 'Scaling perturbation',
             'REPLACE_WORD': 'Replace Word with similar',
             'TYPOS': 'Add typos to words'
@@ -119,9 +119,10 @@ def compute(model_id, version_id):
         for index, row in metrics_df.iterrows():
             dct = dict()
             dct['attack_type'] = name_mapping.get(row['_dku_stress_test_type'])
-            dct['accuracy_drop'] = 100 * round(row['accuracy_drop'], 3)
-            dct['robustness'] = 100 * round(row['robustness'], 3)
+            dct['accuracy_drop'] = round(100 * row['accuracy_drop'], 3)
+            dct['robustness'] = round(100 * row['robustness'], 3)
             metrics_list.append(dct)
+
 
         y_true = perturbed_df[target]
 
