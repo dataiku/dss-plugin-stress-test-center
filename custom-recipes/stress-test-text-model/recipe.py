@@ -23,6 +23,9 @@ model_handler = get_model_handler(model=settings.input_model, version_id=None)
 model_accessor = ModelAccessor(model_handler)
 target = model_accessor.get_target_variable()
 
+reversed_target_mapping = {v: k for k, v in model_accessor.model_handler.get_target_map().items()}
+pos_label = reversed_target_mapping.get(1)
+
 # instanciate the class implementing the perturbations to apply
 config_list = []
 if settings.word_swap:
@@ -55,22 +58,17 @@ samples_df = settings.input_dataset.get_dataframe()
 perturbed_df = stressor.fit_transform(samples_df, target)
 perturbed_df_with_prediction = model_accessor.predict(perturbed_df)
 
-g = samples_df.groupby(target).count()
-classes = g.index.tolist()
-counts = g[g.columns[0]].tolist()
-pos_label = classes[np.argmax(counts)]
-
 # compute metrics
 metrics_df = build_stress_metric(
     y_true=perturbed_df[target],
     y_pred=perturbed_df_with_prediction["prediction"],
     stress_test_indicator=perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE],
     pos_label=pos_label,
-)  # TODO this is hardcoding
+)
 
 # compute critical samples
 name_mapping = {
-    "REPLACE_WORD": "Adversarial attack",
+    "REPLACE_WORD": "Replace word",
     "TYPOS": "Missing values",
     "WORD_DELETION": "Word deletion",
 }
@@ -84,8 +82,9 @@ for index, row in metrics_df.iterrows():
     metrics_list.append(dct)
 
 y_true = perturbed_df[target]
-y_true_class_confidence = perturbed_df_with_prediction[perturbed_df_with_prediction.columns[1:]].values
-y_true_idx = np.array([[True, False] if 'proba_' + str(y) == perturbed_df_with_prediction.columns[1] else [False, True] for y in y_true])
+original_target_value = list(model_accessor.model_handler.get_target_map().keys())
+y_true_class_confidence = perturbed_df_with_prediction[['proba_{}'.format(original_target_value[0]), 'proba_{}'.format(original_target_value[1])]].values
+y_true_idx = np.array([[True, False] if y == reversed_target_mapping.get(1) else [False, True] for y in y_true])
 y_true_class_confidence = y_true_class_confidence[y_true_idx]
 
 critical_samples_id_df = get_critical_samples(
