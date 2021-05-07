@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from drift_dac.covariate_shift import MissingValues, Scaling, Adversarial, ReplaceWord, Typos
+from drift_dac.covariate_shift import MissingValues, Scaling, Adversarial, ReplaceWord, Typos, WordDeletion
 from drift_dac.prior_shift import KnockOut
 from drift_dac.perturbation_shared_utils import Shift
 
@@ -17,6 +17,8 @@ def get_stress_test_name(shift: Shift):
         return DkuStressTestCenterConstants.REPLACE_WORD
     elif isinstance(shift, Typos):
         return DkuStressTestCenterConstants.TYPOS
+    elif isinstance(shift,WordDeletion):
+        return DkuStressTestCenterConstants.WORD_DELETION
     else:
         raise NotImplementedError()
 
@@ -30,8 +32,9 @@ class DkuStressTestCenterConstants(object):
     PRIOR_SHIFT = 'PRIOR_SHIFT'
     REPLACE_WORD = 'REPLACE_WORD'
     TYPOS = 'TYPOS'
+    WORD_DELETION = 'WORD_DELETION'
 
-    PERTURBATION_BASED_STRESS_TYPES = [MISSING_VALUES, SCALING, ADVERSARIAL, REPLACE_WORD, TYPOS]
+    PERTURBATION_BASED_STRESS_TYPES = [MISSING_VALUES, SCALING, ADVERSARIAL, REPLACE_WORD, TYPOS,WORD_DELETION]
 
     TARGET = 'target'
 
