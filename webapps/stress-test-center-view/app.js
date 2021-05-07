@@ -234,7 +234,7 @@ let versionId = webAppConfig['versionId'];
                 console.log('Replace Word is chosen with param ', param_t1);
              }
              else {
-                param_s = 0;
+                param_t1 = 0;
              }
 
             if ($scope.activateT2) {
