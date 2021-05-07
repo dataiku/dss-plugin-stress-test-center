@@ -134,13 +134,21 @@ def compute(model_id, version_id):
                                                       stress_test_indicator=perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE],
                                                       row_indicator=perturbed_df[DkuStressTestCenterConstants.DKU_ROW_ID])
 
-        # TODO hot fix that should be done inside get_critical_samples
-        critical_samples_id_df.reset_index(level=0, inplace=True)
+        if critical_samples_id_df is not None:
+            # TODO hot fix that should be done inside get_critical_samples
+            critical_samples_id_df.reset_index(level=0, inplace=True)
 
-        clean_df_with_id = perturbed_df.loc[perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] == DkuStressTestCenterConstants.CLEAN].drop(DkuStressTestCenterConstants.STRESS_TEST_TYPE, axis=1)
-        critical_samples_df = critical_samples_id_df.merge(clean_df_with_id, on=DkuStressTestCenterConstants.DKU_ROW_ID, how='left').drop(DkuStressTestCenterConstants.DKU_ROW_ID, axis=1)
-        critical_samples_df['uncertainty'] = np.round(critical_samples_df['uncertainty'], 3)
-        critical_samples_list = critical_samples_df.to_dict('records')
+            clean_df_with_id = perturbed_df.loc[
+                perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] == DkuStressTestCenterConstants.CLEAN].drop(
+                DkuStressTestCenterConstants.STRESS_TEST_TYPE, axis=1)
+            critical_samples_df = critical_samples_id_df.merge(clean_df_with_id,
+                                                               on=DkuStressTestCenterConstants.DKU_ROW_ID,
+                                                               how='left').drop(DkuStressTestCenterConstants.DKU_ROW_ID,
+                                                                                axis=1)
+            critical_samples_df['uncertainty'] = np.round(critical_samples_df['uncertainty'], 3)
+            critical_samples_list = critical_samples_df.to_dict('records')
+        else:
+            critical_samples_list = dict()
 
         data = {
             'metrics': metrics_list,
