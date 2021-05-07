@@ -68,12 +68,15 @@ def compute(model_id, version_id):
         is_categorical = np.array(is_categorical)
         is_text = np.array(is_text)
 
+        reversed_target_mapping = {v: k for k, v in model_accessor.model_handler.get_target_map().items()}
+        pos_label = reversed_target_mapping.get(1)
+
         # Run the stress tests
 
         config_list = []
 
         if float(request.args.get('paramPS')) > 0:
-            config_list.append(StressTestConfiguration(KnockOut(float(request.args.get('paramPS')))))
+            config_list.append(StressTestConfiguration(KnockOut(cl=pos_label, samples_fraction=float(request.args.get('paramPS')))))
 
         if float(request.args.get('paramAA')) > 0:
             config_list.append(StressTestConfiguration(Adversarial(float(request.args.get('paramAA')))))
@@ -95,13 +98,13 @@ def compute(model_id, version_id):
         perturbed_df = stressor.fit_transform(test_df, target_column=target)  # perturbed_df is a dataset of schema feat_1 | feat_2 | ... | _STRESS_TEST_TYPE | _DKU_ID_
 
         perturbed_df_with_prediction = model_accessor.predict(perturbed_df)
-        reversed_target_mapping = {v: k for k, v in model_accessor.model_handler.get_target_map().items()}
+
 
         # Compute the performance drop metrics
         metrics_df = build_stress_metric(y_true=perturbed_df[target],
                                          y_pred=perturbed_df_with_prediction['prediction'],
                                          stress_test_indicator=perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE],
-                                         pos_label=reversed_target_mapping.get(1))
+                                         pos_label=pos_label)
 
         name_mapping = {
             'ADVERSARIAL': 'Adversarial attack',
