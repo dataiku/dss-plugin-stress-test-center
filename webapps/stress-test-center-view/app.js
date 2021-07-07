@@ -4,7 +4,7 @@ let versionId = webAppConfig['versionId'];
 
 (function() {
     'use strict';
-    app.controller('vizController', function($scope, $http, $timeout, ModalService) {
+    app.controller('VizController', function($scope, $http, ModalService) {
        $scope.activatePS = false;
        $scope.activateAA = false;
        $scope.activateMV = false;
@@ -252,7 +252,6 @@ let versionId = webAppConfig['versionId'];
                     $scope.loadingResult = false;
                     console.log(response.data);
                     $scope.metrics = response.data['metrics'];
-                    $scope.table_data = response.data['critical_samples'][0]
                     $scope.critical_samples = response.data['critical_samples']
                     $('.critical-sample-container').show();
                     $('.metric-container').show();
