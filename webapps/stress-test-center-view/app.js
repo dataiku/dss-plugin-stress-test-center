@@ -66,6 +66,11 @@ let versionId = webAppConfig['versionId'];
             const paramT1 = $scope.perturbations.replaceWord.$activated ? $scope.perturbations.replaceWord.params.affectedSamples : 0;
             const paramT2 = $scope.perturbations.typos.$activated ? $scope.perturbations.typos.params.affectedSamples : 0;
 
+            if (paramPs + paramAa + paramMv + paramS + paramT1 + paramT2 === 0) {
+                $scope.uiState.loadingResult = false;
+                return;
+            };
+
             $http.get(getWebAppBackendUrl("compute/"+modelId+"/"+versionId+"?paramPS="+paramPs+"&paramAA="+paramAa+"&paramMV="+paramMv+"&paramS="+paramS+"&paramT1="+paramT1+"&paramT2="+paramT2))
                 .then(function(response){
                     $scope.uiState.loadingResult = false;
