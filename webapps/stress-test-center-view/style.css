@@ -1,12 +1,29 @@
+input {
+    border: 1px solid var(--grey-lighten-5);
+}
+
+input:focus-visible {
+    border: 0;
+}
+
 .spinner-container {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    z-index: 1000000;
+    margin: -30px 0 0 -30px;
+    border-radius: 30px;
+    background: rgba(0,0,0,0.5);
+    color: var(--white);
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+ }
+
+ .spinner-div {
     padding-top: 40px;
     padding-bottom: 36px;
     color: var(--grey-lighten-3);
-}
-
-.spinner-container > .spinner {
-    width: 3.5rem;
-    height: 3.5rem;
 }
 
 .jcc {
@@ -55,6 +72,7 @@
 
 .control-group input {
     line-height: 20px;
+    font-size: 12px;
 }
 
 .control-group {
@@ -95,6 +113,7 @@
   height: 20px;
   margin-bottom: 0;
   display: inline-block;
+  font-weight: normal;
 }
 
 .switch input {
@@ -350,6 +369,7 @@ html {
 
 table {
   table-layout: fixed;
+  border-collapse: collapse;
 }
 
 .table-metric {
@@ -359,6 +379,10 @@ table {
     margin: 0 32px;
     width: 100%;
  }
+
+ .table-sample {
+    width: 100%;
+}
 
  .table-metric th, .table-sample th {
     padding: 16px 20px;
@@ -372,6 +396,10 @@ table {
     padding: 12px 16px 12px 32px;
     border-top: 1px solid var(--grey-lighten-6);
     border-bottom: 1px solid var(--grey-lighten-6);
+ }
+
+ .table-striped tbody tr:nth-of-type(2n+1) {
+    background: var(--grey-lighten-7);
  }
 
  .cell {
