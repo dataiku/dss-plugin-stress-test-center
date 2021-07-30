@@ -59,7 +59,7 @@
                         </div>
                     </div>
 
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'priorShift'">
+                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'PRIOR_SHIFT'">
                         <div class="explanation-box">
                             <div class="flex title-sb">
                                 Target Distribution Perturbation
@@ -73,12 +73,12 @@
                                 Positive class frequency after perturbation
                             </label>
                             <div class="control-group">
-                                <input type="number" id="priorShift" ng-model="perturbations.priorShift.params.affectedSamples" placeholder="0.5"  step=0.01 min=0>
+                                <input type="number" id="priorShift" ng-model="perturbations.PRIOR_SHIFT.params.samples_fraction" placeholder="0.5"  step=0.01 min=0>
                             </div>
                         </div>
                     </div>
 
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'advAttack'">
+                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'ADVERSARIAL'">
                         <div class="explanation-box">
                             <div class="flex title-sb">
                                 Adversarial Attack
@@ -92,12 +92,12 @@
                                 Proportion of affected samples
                             </label>
                             <div class="col-6 control-group">
-                                <input type="number" id="advAttack" ng-model="perturbations.advAttack.params.affectedSamples" value="0.5" placeholder=0.5 step=0.01 min=0>
+                                <input type="number" id="advAttack" ng-model="perturbations.ADVERSARIAL.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
                             </div>
                         </div>
                     </div>
 
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'missingValues'">
+                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'MISSING_VALUES'">
                         <div class="explanation-box">
                             <div class="flex title-sb">
                                 Missing Values Enforcer
@@ -112,12 +112,12 @@
                                 Proportion of affected samples
                             </label>
                             <div class="control-group">
-                                <input type="number" id="missingValues" ng-model="perturbations.missingValues.params.affectedSamples" value="0.5" placeholder=0.5 step=0.01 min=0>
+                                <input type="number" id="missingValues" ng-model="perturbations.MISSING_VALUES.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
                             </div>
                         </div>
                     </div>
 
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'scaling'">
+                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'SCALING'">
                         <div class="explanation-box">
                             <div class="flex title-sb">
                                 Scaling Perturbation
@@ -131,12 +131,12 @@
                                 Proportion of affected samples
                             </label>
                             <div class="col-6 control-group">
-                                <input type="number" id="scaling" ng-model="perturbations.scaling.params.affectedSamples" value="0.5" placeholder=0.5 step=0.01 min=0>
+                                <input type="number" id="scaling" ng-model="perturbations.SCALING.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
                             </div>
                         </div>
                     </div>
 
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'replaceWord'">
+                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'REPLACE_WORD'">
                         <div class="explanation-box">
                             <div class="flex title-sb">
                                 Replace Word
@@ -150,12 +150,12 @@
                                 Proportion of affected samples
                             </label>
                             <div class="control-group">
-                                <input type="number" id="replaceWord" ng-model="perturbations.replaceWord.params.affectedSamples" value="0.5" placeholder=0.5 step=0.01 min=0>
+                                <input type="number" id="replaceWord" ng-model="perturbations.REPLACE_WORD.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
                             </div>
                         </div>
                     </div>
 
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'typos'">
+                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'TYPOS'">
                         <div class="explanation-box">
                             <div class="flex title-sb">
                                 Typos in words
@@ -169,7 +169,7 @@
                                 Proportion of affected samples
                             </label>
                             <div class="control-group">
-                                <input type="number" id="typos" ng-model="perturbations.typos.params.affectedSamples" value="0.5" placeholder=0.5 step=0.01 min=0>
+                                <input type="number" id="typos" ng-model="perturbations.TYPOS.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
                             </div>
                         </div>
                     </div>

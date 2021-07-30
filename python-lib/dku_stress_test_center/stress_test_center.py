@@ -4,6 +4,9 @@ import pandas as pd
 from dku_stress_test_center.utils import DkuStressTestCenterConstants, get_stress_test_name
 from drift_dac.perturbation_shared_utils import Shift, PerturbationConstants
 from sklearn.metrics import accuracy_score, f1_score, balanced_accuracy_score
+from drift_dac.prior_shift import KnockOut
+from drift_dac.covariate_shift import MissingValues, Scaling, Adversarial, ReplaceWord, Typos
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -18,17 +21,31 @@ class StressTestConfiguration(object):
         self.features = list_of_features  # unused then?
         # check valid configurations
 
+    @staticmethod
+    def create_conf(shift_type, shift_params, shift_features):
+        shift = {
+            DkuStressTestCenterConstants.ADVERSARIAL: Adversarial,
+            DkuStressTestCenterConstants.PRIOR_SHIFT: KnockOut,
+            DkuStressTestCenterConstants.MISSING_VALUES: MissingValues,
+            DkuStressTestCenterConstants.SCALING: Scaling,
+            DkuStressTestCenterConstants.TYPOS: Typos,
+            DkuStressTestCenterConstants.REPLACE_WORD: ReplaceWord
+        }[shift_type](**shift_params)
+        return StressTestConfiguration(shift, shift_features)
 
 class StressTestGenerator(object):
     def __init__(self,
-                 config_list: list,  # list of StressTestConfiguration
+                 shift_configs: dict,
                  selected_features: list,
                  is_categorical: np.array = None,  # wrt selected features
                  is_text: np.array = None,  # wrt selected features
                  clean_dataset_size=DkuStressTestCenterConstants.CLEAN_DATASET_NUM_ROWS,
                  random_state=65537):
 
-        self.config_list = config_list
+        self.config_list = []
+        for shift_type, shift_config in shift_configs.items():
+            params, features = shift_config["params"], shift_config.get("features")
+            self.config_list.append(StressTestConfiguration.create_conf(shift_type, params, features))
         self.selected_features = selected_features
         self.is_categorical = is_categorical
         self.is_text = is_text

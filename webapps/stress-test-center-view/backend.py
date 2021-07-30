@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import logging
-import simplejson
+import simplejson # might want to use flask.jsonify instead
 import traceback
 from flask import request
+import json
 
-from dataiku import api_client, Model
+from dataiku import Model
 from dataiku.customwebapp import get_webapp_config
 from dataiku.doctor.posttraining.model_information_handler import PredictionModelInformationHandler
 
@@ -13,43 +14,39 @@ from dku_stress_test_center.model_accessor import ModelAccessor
 from dku_stress_test_center.stress_test_center import StressTestConfiguration, StressTestGenerator
 from dku_stress_test_center.stress_test_center import build_stress_metric, get_critical_samples
 from dku_stress_test_center.stress_test_center import DkuStressTestCenterConstants
-from drift_dac.covariate_shift import MissingValues, Scaling, Adversarial, ReplaceWord, Typos
 from model_metadata import get_model_handler
-from drift_dac.prior_shift import KnockOut
 from dku_webapp import convert_numpy_int64_to_int, pretty_floats
 
 logger = logging.getLogger(__name__)
 
+# Initialization of the backend
 
-@app.route('/compute/<model_id>/<version_id>')
-def compute(model_id, version_id):
+fmi = get_webapp_config().get("trainedModelFullModelId")
+if fmi is None:
+    model = Model(get_webapp_config()["modelId"])
+    version_id = get_webapp_config().get("versionId")
+    original_model_handler = get_model_handler(model, version_id)
+else:
+    original_model_handler = PredictionModelInformationHandler.from_full_model_id(fmi)
+model_accessor = ModelAccessor(original_model_handler)
+
+def undo_preproc_name(f):
+    if ':' in f:
+        return f.split(':')[1]
+    else:
+        return f
+
+@app.route('/compute', methods=["POST"])
+def compute():
     try:
-
-        fmi = get_webapp_config().get("trainedModelFullModelId")
-        if fmi is None:
-            model = Model(get_webapp_config()["modelId"])
-            version_id = get_webapp_config().get("versionId")
-            original_model_handler = get_model_handler(model, version_id)
-            model_accessor = ModelAccessor(original_model_handler)
-        else:
-            original_model_handler = PredictionModelInformationHandler.from_full_model_id(fmi)
-            model_accessor = ModelAccessor(original_model_handler)
-
         # Get test data
         logger.info('Retrieving model data...')
-        test_df = model_accessor.get_original_test_df()
         target = model_accessor.get_target_variable()
-
-        def undo_preproc_name(f):
-            if ':' in f:
-                return f.split(':')[1]
-            else:
-                return f
 
         selected_features = set()
         feature_importance = model_accessor.get_feature_importance().index.tolist()
 
-        for feature in feature_importance:
+        for feature in feature_importance: # TODO: delete (use features per perturbation instead)
             selected_features.add(undo_preproc_name(feature))
             if len(selected_features) > 10:
                 break
@@ -73,28 +70,12 @@ def compute(model_id, version_id):
 
         # Run the stress tests
 
-        config_list = []
-
-        if float(request.args.get('paramPS')) > 0:
-            config_list.append(StressTestConfiguration(KnockOut(cl=pos_label, samples_fraction=float(request.args.get('paramPS')))))
-
-        if float(request.args.get('paramAA')) > 0:
-            config_list.append(StressTestConfiguration(Adversarial(float(request.args.get('paramAA')))))
-
-        if float(request.args.get('paramMV')) > 0:
-            config_list.append(StressTestConfiguration(MissingValues(float(request.args.get('paramMV')))))
-
-        if float(request.args.get('paramS')) > 0:
-            config_list.append(StressTestConfiguration(Scaling(float(request.args.get('paramS')))))
-
-        if float(request.args.get('paramT1')) > 0:
-            config_list.append(StressTestConfiguration(ReplaceWord(float(request.args.get('paramT1')))))
-
-        if float(request.args.get('paramT2')) > 0:
-            config_list.append(StressTestConfiguration(Typos(float(request.args.get('paramT2')))))
-
-        print('CONFIG LIST', config_list)
-        stressor = StressTestGenerator(config_list, selected_features, is_categorical, is_text)
+        config = json.loads(request.data)
+        prior_shift = config.get(DkuStressTestCenterConstants.PRIOR_SHIFT) # UGLY HACK (temp)
+        if prior_shift is not None:
+            prior_shift["params"]["cl"] = pos_label
+        stressor = StressTestGenerator(config, selected_features, is_categorical, is_text)
+        test_df = model_accessor.get_original_test_df()
         perturbed_df = stressor.fit_transform(test_df, target_column=target)  # perturbed_df is a dataset of schema feat_1 | feat_2 | ... | _STRESS_TEST_TYPE | _DKU_ID_
 
         perturbed_df_with_prediction = model_accessor.predict(perturbed_df)

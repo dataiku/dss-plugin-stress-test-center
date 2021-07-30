@@ -6,44 +6,44 @@ let versionId = webAppConfig['versionId'];
     'use strict';
     app.controller('VizController', function($scope, $http, ModalService) {
         $scope.uiState = {
-            selectedRow: "priorShift"
+            selectedRow: "PRIOR_SHIFT"
         };
 
         $scope.perturbations = {
-            priorShift: {
+            PRIOR_SHIFT: {
                 displayName: "Target distribution",
                 params: {
-                    affectedSamples: .5
+                    samples_fraction: .5
                 }
             },
-            advAttack: {
+            ADVERSARIAL: {
                 displayName: "Adversarial attack",
                 params: {
-                    affectedSamples: .5
+                    samples_fraction: .5
                 }
             },
-            missingValues: {
+            MISSING_VALUES: {
                 displayName: "Missing values enforcer",
                 params: {
-                    affectedSamples: .5
+                    samples_fraction: .5
                 }
             },
-            scaling: {
+            SCALING: {
                 displayName: "Scaling perturbation",
                 params: {
-                    affectedSamples: .5
+                    samples_fraction: .5
                 }
             },
-            replaceWord: {
+            REPLACE_WORD: {
                 displayName: "Replace word",
                 params: {
-                    affectedSamples: .5
+                    samples_fraction: .5
                 }
             },
-            typos: {
+            TYPOS: {
                 displayName: "Typos",
                 params: {
-                    affectedSamples: .5
+                    samples_fraction: .5
                 }
             }
         }
@@ -58,20 +58,14 @@ let versionId = webAppConfig['versionId'];
 
        $scope.runAnalysis = function () {
             $scope.uiState.loadingResult = true;
+            const perturbationsToCompute = {};
+            for (let key in $scope.perturbations) {
+                if ($scope.perturbations.$activated) {
+                    perturbationsToCompute[key] = $scope.perturbations[key];
+                }
+            }
 
-            const paramPs = $scope.perturbations.priorShift.$activated ? $scope.perturbations.priorShift.params.affectedSamples : 0;
-            const paramAa = $scope.perturbations.advAttack.$activated ? $scope.perturbations.advAttack.params.affectedSamples : 0;
-            const paramMv = $scope.perturbations.missingValues.$activated ? $scope.perturbations.missingValues.params.affectedSamples : 0;
-            const paramS = $scope.perturbations.scaling.$activated ? $scope.perturbations.scaling.params.affectedSamples : 0;
-            const paramT1 = $scope.perturbations.replaceWord.$activated ? $scope.perturbations.replaceWord.params.affectedSamples : 0;
-            const paramT2 = $scope.perturbations.typos.$activated ? $scope.perturbations.typos.params.affectedSamples : 0;
-
-            if (paramPs + paramAa + paramMv + paramS + paramT1 + paramT2 === 0) {
-                $scope.uiState.loadingResult = false;
-                return;
-            };
-
-            $http.get(getWebAppBackendUrl("compute/"+modelId+"/"+versionId+"?paramPS="+paramPs+"&paramAA="+paramAa+"&paramMV="+paramMv+"&paramS="+paramS+"&paramT1="+paramT1+"&paramT2="+paramT2))
+            $http.post(getWebAppBackendUrl("compute"), perturbationsToCompute)
                 .then(function(response){
                     $scope.uiState.loadingResult = false;
                     $scope.metrics = response.data['metrics'];
