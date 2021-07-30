@@ -70,3 +70,30 @@ app.directive("modalBackground", function($compile) {
         }
     }
 });
+
+app.directive("spinner", function () {
+    return {
+        template: "<div class='spinner-container'></div>",
+        link: function (scope, element) {
+            var opts = {
+                lines: 6,
+                length: 0,
+                width: 10,
+                radius: 10,
+                corners: 1,
+                rotate: 0,
+                color: '#fff',
+                speed: 2,
+                trail: 60,
+                shadow: false,
+                hwaccel: false,
+                className: 'spinner',
+                zIndex: 2e9,
+                top: '10px',
+                left: '10px'
+             };
+             const spinner = new Spinner(opts);
+             spinner.spin(element[0].childNodes[0]);
+        }
+    }
+});
