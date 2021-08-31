@@ -4,15 +4,6 @@ import sys
 import json
 import dataiku
 from dataiku.doctor.posttraining.model_information_handler import PredictionModelInformationHandler
-from dku_tools import process_timestamp
-
-
-def get_train_date(model_version, version_id):
-    m = dataiku.Model(model_version, ignore_flow=True)
-    for v in m.list_versions():
-        if v.get('versionId') == version_id:
-            return process_timestamp((v.get('snippet').get('trainDate')))
-    return None
 
 
 def get_model_handler(model, version_id=None):

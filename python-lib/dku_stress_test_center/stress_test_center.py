@@ -7,11 +7,6 @@ from sklearn.metrics import accuracy_score, f1_score, balanced_accuracy_score
 from drift_dac.prior_shift import KnockOut
 from drift_dac.covariate_shift import MissingValues, Scaling, Adversarial, ReplaceWord, Typos
 
-import logging
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format='Stress Test Center Plugin | %(levelname)s - %(message)s')
-
 
 class StressTestConfiguration(object):
     def __init__(self,
