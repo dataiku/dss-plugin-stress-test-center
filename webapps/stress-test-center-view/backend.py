@@ -3,7 +3,7 @@ import numpy as np
 import logging
 import simplejson # might want to use flask.jsonify instead
 import traceback
-from flask import request
+from flask import request, jsonify
 import json
 
 from dataiku import Model
@@ -19,24 +19,43 @@ from dku_webapp import convert_numpy_int64_to_int, pretty_floats
 
 logger = logging.getLogger(__name__)
 
-# Initialization of the backend
-
-fmi = get_webapp_config().get("trainedModelFullModelId")
-if fmi is None:
-    model = Model(get_webapp_config()["modelId"])
-    version_id = get_webapp_config().get("versionId")
-    original_model_handler = get_model_handler(model, version_id)
-else:
-    original_model_handler = PredictionModelInformationHandler.from_full_model_id(fmi)
-model_accessor = ModelAccessor(original_model_handler)
-
 def undo_preproc_name(f):
     if ':' in f:
         return f.split(':')[1]
     else:
         return f
 
-@app.route('/compute', methods=["POST"])
+stressor = StressTestGenerator()
+
+@app.route('/model-info', methods=['GET'])
+def get_model_info():
+    try:
+        fmi = get_webapp_config().get("trainedModelFullModelId")
+        if fmi is None:
+            model = Model(get_webapp_config()["modelId"])
+            version_id = get_webapp_config().get("versionId")
+            original_model_handler = get_model_handler(model, version_id)
+        else:
+            original_model_handler = PredictionModelInformationHandler.from_full_model_id(fmi)
+        model_accessor = ModelAccessor(original_model_handler)
+        is_regression = 'REGRESSION' in original_model_handler.get_prediction_type()
+        return jsonify(
+            target_classes=[] if is_regression else list(original_model_handler.get_target_map().keys())
+        )
+    except:
+        logger.error(traceback.format_exc())
+        return traceback.format_exc(), 500
+
+@app.route('/stress-tests-config', methods=["POST"])
+def set_stress_tests_config():
+    try:
+        config = json.loads(request.data)
+        stressor.set_config(config)
+    except:
+        logger.error(traceback.format_exc())
+        return traceback.format_exc(), 500
+
+@app.route('/compute', methods=["GET"])
 def compute():
     try:
         # Get test data
@@ -69,12 +88,9 @@ def compute():
         pos_label = reversed_target_mapping.get(1)
 
         # Run the stress tests
-
-        config = json.loads(request.data)
-        prior_shift = config.get(DkuStressTestCenterConstants.PRIOR_SHIFT) # UGLY HACK (temp)
-        if prior_shift is not None:
-            prior_shift["params"]["cl"] = pos_label
-        stressor = StressTestGenerator(config, selected_features, is_categorical, is_text)
+        stressor.selected_features = selected_features
+        stressor.is_categorical = is_categorical
+        stress.is_text = is_text
         test_df = model_accessor.get_original_test_df()
         perturbed_df = stressor.fit_transform(test_df, target_column=target)  # perturbed_df is a dataset of schema feat_1 | feat_2 | ... | _STRESS_TEST_TYPE | _DKU_ID_
 

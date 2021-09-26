@@ -5,58 +5,19 @@ let versionId = webAppConfig['versionId'];
 (function() {
     'use strict';
     app.controller('VizController', function($scope, $http, ModalService) {
-        $scope.uiState = {
-            selectedRow: "PRIOR_SHIFT"
-        };
-
-        $scope.perturbations = {
-            PRIOR_SHIFT: {
-                displayName: "Target distribution",
-                params: {
-                    samples_fraction: .5
-                }
-            },
-            ADVERSARIAL: {
-                displayName: "Adversarial attack",
-                params: {
-                    samples_fraction: .5
-                }
-            },
-            MISSING_VALUES: {
-                displayName: "Missing values enforcer",
-                params: {
-                    samples_fraction: .5
-                }
-            },
-            SCALING: {
-                displayName: "Scaling perturbation",
-                params: {
-                    samples_fraction: .5
-                }
-            },
-            REPLACE_WORD: {
-                displayName: "Replace word",
-                params: {
-                    samples_fraction: .5
-                }
-            },
-            TYPOS: {
-                displayName: "Typos",
-                params: {
-                    samples_fraction: .5
-                }
-            }
-        }
-
         $scope.modal = {};
         $scope.removeModal = function(event) {
-            if (ModalService.remove($scope.modal)(event)) {
-                angular.element(".template").focus();
-            }
+        if (ModalService.remove($scope.modal)(event)) {
+            angular.element(".template").focus();
+        }
         };
         $scope.createModal = ModalService.create($scope.modal);
 
-       $scope.runAnalysis = function () {
+        $scope.uiState = {};
+        $scope.perturbations = {};
+        $scope.modelInfo = {};
+
+        $scope.runAnalysis = function () {
             $scope.uiState.loadingResult = true;
             const perturbationsToCompute = {};
             for (let key in $scope.perturbations) {
@@ -86,6 +47,36 @@ let versionId = webAppConfig['versionId'];
             }
         }
 
+        $http.get(getWebAppBackendUrl("model-info"))
+            .then(function(response){
+                $scope.modelInfo.targetClasses = response.data["target_classes"];
+                if ($scope.modelInfo.targetClasses.length) {
+                    $scope.modelInfo.isClassification = true;
+                    $scope.uiState.selectedRow = "PRIOR_SHIFT";
+                    $scope.perturbations.PRIOR_SHIFT = {
+                        displayName: "Target distribution perturbation",
+                        params: {
+                            samples_fraction: .5
+                        }
+                    };
+                } else {
+                    $scope.uiState.selectedRow = "MISSING_VALUES";
+                }
 
+                $scope.perturbations.MISSING_VALUES = {
+                    displayName: "Missing values enforcer",
+                    params: {
+                        samples_fraction: .5
+                    }
+                };
+                $scope.perturbations.SCALING = {
+                    displayName: "Scaling perturbation",
+                    params: {
+                        samples_fraction: .5
+                    }
+                };
+        }, function(e) {
+            $scope.createModal.error(e.data);
+        });
     })}
 )();

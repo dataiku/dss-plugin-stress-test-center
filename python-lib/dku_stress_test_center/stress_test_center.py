@@ -29,25 +29,22 @@ class StressTestConfiguration(object):
         return StressTestConfiguration(shift, shift_features)
 
 class StressTestGenerator(object):
-    def __init__(self,
-                 shift_configs: dict,
-                 selected_features: list,
-                 is_categorical: np.array = None,  # wrt selected features
-                 is_text: np.array = None,  # wrt selected features
-                 clean_dataset_size=DkuStressTestCenterConstants.CLEAN_DATASET_NUM_ROWS,
-                 random_state=65537):
-
-        self.config_list = []
-        for shift_type, shift_config in shift_configs.items():
-            params, features = shift_config["params"], shift_config.get("features")
-            self.config_list.append(StressTestConfiguration.create_conf(shift_type, params, features))
-        self.selected_features = selected_features
-        self.is_categorical = is_categorical
-        self.is_text = is_text
+    def __init__(self, clean_dataset_size=DkuStressTestCenterConstants.CLEAN_DATASET_NUM_ROWS,
+                random_state=65537):
+        self.config_list = None
+        self.selected_features = None
+        self.is_categorical = None
+        self.is_text = None
         self.is_numeric = None
 
         self._random_state = random_state
         self._clean_dataset_size = clean_dataset_size
+
+    def set_config(self, shift_configs: dict):
+        self.config_list = []
+        for shift_type, shift_config in shift_configs.items():
+            params, features = shift_config["params"], shift_config.get("features")
+            self.config_list.append(StressTestConfiguration.create_conf(shift_type, params, features))
 
     def _subsample_clean_df(self,
                             clean_df: pd.DataFrame):
