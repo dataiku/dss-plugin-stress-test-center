@@ -204,7 +204,7 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="metric in metrics">
-                                <td class="cell text-highlight">{{ metric['attack_type'] }}</td>
+                                <td class="cell text-highlight">{{ perturbations[metric['attack_type']].displayName }}</td>
                                 <td class="cell text-sb">{{ metric['accuracy_drop'] }}%</td>
                                 <td class="cell text-sb">{{ metric['robustness'] }}%</td>
                             </tr>

@@ -103,19 +103,10 @@ def compute():
                                          stress_test_indicator=perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE],
                                          pos_label=pos_label)
 
-        name_mapping = {
-            'ADVERSARIAL': 'Adversarial attack',
-            'MISSING_VALUES': 'Missing values enforcer',
-            'PRIOR_SHIFT': 'Target distribution perturbation',
-            'SCALING': 'Scaling perturbation',
-            'REPLACE_WORD': 'Replace Word with similar',
-            'TYPOS': 'Add typos to words'
-        }
-
         metrics_list = []
         for index, row in metrics_df.iterrows():
             dct = dict()
-            dct['attack_type'] = name_mapping.get(row['_dku_stress_test_type'])
+            dct['attack_type'] = row['_dku_stress_test_type']
             dct['accuracy_drop'] = round(100 * row['accuracy_drop'], 3)
             dct['robustness'] = round(100 * row['robustness'], 3)
             metrics_list.append(dct)
