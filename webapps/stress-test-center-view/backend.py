@@ -6,7 +6,7 @@ import traceback
 from flask import request, jsonify
 import json
 
-from dataiku import Model
+from dataiku import Model, api_client
 from dataiku.customwebapp import get_webapp_config
 from dataiku.doctor.posttraining.model_information_handler import PredictionModelInformationHandler
 
@@ -39,6 +39,7 @@ def get_model_info():
             original_model_handler = PredictionModelInformationHandler.from_full_model_id(fmi)
         model_accessor = ModelAccessor(original_model_handler)
         is_regression = 'REGRESSION' in original_model_handler.get_prediction_type()
+        stressor.model_accessor = model_accessor
         return jsonify(
             target_classes=[] if is_regression else list(original_model_handler.get_target_map().keys())
         )
@@ -51,6 +52,7 @@ def set_stress_tests_config():
     try:
         config = json.loads(request.data)
         stressor.set_config(config)
+        return {"result": "ok"}
     except:
         logger.error(traceback.format_exc())
         return traceback.format_exc(), 500
@@ -60,8 +62,7 @@ def compute():
     try:
         # Get test data
         logger.info('Retrieving model data...')
-        target = model_accessor.get_target_variable()
-
+        model_accessor = stressor.model_accessor
         selected_features = set()
         feature_importance = model_accessor.get_feature_importance().index.tolist()
 
@@ -90,14 +91,15 @@ def compute():
         # Run the stress tests
         stressor.selected_features = selected_features
         stressor.is_categorical = is_categorical
-        stress.is_text = is_text
-        test_df = model_accessor.get_original_test_df()
-        perturbed_df = stressor.fit_transform(test_df, target_column=target)  # perturbed_df is a dataset of schema feat_1 | feat_2 | ... | _STRESS_TEST_TYPE | _DKU_ID_
+        stressor.is_text = is_text
 
+        # perturbed_df is a dataset of schema feat_1 | feat_2 | ... | _STRESS_TEST_TYPE | _DKU_ID_
+        perturbed_df = stressor.fit_transform()
         perturbed_df_with_prediction = model_accessor.predict(perturbed_df)
 
 
         # Compute the performance drop metrics
+        target = model_accessor.get_target_variable()
         metrics_df = build_stress_metric(y_true=perturbed_df[target],
                                          y_pred=perturbed_df_with_prediction['prediction'],
                                          stress_test_indicator=perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE],

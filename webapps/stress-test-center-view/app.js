@@ -21,20 +21,25 @@ let versionId = webAppConfig['versionId'];
             $scope.uiState.loadingResult = true;
             const perturbationsToCompute = {};
             for (let key in $scope.perturbations) {
-                if ($scope.perturbations.$activated) {
+                if ($scope.perturbations[key].$activated) {
                     perturbationsToCompute[key] = $scope.perturbations[key];
                 }
             }
-
-            $http.post(getWebAppBackendUrl("compute"), perturbationsToCompute)
-                .then(function(response){
+            $http.post(getWebAppBackendUrl("stress-tests-config"), perturbationsToCompute)
+                .then(function(response) {
+                    $http.get(getWebAppBackendUrl("compute"))
+                        .then(function(response){
+                            $scope.uiState.loadingResult = false;
+                            $scope.metrics = response.data['metrics'];
+                            $scope.critical_samples = response.data['critical_samples']
+                    }, function(e) {
+                        $scope.uiState.loadingResult = false;
+                        $scope.createModal.error(e.data);
+                    });
+                }, function(e) {
                     $scope.uiState.loadingResult = false;
-                    $scope.metrics = response.data['metrics'];
-                    $scope.critical_samples = response.data['critical_samples']
-            }, function(e) {
-                $scope.uiState.loadingResult = false;
-                $scope.createModal.error(e.data);
-            });
+                    $scope.createModal.error(e.data);
+                });
 
             $scope.filterUncertainty = function(item) {
                 var result = {};

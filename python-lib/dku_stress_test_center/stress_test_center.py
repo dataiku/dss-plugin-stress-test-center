@@ -32,6 +32,7 @@ class StressTestGenerator(object):
     def __init__(self, clean_dataset_size=DkuStressTestCenterConstants.CLEAN_DATASET_NUM_ROWS,
                 random_state=65537):
         self.config_list = None
+        self.model_accessor = None
         self.selected_features = None
         self.is_categorical = None
         self.is_text = None
@@ -53,11 +54,9 @@ class StressTestGenerator(object):
 
         return clean_df.sample(n=self._clean_dataset_size, random_state=self._random_state)
 
-    def fit_transform(self,
-                      clean_df: pd.DataFrame,
-                      target_column: str = DkuStressTestCenterConstants.TARGET):
-
-        clean_df = self._subsample_clean_df(clean_df)
+    def fit_transform(self):
+        clean_df = self._subsample_clean_df(self.model_accessor.get_original_test_df())
+        target_column = self.model_accessor.get_target_variable()
 
         all_features = list(clean_df.columns)
         all_features.remove(target_column)
@@ -72,7 +71,6 @@ class StressTestGenerator(object):
 
         perturbed_datasets_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] = DkuStressTestCenterConstants.CLEAN
         perturbed_datasets_df[DkuStressTestCenterConstants.DKU_ROW_ID] = perturbed_datasets_df.index
-
         for config in self.config_list:
             pertubed_df = clean_df.copy(deep=True)
 
