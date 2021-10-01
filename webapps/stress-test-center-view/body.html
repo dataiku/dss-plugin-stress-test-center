@@ -78,22 +78,7 @@
                                 <label for="priorShift" class="text label-text">Selected class frequency after perturbation</label>
                                 <input type="number" id="priorShift" ng-model="perturbations.PRIOR_SHIFT.params.samples_fraction" placeholder="0.5"  step=0.01 min=0>
                             </div>
-                    </div>
-
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'ADVERSARIAL'">
-                        <div class="explanation-box">
-                            <div class="flex title-sb">
-                                Adversarial Attack
-                            </div>
-                            <div class="flex text-r">
-                                The adversarial attack performs minimal feature perturbation to change sample predictions.
-                            </div>
-                        </div>
-                        <form class="flex row-param">
-                            <div class="control-group">
-                                <label for="advAttack" class="text label-text">Proportion of affected samples</label>
-                                <input type="number" id="advAttack" ng-model="perturbations.ADVERSARIAL.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
-                            </div>
+                        </form>
                     </div>
 
                     <div class="perturbation-details" ng-show="uiState.selectedRow == 'MISSING_VALUES'">
@@ -111,6 +96,7 @@
                                 <label for="missingValues" class="text label-text">Proportion of affected samples</label>
                                 <input type="number" id="missingValues" ng-model="perturbations.MISSING_VALUES.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
                             </div>
+                        </form>
                     </div>
 
                     <div class="perturbation-details" ng-show="uiState.selectedRow == 'SCALING'">
@@ -127,43 +113,7 @@
                                 <label for="scaling" class="text label-text">Proportion of affected samples</label>
                                 <input type="number" id="scaling" ng-model="perturbations.SCALING.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
                             </div>
-                    </div>
-
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'REPLACE_WORD'">
-                        <div class="explanation-box">
-                            <div class="flex title-sb">
-                                Replace Word
-                            </div>
-                            <div class="flex text-r">
-                                Replace Word replaces random words with similar words (close in the embedding space).
-                            </div>
-                        </div>
-                        <form class="flex row-param">
-                            <label for="replaceWord" class="text label-text">
-                                Proportion of affected samples
-                            </label>
-                            <div class="control-group">
-                                <input type="number" id="replaceWord" ng-model="perturbations.REPLACE_WORD.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
-                            </div>
-                    </div>
-
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'TYPOS'">
-                        <div class="explanation-box">
-                            <div class="flex title-sb">
-                                Typos in words
-                            </div>
-                            <div class="flex text-r">
-                                Typos inserts/deletes characters to simulate typos in words.
-                            </div>
-                        </div>
-                        <div class="flex row-param">
-                            <label for="typos" class="text label-text">
-                                Proportion of affected samples
-                            </label>
-                            <div class="control-group">
-                                <input type="number" id="typos" ng-model="perturbations.TYPOS.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
-                            </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -229,7 +179,7 @@
                                 <tr>
                                     <th class="top-cell--blue title-sb">
                                         <div class="flex top-cell__row">
-                                            <div>{{ sample['uncertainty'] }}</div>
+                                            <div>{{ uncertainties[$index] }}</div>
                                             <div>0.63</div>
                                         </div>
                                         <div class="flex top-cell__row">
@@ -240,7 +190,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr ng-repeat="(key, value) in filterUncertainty(sample)">
+                                <tr ng-repeat="(key, value) in sample">
                                 <td>
                                     {{key}}
                                     <span class="text-lighter">= {{value}}</span>

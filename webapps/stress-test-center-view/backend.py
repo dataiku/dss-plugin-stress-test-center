@@ -117,33 +117,23 @@ def compute():
         y_true = perturbed_df[target]
 
         original_target_value = list(model_accessor.model_handler.get_target_map().keys())
-        y_true_class_confidence = perturbed_df_with_prediction[['proba_{}'.format(original_target_value[0]), 'proba_{}'.format(original_target_value[1])]].values
-        y_true_idx = np.array([[True, False] if y == reversed_target_mapping.get(1) else [False, True] for y in y_true])
+        y_true_class_confidence = perturbed_df_with_prediction[
+            ['proba_{}'.format(original_target_value[0]), 'proba_{}'.format(original_target_value[1])]
+        ].values
+        y_true_idx = np.array([
+            [True, False] if y == reversed_target_mapping.get(1) else [False, True] for y in y_true
+        ])
         y_true_class_confidence = y_true_class_confidence[y_true_idx]
 
-        critical_samples_id_df = get_critical_samples(y_true_class_confidence=y_true_class_confidence,
-                                                      stress_test_indicator=perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE],
-                                                      row_indicator=perturbed_df[DkuStressTestCenterConstants.DKU_ROW_ID])
-
-        if critical_samples_id_df is not None:
-            # TODO hot fix that should be done inside get_critical_samples
-            critical_samples_id_df.reset_index(level=0, inplace=True)
-
-            clean_df_with_id = perturbed_df.loc[
-                perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] == DkuStressTestCenterConstants.CLEAN].drop(
-                DkuStressTestCenterConstants.STRESS_TEST_TYPE, axis=1)
-            critical_samples_df = critical_samples_id_df.merge(clean_df_with_id,
-                                                               on=DkuStressTestCenterConstants.DKU_ROW_ID,
-                                                               how='left').drop(DkuStressTestCenterConstants.DKU_ROW_ID,
-                                                                                axis=1)
-            critical_samples_df['uncertainty'] = np.round(critical_samples_df['uncertainty'], 3)
-            critical_samples_list = critical_samples_df.to_dict('records')
-        else:
-            critical_samples_list = dict()
+        critical_samples_df, uncertainties = get_critical_samples(
+            y_true_class_confidence=y_true_class_confidence,
+            perturbed_df=perturbed_df
+        )
 
         data = {
             'metrics': metrics_list,
-            'critical_samples': critical_samples_list
+            'critical_samples': critical_samples_df.to_dict('records'),
+            'uncertainties': uncertainties
         }
         return simplejson.dumps(pretty_floats(data), ignore_nan=True, default=convert_numpy_int64_to_int)
     except:

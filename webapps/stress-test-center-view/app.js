@@ -26,12 +26,13 @@ let versionId = webAppConfig['versionId'];
                 }
             }
             $http.post(getWebAppBackendUrl("stress-tests-config"), perturbationsToCompute)
-                .then(function(response) {
+                .then(function() {
                     $http.get(getWebAppBackendUrl("compute"))
                         .then(function(response){
                             $scope.uiState.loadingResult = false;
                             $scope.metrics = response.data['metrics'];
                             $scope.critical_samples = response.data['critical_samples']
+                            $scope.uncertainties = response.data['uncertainties']
                     }, function(e) {
                         $scope.uiState.loadingResult = false;
                         $scope.createModal.error(e.data);
@@ -40,16 +41,6 @@ let versionId = webAppConfig['versionId'];
                     $scope.uiState.loadingResult = false;
                     $scope.createModal.error(e.data);
                 });
-
-            $scope.filterUncertainty = function(item) {
-                var result = {};
-                for (let k in item) {
-                    if (k != 'uncertainty') {
-                        result[k] = item[k];
-                    }
-                }
-                return result;
-            }
         }
 
         $http.get(getWebAppBackendUrl("model-info"))

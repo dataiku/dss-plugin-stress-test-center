@@ -165,42 +165,37 @@ def build_stress_metric(y_true: np.array,
 
 
 def get_critical_samples(y_true_class_confidence: np.array,  # n_rows x 1
-                         stress_test_indicator: np.array,
-                         row_indicator: np.array,
+                         perturbed_df: pd.DataFrame,
                          top_k_samples: int = 5):
     # sparse format for the pair (orig_x, pert_x)
-
-    valid_stress_ids = set(stress_test_indicator.unique()) & set(
-        DkuStressTestCenterConstants.PERTURBATION_BASED_STRESS_TYPES)
+    stress_test_indicator = perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE]
+    valid_stress_ids = set(stress_test_indicator) & set(DkuStressTestCenterConstants.PERTURBATION_BASED_STRESS_TYPES)
     valid_stress_ids |= set([DkuStressTestCenterConstants.CLEAN])
 
     true_class_confidence_df = pd.DataFrame({
         DkuStressTestCenterConstants.STRESS_TEST_TYPE: stress_test_indicator,
-        DkuStressTestCenterConstants.DKU_ROW_ID: row_indicator,
+        DkuStressTestCenterConstants.DKU_ROW_ID: perturbed_df[DkuStressTestCenterConstants.DKU_ROW_ID],
         DkuStressTestCenterConstants.CONFIDENCE: y_true_class_confidence
     })
 
-    true_class_confidence_df = true_class_confidence_df[
-        true_class_confidence_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE].isin(valid_stress_ids)]
+    true_class_confidence_df = true_class_confidence_df[true_class_confidence_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE].isin(valid_stress_ids)]
 
-    # critical samples evaluation
-    # sort by std of uncertainty
+    # critical samples evaluation sorted by std of uncertainty
 
     std_confidence_df = true_class_confidence_df.groupby([DkuStressTestCenterConstants.DKU_ROW_ID]).std()
+    uncertainty = np.round(std_confidence_df[DkuStressTestCenterConstants.CONFIDENCE].dropna(), 3)
 
-    uncertainty = std_confidence_df[DkuStressTestCenterConstants.CONFIDENCE]
+    critical_samples_df = pd.DataFrame({DkuStressTestCenterConstants.UNCERTAINTY: uncertainty})
 
-    critical_samples_df = pd.DataFrame({
-        DkuStressTestCenterConstants.UNCERTAINTY: uncertainty
-    })
+    if critical_samples_df.empty:
+        return pd.DataFrame(), []
 
-    critical_samples_df = critical_samples_df.sort_values(
-        by=DkuStressTestCenterConstants.UNCERTAINTY, ascending=False)
+    critical_samples_df = critical_samples_df.sort_values(by=DkuStressTestCenterConstants.UNCERTAINTY,
+                                                          ascending=False)
 
-    critical_samples_df = critical_samples_df.dropna()
+    critical_samples_df.reset_index(level=0, inplace=True)
 
-    if critical_samples_df.shape[0] > 0:
-        return critical_samples_df.head(top_k_samples)
-    else:
-        return None
-
+    clean_df_with_id = perturbed_df.loc[perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] == DkuStressTestCenterConstants.CLEAN]
+    critical_samples_df = critical_samples_df.merge(clean_df_with_id, on=DkuStressTestCenterConstants.DKU_ROW_ID, how='left').head(top_k_samples)
+    return (critical_samples_df.drop([DkuStressTestCenterConstants.DKU_ROW_ID, DkuStressTestCenterConstants.STRESS_TEST_TYPE, DkuStressTestCenterConstants.UNCERTAINTY], axis=1),
+        critical_samples_df[DkuStressTestCenterConstants.UNCERTAINTY].tolist())
