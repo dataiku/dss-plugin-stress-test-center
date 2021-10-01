@@ -30,6 +30,7 @@ stressor = StressTestGenerator()
 @app.route('/model-info', methods=['GET'])
 def get_model_info():
     try:
+        logger.info('Retrieving model data...')
         fmi = get_webapp_config().get("trainedModelFullModelId")
         if fmi is None:
             model = Model(get_webapp_config()["modelId"])
@@ -37,11 +38,11 @@ def get_model_info():
             original_model_handler = get_model_handler(model, version_id)
         else:
             original_model_handler = PredictionModelInformationHandler.from_full_model_id(fmi)
-        model_accessor = ModelAccessor(original_model_handler)
         is_regression = 'REGRESSION' in original_model_handler.get_prediction_type()
-        stressor.model_accessor = model_accessor
+        stressor.model_accessor = ModelAccessor(original_model_handler)
         return jsonify(
-            target_classes=[] if is_regression else list(original_model_handler.get_target_map().keys())
+            target_classes=[] if is_regression else list(original_model_handler.get_target_map().keys()),
+            columns={feature: preprocessing["type"] for (feature, preprocessing) in stressor.model_accessor.get_per_feature().items()}
         )
     except:
         logger.error(traceback.format_exc())
@@ -61,7 +62,6 @@ def set_stress_tests_config():
 def compute():
     try:
         # Get test data
-        logger.info('Retrieving model data...')
         model_accessor = stressor.model_accessor
         selected_features = set()
         feature_importance = model_accessor.get_feature_importance().index.tolist()
