@@ -96,6 +96,14 @@
                                 <label for="missingValues" class="text label-text">Proportion of affected samples</label>
                                 <input type="number" id="missingValues" ng-model="perturbations.MISSING_VALUES.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
                             </div>
+                            <div class="control-group">
+                                <label for="missingValues" class="text label-text">Affected columns</label>
+                                <ul>
+                                    <li ng-repeat="col in perturbations.MISSING_VALUES.available_columns">
+                                        <input type="checkbox"ng-model="col.$activated">{{ col.name }}
+                                    </li>
+                                </ul>
+                            </div>
                         </form>
                     </div>
 
@@ -112,6 +120,14 @@
                             <div class="control-group">
                                 <label for="scaling" class="text label-text">Proportion of affected samples</label>
                                 <input type="number" id="scaling" ng-model="perturbations.SCALING.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
+                            </div>
+                            <div class="control-group">
+                                <label for="missingValues" class="text label-text">Affected columns</label>
+                                <ul>
+                                    <li ng-repeat="col in perturbations.SCALING.available_columns">
+                                        <input type="checkbox"ng-model="col.$activated">{{ col.name }}
+                                    </li>
+                                </ul>
                             </div>
                         </form>
                     </div>
