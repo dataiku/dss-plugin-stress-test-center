@@ -5,93 +5,74 @@ let versionId = webAppConfig['versionId'];
 (function() {
     'use strict';
     app.controller('VizController', function($scope, $http, ModalService) {
-        $scope.uiState = {
-            selectedRow: "priorShift"
-        };
-
-        $scope.perturbations = {
-            priorShift: {
-                displayName: "Target distribution",
-                params: {
-                    affectedSamples: .5
-                }
-            },
-            advAttack: {
-                displayName: "Adversarial attack",
-                params: {
-                    affectedSamples: .5
-                }
-            },
-            missingValues: {
-                displayName: "Missing values enforcer",
-                params: {
-                    affectedSamples: .5
-                }
-            },
-            scaling: {
-                displayName: "Scaling perturbation",
-                params: {
-                    affectedSamples: .5
-                }
-            },
-            replaceWord: {
-                displayName: "Replace word",
-                params: {
-                    affectedSamples: .5
-                }
-            },
-            typos: {
-                displayName: "Typos",
-                params: {
-                    affectedSamples: .5
-                }
-            }
-        }
-
         $scope.modal = {};
         $scope.removeModal = function(event) {
-            if (ModalService.remove($scope.modal)(event)) {
-                angular.element(".template").focus();
-            }
+        if (ModalService.remove($scope.modal)(event)) {
+            angular.element(".template").focus();
+        }
         };
         $scope.createModal = ModalService.create($scope.modal);
 
-       $scope.runAnalysis = function () {
+        $scope.uiState = {};
+        $scope.perturbations = {};
+        $scope.modelInfo = {};
+
+        $scope.runAnalysis = function () {
             $scope.uiState.loadingResult = true;
-
-            const paramPs = $scope.perturbations.priorShift.$activated ? $scope.perturbations.priorShift.params.affectedSamples : 0;
-            const paramAa = $scope.perturbations.advAttack.$activated ? $scope.perturbations.advAttack.params.affectedSamples : 0;
-            const paramMv = $scope.perturbations.missingValues.$activated ? $scope.perturbations.missingValues.params.affectedSamples : 0;
-            const paramS = $scope.perturbations.scaling.$activated ? $scope.perturbations.scaling.params.affectedSamples : 0;
-            const paramT1 = $scope.perturbations.replaceWord.$activated ? $scope.perturbations.replaceWord.params.affectedSamples : 0;
-            const paramT2 = $scope.perturbations.typos.$activated ? $scope.perturbations.typos.params.affectedSamples : 0;
-
-            if (paramPs + paramAa + paramMv + paramS + paramT1 + paramT2 === 0) {
-                $scope.uiState.loadingResult = false;
-                return;
-            };
-
-            $http.get(getWebAppBackendUrl("compute/"+modelId+"/"+versionId+"?paramPS="+paramPs+"&paramAA="+paramAa+"&paramMV="+paramMv+"&paramS="+paramS+"&paramT1="+paramT1+"&paramT2="+paramT2))
-                .then(function(response){
-                    $scope.uiState.loadingResult = false;
-                    $scope.metrics = response.data['metrics'];
-                    $scope.critical_samples = response.data['critical_samples']
-            }, function(e) {
-                $scope.uiState.loadingResult = false;
-                $scope.createModal.error(e.data);
-            });
-
-            $scope.filterUncertainty = function(item) {
-                var result = {};
-                for (let k in item) {
-                    if (k != 'uncertainty') {
-                        result[k] = item[k];
-                    }
+            const perturbationsToCompute = {};
+            for (let key in $scope.perturbations) {
+                if ($scope.perturbations[key].$activated) {
+                    perturbationsToCompute[key] = $scope.perturbations[key];
                 }
-                return result;
             }
+            $http.post(getWebAppBackendUrl("stress-tests-config"), perturbationsToCompute)
+                .then(function() {
+                    $http.get(getWebAppBackendUrl("compute"))
+                        .then(function(response){
+                            $scope.uiState.loadingResult = false;
+                            $scope.metrics = response.data['metrics'];
+                            $scope.critical_samples = response.data['critical_samples']
+                            $scope.uncertainties = response.data['uncertainties']
+                    }, function(e) {
+                        $scope.uiState.loadingResult = false;
+                        $scope.createModal.error(e.data);
+                    });
+                }, function(e) {
+                    $scope.uiState.loadingResult = false;
+                    $scope.createModal.error(e.data);
+                });
         }
 
+        $http.get(getWebAppBackendUrl("model-info"))
+            .then(function(response){
+                $scope.modelInfo.targetClasses = response.data["target_classes"];
+                if ($scope.modelInfo.targetClasses.length) {
+                    $scope.modelInfo.isClassification = true;
+                    $scope.uiState.selectedRow = "PRIOR_SHIFT";
+                    $scope.perturbations.PRIOR_SHIFT = {
+                        displayName: "Target distribution perturbation",
+                        params: {
+                            samples_fraction: .5
+                        }
+                    };
+                } else {
+                    $scope.uiState.selectedRow = "MISSING_VALUES";
+                }
 
+                $scope.perturbations.MISSING_VALUES = {
+                    displayName: "Missing values enforcer",
+                    params: {
+                        samples_fraction: .5
+                    }
+                };
+                $scope.perturbations.SCALING = {
+                    displayName: "Scaling perturbation",
+                    params: {
+                        samples_fraction: .5
+                    }
+                };
+        }, function(e) {
+            $scope.createModal.error(e.data);
+        });
     })}
 )();

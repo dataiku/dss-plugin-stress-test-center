@@ -6,6 +6,7 @@
 <script src="/plugins/stress-test-center/resource/js/helpers.js" type="text/javascript"></script>
 <link rel="stylesheet" href="/static/public/styles/1.0.0/typography.css"/>
 <link rel="stylesheet" href="/static/public/styles/1.0.0/fonts.css"/>
+<link rel="stylesheet" href="/static/public/styles/1.0.0/forms.css"/>
 
 <body  ng-app = "StressTestCenter" ng-controller = "VizController" class="report-box">
     <div ng-if="modal.type"
@@ -59,7 +60,7 @@
                         </div>
                     </div>
 
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'priorShift'">
+                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'PRIOR_SHIFT'">
                         <div class="explanation-box">
                             <div class="flex title-sb">
                                 Target Distribution Perturbation
@@ -68,36 +69,19 @@
                                 The target distribution perturbation modifies the data target distribution by resampling.
                             </div>
                         </div>
-                        <div class="flex row-param">
-                            <label for="priorShift" class="text label-text">
-                                Positive class frequency after perturbation
-                            </label>
+                        <form class="flex row-param">
                             <div class="control-group">
-                                <input type="number" id="priorShift" ng-model="perturbations.priorShift.params.affectedSamples" placeholder="0.5"  step=0.01 min=0>
+                                <label class="text label-text">Class to perturb</label>
+                                <select ng-options="class for class in modelInfo.targetClasses" ng-model="perturbations.PRIOR_SHIFT.params.cl"></select>
                             </div>
-                        </div>
+                            <div class="control-group">
+                                <label for="priorShift" class="text label-text">Selected class frequency after perturbation</label>
+                                <input type="number" id="priorShift" ng-model="perturbations.PRIOR_SHIFT.params.samples_fraction" placeholder="0.5"  step=0.01 min=0>
+                            </div>
+                        </form>
                     </div>
 
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'advAttack'">
-                        <div class="explanation-box">
-                            <div class="flex title-sb">
-                                Adversarial Attack
-                            </div>
-                            <div class="flex text-r">
-                                The adversarial attack performs minimal feature perturbation to change sample predictions.
-                            </div>
-                        </div>
-                        <div class="flex row-param">
-                            <label for="advAttack" class="text label-text">
-                                Proportion of affected samples
-                            </label>
-                            <div class="col-6 control-group">
-                                <input type="number" id="advAttack" ng-model="perturbations.advAttack.params.affectedSamples" value="0.5" placeholder=0.5 step=0.01 min=0>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'missingValues'">
+                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'MISSING_VALUES'">
                         <div class="explanation-box">
                             <div class="flex title-sb">
                                 Missing Values Enforcer
@@ -107,17 +91,15 @@
                             </div>
                         </div>
 
-                        <div class="flex row-param">
-                            <label for="missingValues" class="text label-text">
-                                Proportion of affected samples
-                            </label>
+                        <form class="flex row-param">
                             <div class="control-group">
-                                <input type="number" id="missingValues" ng-model="perturbations.missingValues.params.affectedSamples" value="0.5" placeholder=0.5 step=0.01 min=0>
+                                <label for="missingValues" class="text label-text">Proportion of affected samples</label>
+                                <input type="number" id="missingValues" ng-model="perturbations.MISSING_VALUES.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
                             </div>
-                        </div>
+                        </form>
                     </div>
 
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'scaling'">
+                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'SCALING'">
                         <div class="explanation-box">
                             <div class="flex title-sb">
                                 Scaling Perturbation
@@ -126,54 +108,13 @@
                                 The scaling perturbation changes the order of magnitude of each feature by some random scaling.
                             </div>
                         </div>
-                        <div class="flex row-param">
-                            <label for="scaling" class="text label-text">
-                                Proportion of affected samples
-                            </label>
-                            <div class="col-6 control-group">
-                                <input type="number" id="scaling" ng-model="perturbations.scaling.params.affectedSamples" value="0.5" placeholder=0.5 step=0.01 min=0>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'replaceWord'">
-                        <div class="explanation-box">
-                            <div class="flex title-sb">
-                                Replace Word
-                            </div>
-                            <div class="flex text-r">
-                                Replace Word replaces random words with similar words (close in the embedding space).
-                            </div>
-                        </div>
-                        <div class="flex row-param">
-                            <label for="replaceWord" class="text label-text">
-                                Proportion of affected samples
-                            </label>
+                        <form class="flex row-param">
                             <div class="control-group">
-                                <input type="number" id="replaceWord" ng-model="perturbations.replaceWord.params.affectedSamples" value="0.5" placeholder=0.5 step=0.01 min=0>
+                                <label for="scaling" class="text label-text">Proportion of affected samples</label>
+                                <input type="number" id="scaling" ng-model="perturbations.SCALING.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
                             </div>
-                        </div>
+                        </form>
                     </div>
-
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'typos'">
-                        <div class="explanation-box">
-                            <div class="flex title-sb">
-                                Typos in words
-                            </div>
-                            <div class="flex text-r">
-                                Typos inserts/deletes characters to simulate typos in words.
-                            </div>
-                        </div>
-                        <div class="flex row-param">
-                            <label for="typos" class="text label-text">
-                                Proportion of affected samples
-                            </label>
-                            <div class="control-group">
-                                <input type="number" id="typos" ng-model="perturbations.typos.params.affectedSamples" value="0.5" placeholder=0.5 step=0.01 min=0>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </div>
@@ -213,7 +154,7 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="metric in metrics">
-                                <td class="cell text-highlight">{{ metric['attack_type'] }}</td>
+                                <td class="cell text-highlight">{{ perturbations[metric['attack_type']].displayName }}</td>
                                 <td class="cell text-sb">{{ metric['accuracy_drop'] }}%</td>
                                 <td class="cell text-sb">{{ metric['robustness'] }}%</td>
                             </tr>
@@ -238,7 +179,7 @@
                                 <tr>
                                     <th class="top-cell--blue title-sb">
                                         <div class="flex top-cell__row">
-                                            <div>{{ sample['uncertainty'] }}</div>
+                                            <div>{{ uncertainties[$index] }}</div>
                                             <div>0.63</div>
                                         </div>
                                         <div class="flex top-cell__row">
@@ -249,7 +190,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr ng-repeat="(key, value) in filterUncertainty(sample)">
+                                <tr ng-repeat="(key, value) in sample">
                                 <td>
                                     {{key}}
                                     <span class="text-lighter">= {{value}}</span>

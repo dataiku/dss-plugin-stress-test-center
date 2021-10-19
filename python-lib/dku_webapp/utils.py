@@ -1,10 +1,4 @@
-import dataiku
-import pandas as pd
 import numpy as np
-import logging
-from dku_webapp.webapp_constants import DkuWebappConstants
-
-logger = logging.getLogger(__name__)
 
 def convert_numpy_int64_to_int(o):
     if isinstance(o, np.int64):
@@ -26,3 +20,9 @@ def pretty_floats(obj):
         return list(map(pretty_floats, obj))
     return obj
 
+def safe_str(val):
+    if sys.version_info > (3, 0):
+        return str(val)
+    if isinstance(val, unicode):
+        return val.encode("utf-8")
+    return str(val)

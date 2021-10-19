@@ -1,8 +1,5 @@
-import logging
 from typing import Any
 import re
-
-logger = logging.getLogger(__name__)
 
 DEFAULT_ERROR_MESSAGES = {
     "exists": "This field is required.",
