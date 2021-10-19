@@ -19,12 +19,6 @@ from dku_webapp import convert_numpy_int64_to_int, pretty_floats
 
 logger = logging.getLogger(__name__)
 
-def undo_preproc_name(f):
-    if ':' in f:
-        return f.split(':')[1]
-    else:
-        return f
-
 stressor = StressTestGenerator()
 
 @app.route('/model-info', methods=['GET'])
