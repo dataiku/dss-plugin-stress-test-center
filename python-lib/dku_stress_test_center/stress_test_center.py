@@ -34,9 +34,6 @@ class StressTestGenerator(object):
         self.config_list = None
         self.model_accessor = None
         self.selected_features = None
-        self.is_categorical = None
-        self.is_text = None
-        self.is_numeric = None
 
         self._random_state = random_state
         self._clean_dataset_size = clean_dataset_size
@@ -44,28 +41,18 @@ class StressTestGenerator(object):
     def set_config(self, shift_configs: dict):
         self.config_list = []
         for shift_type, shift_config in shift_configs.items():
-            params, features = shift_config["params"], shift_config.get("features")
+            params, features = shift_config["params"], shift_config.get("available_columns")
             self.config_list.append(StressTestConfiguration.create_conf(shift_type, params, features))
 
     def _subsample_clean_df(self,
                             clean_df: pd.DataFrame):
 
         np.random.seed(self._random_state)
-
         return clean_df.sample(n=self._clean_dataset_size, random_state=self._random_state)
 
     def fit_transform(self):
         clean_df = self._subsample_clean_df(self.model_accessor.get_original_test_df())
         target_column = self.model_accessor.get_target_variable()
-
-        all_features = list(clean_df.columns)
-        all_features.remove(target_column)
-
-        if self.is_categorical is None:
-            self.is_categorical = np.array(len(self.selected_features) * [False])
-        if self.is_text is None:
-            self.is_text = np.array(len(self.selected_features) * [False])
-        self.is_numeric = ~self.is_categorical & ~self.is_text
 
         perturbed_datasets_df = clean_df.copy(deep=True)
 
@@ -73,33 +60,21 @@ class StressTestGenerator(object):
         perturbed_datasets_df[DkuStressTestCenterConstants.DKU_ROW_ID] = perturbed_datasets_df.index
         for config in self.config_list:
             pertubed_df = clean_df.copy(deep=True)
-
             stress_test_id = get_stress_test_name(config.shift)
 
             if stress_test_id in DkuStressTestCenterConstants.PERTURBATION_BASED_STRESS_TYPES:
-
-                xt = pertubed_df[self.selected_features].values
+                xt = pertubed_df[config.features].values
                 yt = pertubed_df[target_column].values
-                if config.shift.feature_type == PerturbationConstants.NUMERIC:
-                    (xt[:, self.is_numeric], yt) = config.shift.transform(xt[:, self.is_numeric].astype(float), yt)
-                elif config.shift.feature_type == PerturbationConstants.CATEGORICAL:
-                    (xt[:, self.is_categorical], yt) = config.shift.transform(xt[:, self.is_categorical], yt)
-                elif config.shift.feature_type == PerturbationConstants.TEXT:
-                    (xt[:, self.is_text], yt) = config.shift.transform(xt[:, self.is_text], yt)
-                elif config.shift.feature_type == PerturbationConstants.ANY:
-                    (xt, yt) = config.shift.transform(xt, yt)
-                else:
-                    raise NotImplementedError()
+                xt, yt = config.shift.transform(xt, yt)
 
-                pertubed_df.loc[:, self.selected_features] = xt
+                pertubed_df.loc[:, config.features] = xt
 
             else:
-
-                xt = pertubed_df[all_features].values
+                xt = pertubed_df.drop(target_column, axis=1).values
                 yt = pertubed_df[target_column].values
                 (xt, yt) = config.shift.transform(xt, yt)
 
-                pertubed_df.loc[:, all_features] = xt
+                pertubed_df.loc[:, pertubed_df.columns != target_column] = xt
 
             pertubed_df.loc[:, target_column] = yt
 

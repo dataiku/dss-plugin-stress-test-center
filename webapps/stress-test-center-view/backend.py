@@ -11,7 +11,7 @@ from dataiku.customwebapp import get_webapp_config
 from dataiku.doctor.posttraining.model_information_handler import PredictionModelInformationHandler
 
 from dku_stress_test_center.model_accessor import ModelAccessor
-from dku_stress_test_center.stress_test_center import StressTestConfiguration, StressTestGenerator
+from dku_stress_test_center.stress_test_center import StressTestGenerator
 from dku_stress_test_center.stress_test_center import build_stress_metric, get_critical_samples
 from dku_stress_test_center.stress_test_center import DkuStressTestCenterConstants
 from model_metadata import get_model_handler
@@ -19,17 +19,12 @@ from dku_webapp import convert_numpy_int64_to_int, pretty_floats
 
 logger = logging.getLogger(__name__)
 
-def undo_preproc_name(f):
-    if ':' in f:
-        return f.split(':')[1]
-    else:
-        return f
-
 stressor = StressTestGenerator()
 
 @app.route('/model-info', methods=['GET'])
 def get_model_info():
     try:
+        logger.info('Retrieving model data...')
         fmi = get_webapp_config().get("trainedModelFullModelId")
         if fmi is None:
             model = Model(get_webapp_config()["modelId"])
@@ -37,11 +32,17 @@ def get_model_info():
             original_model_handler = get_model_handler(model, version_id)
         else:
             original_model_handler = PredictionModelInformationHandler.from_full_model_id(fmi)
-        model_accessor = ModelAccessor(original_model_handler)
         is_regression = 'REGRESSION' in original_model_handler.get_prediction_type()
-        stressor.model_accessor = model_accessor
+        stressor.model_accessor = ModelAccessor(original_model_handler)
         return jsonify(
-            target_classes=[] if is_regression else list(original_model_handler.get_target_map().keys())
+            target_classes=[] if is_regression else list(original_model_handler.get_target_map().keys()),
+            columns=[
+                {
+                    "name": feature,
+                    "feature_type": preprocessing["type"]
+                } for (feature, preprocessing) in stressor.model_accessor.get_per_feature().items()
+                    if preprocessing["role"] == "INPUT"
+            ]
         )
     except:
         logger.error(traceback.format_exc())
@@ -61,37 +62,10 @@ def set_stress_tests_config():
 def compute():
     try:
         # Get test data
-        logger.info('Retrieving model data...')
         model_accessor = stressor.model_accessor
-        selected_features = set()
-        feature_importance = model_accessor.get_feature_importance().index.tolist()
-
-        for feature in feature_importance: # TODO: delete (use features per perturbation instead)
-            selected_features.add(undo_preproc_name(feature))
-            if len(selected_features) > 10:
-                break
-
-        selected_features = list(selected_features)
-        logger.info('List of selected features for the stress test: {}'.format(selected_features))
-
-        feature_handling_dict = model_accessor.get_per_feature()
-        is_text = []
-        is_categorical = []
-        for feature in selected_features:
-            feature_params = feature_handling_dict.get(feature)
-            is_categorical.append(feature_params.get('type') == 'CATEGORY')
-            is_text.append(feature_params.get('type') == 'TEXT')
-
-        is_categorical = np.array(is_categorical)
-        is_text = np.array(is_text)
 
         reversed_target_mapping = {v: k for k, v in model_accessor.model_handler.get_target_map().items()}
         pos_label = reversed_target_mapping.get(1)
-
-        # Run the stress tests
-        stressor.selected_features = selected_features
-        stressor.is_categorical = is_categorical
-        stressor.is_text = is_text
 
         # perturbed_df is a dataset of schema feat_1 | feat_2 | ... | _STRESS_TEST_TYPE | _DKU_ID_
         perturbed_df = stressor.fit_transform()

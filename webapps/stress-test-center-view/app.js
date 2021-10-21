@@ -22,13 +22,14 @@ let versionId = webAppConfig['versionId'];
             const perturbationsToCompute = {};
             for (let key in $scope.perturbations) {
                 if ($scope.perturbations[key].$activated) {
-                    perturbationsToCompute[key] = $scope.perturbations[key];
+                    perturbationsToCompute[key] = Object.assign({}, $scope.perturbations[key]);
+                    perturbationsToCompute[key].available_columns = (perturbationsToCompute[key].available_columns || []).filter(col => col.$activated).map(col => col.name);
                 }
             }
             $http.post(getWebAppBackendUrl("stress-tests-config"), perturbationsToCompute)
                 .then(function() {
                     $http.get(getWebAppBackendUrl("compute"))
-                        .then(function(response){
+                        .then(function(response) {
                             $scope.uiState.loadingResult = false;
                             $scope.metrics = response.data['metrics'];
                             $scope.critical_samples = response.data['critical_samples']
@@ -59,17 +60,21 @@ let versionId = webAppConfig['versionId'];
                     $scope.uiState.selectedRow = "MISSING_VALUES";
                 }
 
+                const columns = response.data["columns"];
                 $scope.perturbations.MISSING_VALUES = {
                     displayName: "Missing values enforcer",
                     params: {
                         samples_fraction: .5
-                    }
+                    },
+                    available_columns: columns.filter(col => ["CATEGORY", "NUMERIC"].includes(col.feature_type))
                 };
+
                 $scope.perturbations.SCALING = {
                     displayName: "Scaling perturbation",
                     params: {
                         samples_fraction: .5
-                    }
+                    },
+                    available_columns: columns.filter(col => ["NUMERIC"].includes(col.feature_type))
                 };
         }, function(e) {
             $scope.createModal.error(e.data);
