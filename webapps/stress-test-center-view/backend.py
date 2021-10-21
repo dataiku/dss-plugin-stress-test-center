@@ -41,6 +41,7 @@ def get_model_info():
                     "name": feature,
                     "feature_type": preprocessing["type"]
                 } for (feature, preprocessing) in stressor.model_accessor.get_per_feature().items()
+                    if preprocessing["role"] == "INPUT"
             ]
         )
     except:
