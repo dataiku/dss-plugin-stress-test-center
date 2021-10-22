@@ -6,7 +6,6 @@
 <script src="/plugins/stress-test-center/resource/js/helpers.js" type="text/javascript"></script>
 <link rel="stylesheet" href="/static/public/styles/1.0.0/typography.css"/>
 <link rel="stylesheet" href="/static/public/styles/1.0.0/fonts.css"/>
-<link rel="stylesheet" href="/static/public/styles/1.0.0/forms.css"/>
 
 <body  ng-app = "StressTestCenter" ng-controller = "VizController" class="report-box">
     <div ng-if="modal.type"
@@ -34,10 +33,8 @@
                     </div>
                 </div>
 
-                <div class="explanation-box text-r">
-                    The Stress test center evaluates the impact on the model performances of various types of changes and corruptions in your data.
-                    You can select the stress tests corresponding to corruptions you expect to have at deployment time, and that you expect your model to be robust to.
-                    The robustness metrics score the resilience of your model to the desired perturbations and allows you to compare both accuracy and robustness of multiple models before deployment.
+                <div>
+                    Select the stress tests corresponding to the changes and corruptions you expect to have at deployment time, to assess whether yor model is robust.
                 </div>
             </div>
 
@@ -48,7 +45,7 @@
                             class="flex perturbation-row"
                             ng-click="uiState.selectedRow = perturbation"
                             ng-class="{'row--selected': uiState.selectedRow == perturbation}">
-                            <div class="text-sb" ng-class="{'text--deactivated': !attributes.$activated}">
+                            <div class="text-sb" ng-class="{'text-lighter': !attributes.$activated}">
                                 {{ attributes.displayName }}
                             </div>
                             <div>
@@ -65,17 +62,17 @@
                             <div class="flex title-sb">
                                 Target Distribution Perturbation
                             </div>
-                            <div class="flex text-r">
+                            <div class="flex">
                                 The target distribution perturbation modifies the data target distribution by resampling.
                             </div>
                         </div>
                         <form class="flex row-param">
                             <div class="control-group">
-                                <label class="text label-text">Class to perturb</label>
+                                <label class="label-text">Class to perturb</label>
                                 <select ng-options="class for class in modelInfo.targetClasses" ng-model="perturbations.PRIOR_SHIFT.params.cl"></select>
                             </div>
                             <div class="control-group">
-                                <label for="priorShift" class="text label-text">Selected class frequency after perturbation</label>
+                                <label for="priorShift" class="label-text">Selected class frequency after perturbation</label>
                                 <input type="number" id="priorShift" ng-model="perturbations.PRIOR_SHIFT.params.samples_fraction" placeholder="0.5"  step=0.01 min=0>
                             </div>
                         </form>
@@ -86,18 +83,18 @@
                             <div class="flex title-sb">
                                 Missing Values Enforcer
                             </div>
-                            <div class="flex text-r">
+                            <div class="flex">
                                 The missing values enforcer randomly inserts missing values.
                             </div>
                         </div>
 
                         <form class="flex row-param">
                             <div class="control-group">
-                                <label for="missingValues" class="text label-text">Proportion of affected samples</label>
+                                <label for="missingValues" class="label-text">Proportion of affected samples</label>
                                 <input type="number" id="missingValues" ng-model="perturbations.MISSING_VALUES.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
                             </div>
                             <div class="control-group">
-                                <label for="missingValues" class="text label-text">Affected columns</label>
+                                <label for="missingValues" class="label-text">Affected columns</label>
                                 <ul>
                                     <li ng-repeat="col in perturbations.MISSING_VALUES.available_columns">
                                         <input type="checkbox"ng-model="col.$activated">{{ col.name }}
@@ -112,17 +109,17 @@
                             <div class="flex title-sb">
                                 Scaling Perturbation
                             </div>
-                            <div class="flex text-r">
+                            <div class="flex">
                                 The scaling perturbation changes the order of magnitude of each feature by some random scaling.
                             </div>
                         </div>
                         <form class="flex row-param">
                             <div class="control-group">
-                                <label for="scaling" class="text label-text">Proportion of affected samples</label>
+                                <label for="scaling" class="label-text">Proportion of affected samples</label>
                                 <input type="number" id="scaling" ng-model="perturbations.SCALING.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
                             </div>
                             <div class="control-group">
-                                <label for="missingValues" class="text label-text">Affected columns</label>
+                                <label for="missingValues" class="label-text">Affected columns</label>
                                 <ul>
                                     <li ng-repeat="col in perturbations.SCALING.available_columns">
                                         <input type="checkbox"ng-model="col.$activated">{{ col.name }}
@@ -185,7 +182,7 @@
                 <div class="flex row-header grand-title-sb">
                     Critical samples
                 </div>
-                <div class="explanation-box text-r">
+                <div class="explanation-box">
                     The critical samples are the most sensitive to perturbations, and highlight regions where the model prediction is highly uncertain (presenting large confidence fluctuations).
                 </div>
                 <div class="flex dku-grid">
@@ -199,8 +196,8 @@
                                             <div>0.63</div>
                                         </div>
                                         <div class="flex top-cell__row">
-                                            <div class="text-r">Uncertainty score</div>
-                                            <div class="text-r text-lighter">Probability</div>
+                                            <div>Uncertainty score</div>
+                                            <div class="text-lighter">Probability</div>
                                         </div>
                                     </th>
                                 </tr>
