@@ -13,9 +13,16 @@ let versionId = webAppConfig['versionId'];
         };
         $scope.createModal = ModalService.create($scope.modal);
 
-        $scope.uiState = {};
+        $scope.uiState = {
+            openFeatureSelectors: {}
+        };
         $scope.perturbations = {};
         $scope.modelInfo = {};
+
+        $scope.openFeatureSelector = function(perturbation, event) {
+            $scope.uiState.openFeatureSelectors[perturbation] = !$scope.uiState.openFeatureSelectors[perturbation];
+            event.stopPropagation();
+        }
 
         $scope.runAnalysis = function () {
             $scope.uiState.loadingResult = true;
@@ -23,7 +30,7 @@ let versionId = webAppConfig['versionId'];
             for (let key in $scope.perturbations) {
                 if ($scope.perturbations[key].$activated) {
                     perturbationsToCompute[key] = Object.assign({}, $scope.perturbations[key]);
-                    perturbationsToCompute[key].available_columns = (perturbationsToCompute[key].available_columns || []).filter(col => col.$activated).map(col => col.name);
+                    perturbationsToCompute[key].available_columns = (perturbationsToCompute[key].available_columns || []).filter(col => col.$selected).map(col => col.name);
                 }
             }
             $http.post(getWebAppBackendUrl("stress-tests-config"), perturbationsToCompute)

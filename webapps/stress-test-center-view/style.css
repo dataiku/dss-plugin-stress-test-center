@@ -3,6 +3,10 @@ form {
     max-width: 100%;
 }
 
+label {
+    cursor: pointer;
+}
+
 form input:not([type]):focus,
 form input[type="number"]:focus,
 form input[type="search"]:focus,
@@ -29,7 +33,7 @@ form input[type="text"] {
     tap-highlight-color: var(--white);
     line-height: 1.21428571em;
     background: var(--white);
-    border: 1px solid var(--grey-lighten-7);
+    border: 1px solid var(--grey-lighten-6);
     color: var(--grey-lighten-2);
     -webkit-box-shadow: 0em 0em 0em 0em transparent inset;
     box-shadow: 0em 0em 0em 0em transparent inset;
@@ -86,6 +90,63 @@ input:focus-visible {
     padding: 16px 16px 0 16px;
 }
 
+.feature-selector {
+    border: 1px solid var(--grey-lighten-6);
+    cursor: pointer;
+    padding: 4px 8px;
+    width: 164px;
+    position: relative;
+}
+
+.feature-selector:hover {
+    background: var(--grey-lighten-7);
+}
+
+.feature-selector__title {
+    align-items: center;
+    justify-content: space-between;
+}
+
+.feature-selector__body {
+    cursor: pointer;
+    overflow-y: auto;
+    position: absolute;
+    top: 27px;
+    left: 0;
+    background: var(--white);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    width: 200px;
+    max-height: 200px;
+}
+
+.feature-selector-row {
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    height: 20px;
+}
+
+.feature-selector-row:hover {
+    background: var(--blue-lighten-5);
+}
+
+.icon-font {
+    color: #ffc241;
+}
+
+.numerical {
+    color: #3075ae;
+    font-size: 17px;
+}
+
+.feature-selector-row .icon-font, .feature-selector-row .numerical {
+    width: 12px;
+}
+
+.feature-selector-row .icon-font {
+    font-size: 11px;
+}
+
 .flex {
     display: flex;
 }
@@ -97,16 +158,19 @@ input:focus-visible {
     align-items: center;
 }
 
-.row-param {
-    align-items: center;
-}
-
 .label-text {
     margin-bottom: 0;
 }
 
 .control-group {
+    align-items: center;
     padding-left: 16px;
+    width: 60%;
+    justify-content: space-between;
+}
+
+.control-group + .control-group {
+    margin-top: 16px
 }
 
 .row--selected {

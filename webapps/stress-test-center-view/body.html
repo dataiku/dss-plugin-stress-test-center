@@ -7,7 +7,11 @@
 <link rel="stylesheet" href="/static/public/styles/1.0.0/typography.css"/>
 <link rel="stylesheet" href="/static/public/styles/1.0.0/fonts.css"/>
 
-<body  ng-app = "StressTestCenter" ng-controller = "VizController" class="report-box">
+<body ng-app = "StressTestCenter"
+      ng-controller = "VizController"
+      class="report-box"
+      ng-click="uiState.openFeatureSelectors = {}"
+      tabindex="0">
     <div ng-if="modal.type"
          class="modal-background"
          tabindex=0
@@ -66,12 +70,12 @@
                                 The target distribution perturbation modifies the data target distribution by resampling.
                             </div>
                         </div>
-                        <form class="flex row-param">
-                            <div class="control-group">
+                        <form class="row-param">
+                            <div class="flex control-group">
                                 <label class="label-text">Class to perturb</label>
                                 <select ng-options="class for class in modelInfo.targetClasses" ng-model="perturbations.PRIOR_SHIFT.params.cl"></select>
                             </div>
-                            <div class="control-group">
+                            <div class="flex control-group">
                                 <label for="priorShift" class="label-text">Selected class frequency after perturbation</label>
                                 <input type="number" id="priorShift" ng-model="perturbations.PRIOR_SHIFT.params.samples_fraction" placeholder="0.5"  step=0.01 min=0>
                             </div>
@@ -88,18 +92,34 @@
                             </div>
                         </div>
 
-                        <form class="flex row-param">
-                            <div class="control-group">
+                        <form class="row-param">
+                            <div class="flex control-group">
                                 <label for="missingValues" class="label-text">Proportion of affected samples</label>
                                 <input type="number" id="missingValues" ng-model="perturbations.MISSING_VALUES.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
                             </div>
-                            <div class="control-group">
-                                <label for="missingValues" class="label-text">Affected columns</label>
-                                <ul>
-                                    <li ng-repeat="col in perturbations.MISSING_VALUES.available_columns">
-                                        <input type="checkbox"ng-model="col.$activated">{{ col.name }}
-                                    </li>
-                                </ul>
+                            <div class="flex control-group">
+                                <label ng-click="openFeatureSelector('MISSING_VALUES', $event)"
+                                       class="label-text">
+                                       Affected columns
+                                </label>
+                                <div class="feature-selector"
+                                     ng-click="openFeatureSelector('MISSING_VALUES', $event)">
+                                    <div class="flex feature-selector__title">
+                                        Features
+                                        <i class="icon-caret-down"></i>
+                                    </div>
+                                    <div class="feature-selector__body" ng-if="uiState.openFeatureSelectors.MISSING_VALUES">
+                                        <div class="feature-selector-row"
+                                            ng-click="feature.$selected = !feature.$selected; $event.stopPropagation()"
+                                            ng-repeat="feature in perturbations.MISSING_VALUES.available_columns">
+                                            <input type="checkbox" ng-model="feature.$selected" ng-click="$event.stopPropagation()">
+                                            &nbsp;
+                                            <i class="icon-font" ng-show="feature.feature_type === 'CATEGORY'"></i>
+                                            <div class="numerical" ng-show="feature.feature_type === 'NUMERIC'">#</div>
+                                            <div>&nbsp;{{ feature.name }}</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -113,18 +133,33 @@
                                 The scaling perturbation changes the order of magnitude of each feature by some random scaling.
                             </div>
                         </div>
-                        <form class="flex row-param">
-                            <div class="control-group">
+                        <form class="row-param">
+                            <div class="flex control-group">
                                 <label for="scaling" class="label-text">Proportion of affected samples</label>
                                 <input type="number" id="scaling" ng-model="perturbations.SCALING.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
                             </div>
-                            <div class="control-group">
-                                <label for="missingValues" class="label-text">Affected columns</label>
-                                <ul>
-                                    <li ng-repeat="col in perturbations.SCALING.available_columns">
-                                        <input type="checkbox"ng-model="col.$activated">{{ col.name }}
-                                    </li>
-                                </ul>
+                            <div class="flex control-group">
+                                <label ng-click="openFeatureSelector('SCALING', $event)"
+                                       class="label-text">
+                                       Affected columns
+                                </label>
+                                <div class="feature-selector" ng-click="openFeatureSelector('SCALING', $event)">
+                                    <div class="flex feature-selector__title">
+                                        Features
+                                        <i class="icon-caret-down"></i>
+                                    </div>
+                                    <div class="feature-selector__body" ng-if="uiState.openFeatureSelectors.SCALING">
+                                        <div class="feature-selector-row"
+                                            ng-click="feature.$selected = !feature.$selected; $event.stopPropagation()"
+                                            ng-repeat="feature in perturbations.SCALING.available_columns">
+                                            <input type="checkbox" ng-model="feature.$selected" ng-click="$event.stopPropagation()">
+                                            &nbsp;
+                                            <i class="icon-font" ng-show="feature.feature_type === 'CATEGORY'"></i>
+                                            <div class="numerical" ng-show="feature.feature_type === 'NUMERIC'">#</div>
+                                            <div>&nbsp;{{ feature.name }}</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     </div>
