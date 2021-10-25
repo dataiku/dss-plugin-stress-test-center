@@ -130,8 +130,16 @@ input:focus-visible {
     background: var(--blue-lighten-5);
 }
 
+.icon--hidden {
+    visibility: hidden;
+}
+
 .icon-font {
     color: #ffc241;
+}
+
+.icon-ok {
+    margin-right: 4px;
 }
 
 .numerical {
@@ -141,6 +149,7 @@ input:focus-visible {
 
 .feature-selector-row .icon-font, .feature-selector-row .numerical {
     width: 12px;
+    margin-right: 4px;
 }
 
 .feature-selector-row .icon-font {

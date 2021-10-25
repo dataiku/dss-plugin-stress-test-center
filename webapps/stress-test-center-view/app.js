@@ -24,6 +24,12 @@ let versionId = webAppConfig['versionId'];
             event.stopPropagation();
         }
 
+        $scope.getFeatureDropdownPlaceholder = function(perturbation) {
+            const nrSelectedItems = $scope.perturbations[perturbation].available_columns.filter(col => col.$selected).length;
+            if (!nrSelectedItems) return "Select features";
+            return nrSelectedItems + " feature" + (nrSelectedItems > 1 ? "s" : "");
+        }
+
         $scope.runAnalysis = function () {
             $scope.uiState.loadingResult = true;
             const perturbationsToCompute = {};

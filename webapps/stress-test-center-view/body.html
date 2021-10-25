@@ -72,8 +72,24 @@
                         </div>
                         <form class="row-param">
                             <div class="flex control-group">
-                                <label class="label-text">Class to perturb</label>
-                                <select ng-options="class for class in modelInfo.targetClasses" ng-model="perturbations.PRIOR_SHIFT.params.cl"></select>
+                                <label ng-click="openFeatureSelector('PRIOR_SHIFT', $event)"
+                                       class="label-text">
+                                       Class to perturb
+                                </label>
+                                <div class="feature-selector" ng-click="openFeatureSelector('PRIOR_SHIFT', $event)">
+                                    <div class="flex feature-selector__title">
+                                        {{ perturbations.PRIOR_SHIFT.params.cl || "Select a class" }}
+                                        <i class="icon-caret-down"></i>
+                                    </div>
+                                    <div class="feature-selector__body" ng-if="uiState.openFeatureSelectors.PRIOR_SHIFT">
+                                        <div class="feature-selector-row"
+                                            ng-click="perturbations.PRIOR_SHIFT.params.cl = class"
+                                            ng-repeat="class in modelInfo.targetClasses">
+                                            <i class="icon-ok" ng-class="{'icon--hidden': perturbations.PRIOR_SHIFT.params.cl !== class}"></i>
+                                            <div>{{ class }}</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="flex control-group">
                                 <label for="priorShift" class="label-text">Selected class frequency after perturbation</label>
@@ -105,18 +121,17 @@
                                 <div class="feature-selector"
                                      ng-click="openFeatureSelector('MISSING_VALUES', $event)">
                                     <div class="flex feature-selector__title">
-                                        Features
+                                        {{ getFeatureDropdownPlaceholder('MISSING_VALUES') }}
                                         <i class="icon-caret-down"></i>
                                     </div>
                                     <div class="feature-selector__body" ng-if="uiState.openFeatureSelectors.MISSING_VALUES">
                                         <div class="feature-selector-row"
                                             ng-click="feature.$selected = !feature.$selected; $event.stopPropagation()"
                                             ng-repeat="feature in perturbations.MISSING_VALUES.available_columns">
-                                            <input type="checkbox" ng-model="feature.$selected" ng-click="$event.stopPropagation()">
-                                            &nbsp;
+                                            <i class="icon-ok" ng-class="{'icon--hidden': !feature.$selected}"></i>
                                             <i class="icon-font" ng-show="feature.feature_type === 'CATEGORY'"></i>
                                             <div class="numerical" ng-show="feature.feature_type === 'NUMERIC'">#</div>
-                                            <div>&nbsp;{{ feature.name }}</div>
+                                            <div>{{ feature.name }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -141,22 +156,21 @@
                             <div class="flex control-group">
                                 <label ng-click="openFeatureSelector('SCALING', $event)"
                                        class="label-text">
-                                       Affected columns
+                                       Affected features
                                 </label>
                                 <div class="feature-selector" ng-click="openFeatureSelector('SCALING', $event)">
                                     <div class="flex feature-selector__title">
-                                        Features
+                                        {{ getFeatureDropdownPlaceholder('SCALING') }}
                                         <i class="icon-caret-down"></i>
                                     </div>
                                     <div class="feature-selector__body" ng-if="uiState.openFeatureSelectors.SCALING">
                                         <div class="feature-selector-row"
                                             ng-click="feature.$selected = !feature.$selected; $event.stopPropagation()"
                                             ng-repeat="feature in perturbations.SCALING.available_columns">
-                                            <input type="checkbox" ng-model="feature.$selected" ng-click="$event.stopPropagation()">
-                                            &nbsp;
+                                            <i class="icon-ok" ng-class="{'icon--hidden': !feature.$selected}"></i>
                                             <i class="icon-font" ng-show="feature.feature_type === 'CATEGORY'"></i>
                                             <div class="numerical" ng-show="feature.feature_type === 'NUMERIC'">#</div>
-                                            <div>&nbsp;{{ feature.name }}</div>
+                                            <div>{{ feature.name }}</div>
                                         </div>
                                     </div>
                                 </div>
