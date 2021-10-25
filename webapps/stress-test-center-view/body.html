@@ -20,14 +20,14 @@
     </div>
 
     <div class="webapp-main">
-        <div class="webapp-section">
-            <div class="introduction-section">
-                <div class="flex row-header">
-                    <div class="grand-title-sb">
+        <div class="webapp-section webapp-section__settings">
+            <div class="settings__subsection">
+                <div class="flex settings__subsection-header">
+                    <div class="grand-title-b">
                         Stress tests
                     </div>
                     <div>
-                        <button class="dku-btn dku-btn-primary" 
+                        <button class="dku-btn dku-btn-primary"
                                 id="run-button"
                                 type="button"
                                 ng-class="{'dku-btn-primary--disabled': uiState.loadingResult}"
@@ -38,231 +38,223 @@
                 </div>
 
                 <div>
-                    Select the stress tests corresponding to the changes and corruptions you expect to have at deployment time, to assess whether yor model is robust.
                 </div>
             </div>
 
-            <div class="perturbation-design-row">
-                <div class="flex">
-                    <div class="perturbation-rows">
-                        <div ng-repeat="(perturbation, attributes) in perturbations"
-                            class="flex perturbation-row"
-                            ng-click="uiState.selectedRow = perturbation"
-                            ng-class="{'row--selected': uiState.selectedRow == perturbation}">
-                            <div class="text-sb" ng-class="{'text-lighter': !attributes.$activated}">
-                                {{ attributes.displayName }}
-                            </div>
-                            <div>
-                                <label class="switch">
-                                    <input type="checkbox" ng-model="attributes.$activated">
-                                    <div class="slider round"></div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'PRIOR_SHIFT'">
-                        <div class="explanation-box">
-                            <div class="flex title-sb">
-                                Target Distribution Perturbation
-                            </div>
-                            <div class="flex">
-                                The target distribution perturbation modifies the data target distribution by resampling.
-                            </div>
-                        </div>
-                        <form class="row-param">
-                            <div class="flex control-group">
-                                <label ng-click="openFeatureSelector('PRIOR_SHIFT', $event)"
-                                       class="label-text">
-                                       Class to perturb
-                                </label>
-                                <div class="feature-selector" ng-click="openFeatureSelector('PRIOR_SHIFT', $event)">
-                                    <div class="flex feature-selector__title">
-                                        {{ perturbations.PRIOR_SHIFT.params.cl || "Select a class" }}
-                                        <i class="icon-caret-down"></i>
-                                    </div>
-                                    <div class="feature-selector__body" ng-if="uiState.openFeatureSelectors.PRIOR_SHIFT">
-                                        <div class="feature-selector-row"
-                                            ng-click="perturbations.PRIOR_SHIFT.params.cl = class"
-                                            ng-repeat="class in modelInfo.targetClasses">
-                                            <i class="icon-ok" ng-class="{'icon--hidden': perturbations.PRIOR_SHIFT.params.cl !== class}"></i>
-                                            <div>{{ class }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex control-group">
-                                <label for="priorShift" class="label-text">Selected class frequency after perturbation</label>
-                                <input type="number" id="priorShift" ng-model="perturbations.PRIOR_SHIFT.params.samples_fraction" placeholder="0.5"  step=0.01 min=0>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'MISSING_VALUES'">
-                        <div class="explanation-box">
-                            <div class="flex title-sb">
-                                Missing Values Enforcer
-                            </div>
-                            <div class="flex">
-                                The missing values enforcer randomly inserts missing values.
-                            </div>
-                        </div>
-
-                        <form class="row-param">
-                            <div class="flex control-group">
-                                <label for="missingValues" class="label-text">Proportion of affected samples</label>
-                                <input type="number" id="missingValues" ng-model="perturbations.MISSING_VALUES.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
-                            </div>
-                            <div class="flex control-group">
-                                <label ng-click="openFeatureSelector('MISSING_VALUES', $event)"
-                                       class="label-text">
-                                       Affected columns
-                                </label>
-                                <div class="feature-selector"
-                                     ng-click="openFeatureSelector('MISSING_VALUES', $event)">
-                                    <div class="flex feature-selector__title">
-                                        {{ getFeatureDropdownPlaceholder('MISSING_VALUES') }}
-                                        <i class="icon-caret-down"></i>
-                                    </div>
-                                    <div class="feature-selector__body" ng-if="uiState.openFeatureSelectors.MISSING_VALUES">
-                                        <div class="feature-selector-row"
-                                            ng-click="feature.$selected = !feature.$selected; $event.stopPropagation()"
-                                            ng-repeat="feature in perturbations.MISSING_VALUES.available_columns">
-                                            <i class="icon-ok" ng-class="{'icon--hidden': !feature.$selected}"></i>
-                                            <i class="icon-font" ng-show="feature.feature_type === 'CATEGORY'"></i>
-                                            <div class="numerical" ng-show="feature.feature_type === 'NUMERIC'">#</div>
-                                            <div>{{ feature.name }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="perturbation-details" ng-show="uiState.selectedRow == 'SCALING'">
-                        <div class="explanation-box">
-                            <div class="flex title-sb">
-                                Scaling Perturbation
-                            </div>
-                            <div class="flex">
-                                The scaling perturbation changes the order of magnitude of each feature by some random scaling.
-                            </div>
-                        </div>
-                        <form class="row-param">
-                            <div class="flex control-group">
-                                <label for="scaling" class="label-text">Proportion of affected samples</label>
-                                <input type="number" id="scaling" ng-model="perturbations.SCALING.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
-                            </div>
-                            <div class="flex control-group">
-                                <label ng-click="openFeatureSelector('SCALING', $event)"
-                                       class="label-text">
-                                       Affected features
-                                </label>
-                                <div class="feature-selector" ng-click="openFeatureSelector('SCALING', $event)">
-                                    <div class="flex feature-selector__title">
-                                        {{ getFeatureDropdownPlaceholder('SCALING') }}
-                                        <i class="icon-caret-down"></i>
-                                    </div>
-                                    <div class="feature-selector__body" ng-if="uiState.openFeatureSelectors.SCALING">
-                                        <div class="feature-selector-row"
-                                            ng-click="feature.$selected = !feature.$selected; $event.stopPropagation()"
-                                            ng-repeat="feature in perturbations.SCALING.available_columns">
-                                            <i class="icon-ok" ng-class="{'icon--hidden': !feature.$selected}"></i>
-                                            <i class="icon-font" ng-show="feature.feature_type === 'CATEGORY'"></i>
-                                            <div class="numerical" ng-show="feature.feature_type === 'NUMERIC'">#</div>
-                                            <div>{{ feature.name }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+            <div class="settings__subsection">
+                <div class="flex small-title-b settings__subsection-header">
+                    <label class="switch">
+                        <input type="checkbox" ng-model="perturbations.PRIOR_SHIFT.$activated">
+                        <div class="slider round"></div>
+                    </label>
+                    Target distribution
+                    <i class="icon-info-sign"></i>
                 </div>
+                <div class="ng-hide flex">
+                    The target distribution perturbation modifies the data target distribution by resampling.
+                </div>
+                <form class="row-param">
+                    <div class="control-group">
+                        <label ng-click="openFeatureSelector('PRIOR_SHIFT', $event)"
+                            class="label-text">
+                            Class to perturb
+                        </label>
+                        <div class="feature-selector" ng-click="openFeatureSelector('PRIOR_SHIFT', $event)">
+                            <div class="flex feature-selector__title">
+                                {{ perturbations.PRIOR_SHIFT.params.cl || "Select a class" }}
+                                <i class="icon-caret-down"></i>
+                            </div>
+                            <div class="feature-selector__body" ng-if="uiState.openFeatureSelectors.PRIOR_SHIFT">
+                                <div class="feature-selector-row"
+                                    ng-click="perturbations.PRIOR_SHIFT.params.cl = class"
+                                    ng-repeat="class in modelInfo.targetClasses">
+                                    <i class="icon-ok" ng-class="{'icon--hidden': perturbations.PRIOR_SHIFT.params.cl !== class}"></i>
+                                    <div>{{ class }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="priorShift" class="label-text">Selected class frequency after perturbation</label>
+                        <input type="number" id="priorShift" ng-model="perturbations.PRIOR_SHIFT.params.samples_fraction" placeholder="0.5"  step=0.01 min=0>
+                    </div>
+                </form>
+            </div>
+
+            <div class="settings__subsection">
+                <div class="flex small-title-b settings__subsection-header">
+                    <label class="switch">
+                        <input type="checkbox" ng-model="perturbations.MISSING_VALUES.$activated">
+                        <div class="slider round"></div>
+                    </label>
+                    Missing Values Enforcer
+                    <i class="icon-info-sign"></i>
+                </div>
+                <div class="flex ng-hide">
+                    The missing values enforcer randomly inserts missing values.
+                </div>
+
+                <form class="row-param">
+                    <div class="control-group">
+                        <label ng-click="openFeatureSelector('MISSING_VALUES', $event)"
+                            class="label-text">
+                            Affected columns
+                        </label>
+                        <div class="feature-selector"
+                            ng-click="openFeatureSelector('MISSING_VALUES', $event)">
+                            <div class="flex feature-selector__title">
+                                {{ getFeatureDropdownPlaceholder('MISSING_VALUES') }}
+                                <i class="icon-caret-down"></i>
+                            </div>
+                            <div class="feature-selector__body" ng-if="uiState.openFeatureSelectors.MISSING_VALUES">
+                                <div class="feature-selector-row"
+                                    ng-click="feature.$selected = !feature.$selected; $event.stopPropagation()"
+                                    ng-repeat="feature in perturbations.MISSING_VALUES.available_columns">
+                                    <i class="icon-ok" ng-class="{'icon--hidden': !feature.$selected}"></i>
+                                    <i class="icon-font" ng-show="feature.feature_type === 'CATEGORY'"></i>
+                                    <i class="numerical" ng-show="feature.feature_type === 'NUMERIC'"></i>
+                                    <div>{{ feature.name }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="missingValues" class="label-text">Proportion of affected samples</label>
+                        <input type="number" id="missingValues" ng-model="perturbations.MISSING_VALUES.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
+                    </div>
+                </form>
+            </div>
+
+            <div class="settings__subsection">
+                <div class="flex small-title-b settings__subsection-header">
+                    <label class="switch">
+                        <input type="checkbox" ng-model="perturbations.SCALING.$activated">
+                        <div class="slider round"></div>
+                    </label>
+                    Scaling Perturbation
+                    <i class="icon-info-sign"></i>
+                </div>
+                <div class="flex ng-hide">
+                    The scaling perturbation changes the order of magnitude of each feature by some random scaling.
+                </div>
+                <form class="row-param">
+                    <div class="control-group">
+                        <label ng-click="openFeatureSelector('SCALING', $event)"
+                            class="label-text">
+                            Affected features
+                        </label>
+                        <div class="feature-selector" ng-click="openFeatureSelector('SCALING', $event)">
+                            <div class="flex feature-selector__title">
+                                {{ getFeatureDropdownPlaceholder('SCALING') }}
+                                <i class="icon-caret-down"></i>
+                            </div>
+                            <div class="feature-selector__body" ng-if="uiState.openFeatureSelectors.SCALING">
+                                <div class="feature-selector-row"
+                                    ng-click="feature.$selected = !feature.$selected; $event.stopPropagation()"
+                                    ng-repeat="feature in perturbations.SCALING.available_columns">
+                                    <i class="icon-ok" ng-class="{'icon--hidden': !feature.$selected}"></i>
+                                    <i class="icon-font" ng-show="feature.feature_type === 'CATEGORY'"></i>
+                                    <i class="numerical" ng-show="feature.feature_type === 'NUMERIC'"></i>
+                                    <div>{{ feature.name }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="scaling" class="label-text">Proportion of affected samples</label>
+                        <input type="number" id="scaling" ng-model="perturbations.SCALING.params.samples_fraction" value="0.5" placeholder=0.5 step=0.01 min=0>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div class="webapp-section" ng-if="!metrics && !uiState.loadingResult">
-            <div class="flex">
-                <div class="empty-state">
-                    <div class="empty-state__title">
-                        Stress Test Center
-                    </div>
-                    <div class="empty-state__subtitle">
-                        Put your model through a battery of tests to see how it handles the unexpected and assess its robustness
-                    </div>
+        <div class="webapp-section webapp-section__results">
+            <div class="empty-state" ng-if="!metrics && !uiState.loadingResult">
+                <div class="empty-state__title">
+                    Put your model through a battery of tests to see how it handles the unexpected
+                </div>
+                <div class="empty-state__subtitle">
+                    Select the tests corresponding to corruptions you expect to have at deployment time, and assess the robustness of your model.
+                </div>
+                <div>
+                    <button class="dku-btn dku-btn-primary"
+                            id="run-button"
+                            type="button"
+                            ng-class="{'dku-btn-primary--disabled': uiState.loadingResult}"
+                            ng-click="runAnalysis()">
+                        Compute
+                    </button>
                 </div>
             </div>
-        </div>
 
-        <div class="webapp-section spinner-div" ng-if="uiState.loadingResult">
-            <div class="jcc">
+            <div class="spinner-div" ng-if="uiState.loadingResult">
                 <spinner></spinner>
             </div>
-        </div>
 
-        <div class="webapp-section webapp-section__result" ng-if="metrics && !uiState.loadingResult">
-            <div class="metric-subsection">
-                <div class="flex row-header grand-title-sb">
-                    Robustness metrics
-                </div>
-                <div class="flex">
-                    <table class="table-metric">
-                        <thead>
-                            <tr>
-                                <th scope="col" class="fake-cell"></th>
-                                <th scope="col" class="cell small-title-sb top-cell--blue">Performance</th>
-                                <th scope="col" class="cell small-title-sb top-cell--orange">Robustness</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="metric in metrics">
-                                <td class="cell text-highlight">{{ perturbations[metric['attack_type']].displayName }}</td>
-                                <td class="cell text-sb">{{ metric['accuracy_drop'] }}%</td>
-                                <td class="cell text-sb">{{ metric['robustness'] }}%</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <hr/>
-
-            <div class="sample-subsection">
-                <div class="flex row-header grand-title-sb">
-                    Critical samples
-                </div>
-                <div class="explanation-box">
-                    The critical samples are the most sensitive to perturbations, and highlight regions where the model prediction is highly uncertain (presenting large confidence fluctuations).
-                </div>
-                <div class="flex dku-grid">
-                    <div ng-repeat="sample in critical_samples">
-                        <table class="table-sample table-striped">
+            <div class="tutu" ng-if="metrics && !uiState.loadingResult">
+                <div class="metric-subsection">
+                    <div class="flex row-header grand-title-b">
+                        Robustness metrics
+                    </div>
+                    <div class="flex">
+                        <table class="table-metric">
                             <thead>
                                 <tr>
-                                    <th class="top-cell--blue title-sb">
-                                        <div class="flex top-cell__row">
-                                            <div>{{ uncertainties[$index] }}</div>
-                                            <div>0.63</div>
-                                        </div>
-                                        <div class="flex top-cell__row">
-                                            <div>Uncertainty score</div>
-                                            <div class="text-lighter">Probability</div>
-                                        </div>
-                                    </th>
+                                    <th scope="col" class="fake-cell"></th>
+                                    <th scope="col" class="cell small-title-b top-cell--blue">Performance</th>
+                                    <th scope="col" class="cell small-title-b top-cell--orange">Robustness</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr ng-repeat="(key, value) in sample">
-                                <td>
-                                    {{key}}
-                                    <span class="text-lighter">= {{value}}</span>
-                                </td>
+                                <tr ng-repeat="metric in metrics">
+                                    <td class="cell text-highlight">{{ perturbations[metric['attack_type']].displayName }}</td>
+                                    <td class="cell text-sb">{{ metric['accuracy_drop'] }}%</td>
+                                    <td class="cell text-sb">{{ metric['robustness'] }}%</td>
                                 </tr>
                             </tbody>
-
                         </table>
                     </div>
+                </div>
 
+                <hr/>
+
+                <div class="sample-subsection">
+                    <div class="flex row-header grand-title-b">
+                        Critical samples
+                    </div>
+                    <div class="explanation-box">
+                        The critical samples are the most sensitive to perturbations, and highlight regions where the model prediction is highly uncertain (presenting large confidence fluctuations).
+                    </div>
+                    <div class="flex dku-grid">
+                        <div ng-repeat="sample in critical_samples">
+                            <table class="table-sample table-striped">
+                                <thead>
+                                    <tr>
+                                        <th class="top-cell--blue title-b">
+                                            <div class="flex top-cell__row">
+                                                <div>{{ uncertainties[$index] }}</div>
+                                                <div>0.63</div>
+                                            </div>
+                                            <div class="flex top-cell__row">
+                                                <div>Uncertainty score</div>
+                                                <div class="text-lighter">Probability</div>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="(key, value) in sample">
+                                    <td>
+                                        {{key}}
+                                        <span class="text-lighter">= {{value}}</span>
+                                    </td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>

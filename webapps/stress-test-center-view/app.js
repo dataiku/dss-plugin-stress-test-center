@@ -25,20 +25,32 @@ let versionId = webAppConfig['versionId'];
         }
 
         $scope.getFeatureDropdownPlaceholder = function(perturbation) {
+            if (!$scope.perturbations[perturbation]) return;
             const nrSelectedItems = $scope.perturbations[perturbation].available_columns.filter(col => col.$selected).length;
             if (!nrSelectedItems) return "Select features";
             return nrSelectedItems + " feature" + (nrSelectedItems > 1 ? "s" : "");
         }
 
         $scope.runAnalysis = function () {
-            $scope.uiState.loadingResult = true;
             const perturbationsToCompute = {};
             for (let key in $scope.perturbations) {
                 if ($scope.perturbations[key].$activated) {
-                    perturbationsToCompute[key] = Object.assign({}, $scope.perturbations[key]);
-                    perturbationsToCompute[key].available_columns = (perturbationsToCompute[key].available_columns || []).filter(col => col.$selected).map(col => col.name);
+                    if (key === 'PRIOR_SHIFT') { // TODO: cleaner check
+                        if ($scope.perturbations.PRIOR_SHIFT.params.cl) {
+                            perturbationsToCompute[key] = Object.assign({}, $scope.perturbations[key]);
+                        }
+                    } else {
+                        const samplePerturbation = Object.assign({}, $scope.perturbations[key]);
+                        samplePerturbation.available_columns = samplePerturbation.available_columns.filter(col => col.$selected).map(col => col.name);
+                        if (samplePerturbation.available_columns.length) {
+                            perturbationsToCompute[key] = samplePerturbation;
+                        }
+                    }
                 }
             }
+            if (!Object.keys(perturbationsToCompute).length) return;
+
+            $scope.uiState.loadingResult = true;
             $http.post(getWebAppBackendUrl("stress-tests-config"), perturbationsToCompute)
                 .then(function() {
                     $http.get(getWebAppBackendUrl("compute"))
