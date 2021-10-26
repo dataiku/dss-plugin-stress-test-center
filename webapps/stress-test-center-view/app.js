@@ -31,6 +31,13 @@ let versionId = webAppConfig['versionId'];
             return nrSelectedItems + " feature" + (nrSelectedItems > 1 ? "s" : "");
         }
 
+        $scope.showTooltip = function($event) {
+            const top = $event.target.getBoundingClientRect().top;
+            const tooltip = angular.element($event.target).find(".settings__help-text");
+            tooltip.css("top", (top - 8) + "px");
+            tooltip.toggleClass("tooltip--hidden");
+        }
+
         $scope.runAnalysis = function () {
             const perturbationsToCompute = {};
             for (let key in $scope.perturbations) {

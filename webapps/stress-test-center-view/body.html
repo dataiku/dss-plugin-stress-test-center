@@ -48,10 +48,12 @@
                         <div class="slider round"></div>
                     </label>
                     Target distribution
-                    <i class="icon-info-sign"></i>
-                </div>
-                <div class="ng-hide flex">
-                    The target distribution perturbation modifies the data target distribution by resampling.
+                    <i class="icon-info-sign icon--hoverable" ng-mouseover="showTooltip($event)" ng-mouseleave="showTooltip($event)">
+                        <div class="settings__help-text tooltip--hidden">
+                            <i class="icon-info-sign"></i>
+                            Modifies the target distribution by resampling
+                        </div>
+                    </i>
                 </div>
                 <form class="row-param">
                     <div class="control-group">
@@ -88,12 +90,13 @@
                         <div class="slider round"></div>
                     </label>
                     Missing Values Enforcer
-                    <i class="icon-info-sign"></i>
+                    <i class="icon-info-sign icon--hoverable" ng-mouseover="showTooltip($event)" ng-mouseleave="showTooltip($event)">
+                        <div class="settings__help-text tooltip--hidden">
+                            <i class="icon-info-sign"></i>
+                            Randomly inserts missing values
+                        </div>
+                    </i>
                 </div>
-                <div class="flex ng-hide">
-                    The missing values enforcer randomly inserts missing values.
-                </div>
-
                 <form class="row-param">
                     <div class="control-group">
                         <label ng-click="openFeatureSelector('MISSING_VALUES', $event)"
@@ -132,10 +135,12 @@
                         <div class="slider round"></div>
                     </label>
                     Scaling Perturbation
-                    <i class="icon-info-sign"></i>
-                </div>
-                <div class="flex ng-hide">
-                    The scaling perturbation changes the order of magnitude of each feature by some random scaling.
+                    <i class="icon-info-sign icon--hoverable" ng-mouseover="showTooltip($event)" ng-mouseleave="showTooltip($event)">
+                        <div class="settings__help-text tooltip--hidden">
+                            <i class="icon-info-sign"></i>
+                            Changes the order of magnitude of each feature by some random scaling
+                        </div>
+                    </i>
                 </div>
                 <form class="row-param">
                     <div class="control-group">
