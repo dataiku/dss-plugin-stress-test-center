@@ -41,7 +41,7 @@ class StressTestGenerator(object):
     def set_config(self, shift_configs: dict):
         self.config_list = []
         for shift_type, shift_config in shift_configs.items():
-            params, features = shift_config["params"], shift_config.get("available_columns")
+            params, features = shift_config["params"], shift_config.get("selected_features")
             self.config_list.append(StressTestConfiguration.create_conf(shift_type, params, features))
 
     def _subsample_clean_df(self,

@@ -7,39 +7,22 @@ let versionId = webAppConfig['versionId'];
     app.controller('VizController', function($scope, $http, ModalService) {
         $scope.modal = {};
         $scope.removeModal = function(event) {
-        if (ModalService.remove($scope.modal)(event)) {
-            angular.element(".template").focus();
-        }
+            if (ModalService.remove($scope.modal)(event)) {
+                angular.element(".template").focus();
+            }
         };
         $scope.createModal = ModalService.create($scope.modal);
 
-        $scope.uiState = {
-            openCustomDropdowns: {}
-        };
+        $scope.uiState = {};
         $scope.perturbations = {};
         $scope.modelInfo = {};
 
-        $scope.closeAllDropdowns = function() {
-            if (Object.values($scope.uiState.openCustomDropdowns)
-                .reduce((openDropdown, atLeastOneOpenDropdown) => openDropdown || atLeastOneOpenDropdown, false)) {
-                $scope.uiState.openCustomDropdowns = {};
-            }
-        }
-
-        $scope.openCustomDropdown = function(perturbation, event) {
-            const isOpen = $scope.uiState.openCustomDropdowns[perturbation];
-            if (!isOpen) {
-                $scope.closeAllDropdowns()
-            }
-            $scope.uiState.openCustomDropdowns[perturbation] = !isOpen;
-            event.stopPropagation();
-        }
-
-        $scope.getFeatureDropdownPlaceholder = function(perturbation) {
-            if (!$scope.perturbations[perturbation]) return;
-            const nrSelectedItems = $scope.perturbations[perturbation].available_columns.filter(col => col.$selected).length;
-            if (!nrSelectedItems) return "Select features";
-            return nrSelectedItems + " feature" + (nrSelectedItems > 1 ? "s" : "");
+        const featureTypesToIconClass = {
+            NUMERIC: "numerical",
+            CATEGORY: "icon-font"
+        };
+        $scope.featureToTypeIcon = function(feature) {
+            return featureTypesToIconClass[features[feature]];
         }
 
         $scope.showTooltip = function($event) {
@@ -52,17 +35,15 @@ let versionId = webAppConfig['versionId'];
         $scope.runAnalysis = function () {
             const perturbationsToCompute = {};
             for (let key in $scope.perturbations) {
-                if ($scope.perturbations[key].$activated) {
-                    if (key === 'PRIOR_SHIFT') { // TODO: cleaner check
-                        if ($scope.perturbations.PRIOR_SHIFT.params.cl) {
-                            perturbationsToCompute[key] = Object.assign({}, $scope.perturbations[key]);
-                        }
+                const perturbation = $scope.perturbations[key];
+                if (perturbation.$activated) {
+                    if (perturbation.testType === "SAMPLE_PERTURBATION") {
+                        if (!perturbation.selected_features.size) continue;
+                        perturbationsToCompute[key] = {params: perturbation.params};
+                        perturbationsToCompute[key].selected_features = Array.from(perturbation.selected_features);
                     } else {
-                        const samplePerturbation = Object.assign({}, $scope.perturbations[key]);
-                        samplePerturbation.available_columns = samplePerturbation.available_columns.filter(col => col.$selected).map(col => col.name);
-                        if (samplePerturbation.available_columns.length) {
-                            perturbationsToCompute[key] = samplePerturbation;
-                        }
+                        if (!$scope.perturbations[key].params.cl) continue; // TODO: cleaner
+                        perturbationsToCompute[key] = {params: perturbation.params};
                     }
                 }
             }
@@ -87,37 +68,41 @@ let versionId = webAppConfig['versionId'];
                 });
         }
 
+        $scope.samples = 100;
+        let features;
         $http.get(getWebAppBackendUrl("model-info"))
             .then(function(response){
                 $scope.modelInfo.targetClasses = response.data["target_classes"];
                 if ($scope.modelInfo.targetClasses.length) {
-                    $scope.modelInfo.isClassification = true;
-                    $scope.uiState.selectedRow = "PRIOR_SHIFT";
                     $scope.perturbations.PRIOR_SHIFT = {
-                        displayName: "Target distribution perturbation",
+                        displayName: "Target distribution",
+                        testType: "SUBPOPULATION_PERTURBATION",
                         params: {
                             samples_fraction: .5
                         }
                     };
-                } else {
-                    $scope.uiState.selectedRow = "MISSING_VALUES";
                 }
 
-                const columns = response.data["columns"];
+                features = response.data["features"];
+                const featureNames = Object.keys(features);
                 $scope.perturbations.MISSING_VALUES = {
-                    displayName: "Missing values enforcer",
+                    displayName: "Missing values",
+                    availableColumns: featureNames.filter(name => ["NUMERIC", "CATEGORY"].includes(features[name])),
+                    testType: "SAMPLE_PERTURBATION",
                     params: {
                         samples_fraction: .5
                     },
-                    available_columns: columns.filter(col => ["CATEGORY", "NUMERIC"].includes(col.feature_type))
+                    selected_features: new Set()
                 };
 
                 $scope.perturbations.SCALING = {
-                    displayName: "Scaling perturbation",
+                    displayName: "Scaling",
+                    availableColumns: featureNames.filter(name => ["NUMERIC"].includes(features[name])),
+                    testType: "SAMPLE_PERTURBATION",
                     params: {
                         samples_fraction: .5
                     },
-                    available_columns: columns.filter(col => ["NUMERIC"].includes(col.feature_type))
+                    selected_features: new Set()
                 };
         }, function(e) {
             $scope.createModal.error(e.data);

@@ -97,3 +97,58 @@ app.directive("spinner", function () {
         }
     }
 });
+
+app.directive("customDropdown", function() {
+    return {
+        scope: {
+            itemImage: '=?',
+            label: '@',
+            itemName: '@',
+            item: '=',
+            items: '=',
+            possibleValues: '='
+        },
+        restrict: 'A',
+        templateUrl:'/plugins/stress-test-center/resource/templates/custom-dropdown.html',
+        link: function(scope, elem) {
+            scope.isSelected = function(value) {
+                if (scope.items) {
+                    return scope.items.has(value);
+                }
+                return scope.item === value;
+            }
+
+            scope.updateSelection = function(value, event) {
+                if (scope.items) {
+                    if (scope.isSelected(value)) {
+                        scope.items.delete(value);
+                    } else {
+                        scope.items.add(value);
+                    }
+                    event.stopPropagation();
+                } else {
+                    scope.item = value;
+                }
+            }
+
+            scope.getPlaceholder = function() {
+                if (scope.items) {
+                    if (!(scope.items || []).size) return "Select " + scope.itemName + "s";
+                    return scope.items.size + " " + scope.itemName + (scope.items.size > 1 ? "s" : "");
+                }
+                if (!scope.item) return "Select a " + scope.itemName;
+                return scope.item;
+            }
+
+            scope.toggleDropdown = function() {
+                scope.isOpen = !scope.isOpen;
+            }
+
+            const dropdownElem = angular.element(elem[0]).find(".custom-dropdown");
+            scope.$on("closeDropdowns", function(e, target) {
+                if (target && angular.element(target).closest(dropdownElem)[0]) return;
+                scope.isOpen = false;
+            })
+        }
+    }
+})

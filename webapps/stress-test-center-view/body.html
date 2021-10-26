@@ -10,11 +10,12 @@
 <body ng-app = "StressTestCenter"
       ng-controller = "VizController"
       class="report-box"
-      ng-click="closeAllDropdowns()"
+      ng-click="$broadcast('closeDropdowns', $event.target)"
+      ng-keyup="$broadcast('closeDropdowns')"
       tabindex="0">
     <div ng-if="modal.type"
          class="modal-background"
-         tabindex=0
+         tabindex="0"
          ng-keyup="$event.keyCode == 27 && removeModal()"
          ng-click="removeModal($event)">
     </div>
@@ -57,7 +58,7 @@
                         <input type="checkbox" ng-model="perturbations.PRIOR_SHIFT.$activated">
                         <div class="slider round"></div>
                     </label>
-                    Target distribution
+                    {{ perturbations.PRIOR_SHIFT.displayName }}
                     <i class="icon-info-sign icon--hoverable" ng-mouseover="showTooltip($event)" ng-mouseleave="showTooltip($event)">
                         <div class="settings__help-text tooltip--hidden">
                             <i class="icon-info-sign"></i>
@@ -66,25 +67,11 @@
                     </i>
                 </div>
                 <form class="settings__subsection-form">
-                    <div class="control-group">
-                        <label ng-click="openCustomDropdown('PRIOR_SHIFT', $event)"
-                            class="label-text">
-                            Affected class
-                        </label>
-                        <div class="custom-dropdown" ng-click="openCustomDropdown('PRIOR_SHIFT', $event)">
-                            <div class="flex custom-dropdown__title">
-                                {{ perturbations.PRIOR_SHIFT.params.cl || "Select a class" }}
-                                <i class="icon-caret-down"></i>
-                            </div>
-                            <div class="custom-dropdown__body" ng-if="uiState.openCustomDropdowns.PRIOR_SHIFT">
-                                <div class="custom-dropdown-row"
-                                    ng-click="perturbations.PRIOR_SHIFT.params.cl = class"
-                                    ng-repeat="class in modelInfo.targetClasses">
-                                    <i class="icon-ok" ng-class="{'icon--hidden': perturbations.PRIOR_SHIFT.params.cl !== class}"></i>
-                                    <div>{{ class }}</div>
-                                </div>
-                            </div>
-                        </div>
+                    <div custom-dropdown
+                         possible-values="modelInfo.targetClasses"
+                         item="perturbations.PRIOR_SHIFT.params.cl"
+                         item-name="class"
+                         label="Affected class">
                     </div>
                     <div class="control-group">
                         <label for="priorShift" class="label-text">Selected class frequency after perturbation</label>
@@ -99,7 +86,7 @@
                         <input type="checkbox" ng-model="perturbations.MISSING_VALUES.$activated">
                         <div class="slider round"></div>
                     </label>
-                    Missing Values Enforcer
+                    {{ perturbations.MISSING_VALUES.displayName }}
                     <i class="icon-info-sign icon--hoverable" ng-mouseover="showTooltip($event)" ng-mouseleave="showTooltip($event)">
                         <div class="settings__help-text tooltip--hidden">
                             <i class="icon-info-sign"></i>
@@ -108,28 +95,12 @@
                     </i>
                 </div>
                 <form class="settings__subsection-form">
-                    <div class="control-group">
-                        <label ng-click="openCustomDropdown('MISSING_VALUES', $event)"
-                            class="label-text">
-                            Affected columns
-                        </label>
-                        <div class="custom-dropdown"
-                            ng-click="openCustomDropdown('MISSING_VALUES', $event)">
-                            <div class="flex custom-dropdown__title">
-                                {{ getFeatureDropdownPlaceholder('MISSING_VALUES') }}
-                                <i class="icon-caret-down"></i>
-                            </div>
-                            <div class="custom-dropdown__body" ng-if="uiState.openCustomDropdowns.MISSING_VALUES">
-                                <div class="custom-dropdown-row"
-                                    ng-click="feature.$selected = !feature.$selected; $event.stopPropagation()"
-                                    ng-repeat="feature in perturbations.MISSING_VALUES.available_columns">
-                                    <i class="icon-ok" ng-class="{'icon--hidden': !feature.$selected}"></i>
-                                    <i class="icon-font" ng-show="feature.feature_type === 'CATEGORY'"></i>
-                                    <i class="numerical" ng-show="feature.feature_type === 'NUMERIC'"></i>
-                                    <div>{{ feature.name }}</div>
-                                </div>
-                            </div>
-                        </div>
+                    <div custom-dropdown
+                         possible-values="perturbations.MISSING_VALUES.availableColumns"
+                         items="perturbations.MISSING_VALUES.selected_features"
+                         item-name="feature"
+                         item-image="featureToTypeIcon"
+                         label="Affected features">
                     </div>
                     <div class="control-group">
                         <label for="missingValues" class="label-text">Proportion of affected samples</label>
@@ -144,7 +115,7 @@
                         <input type="checkbox" ng-model="perturbations.SCALING.$activated">
                         <div class="slider round"></div>
                     </label>
-                    Scaling Perturbation
+                    {{ perturbations.SCALING.displayName }}
                     <i class="icon-info-sign icon--hoverable" ng-mouseover="showTooltip($event)" ng-mouseleave="showTooltip($event)">
                         <div class="settings__help-text tooltip--hidden">
                             <i class="icon-info-sign"></i>
@@ -153,27 +124,12 @@
                     </i>
                 </div>
                 <form class="settings__subsection-form">
-                    <div class="control-group">
-                        <label ng-click="openCustomDropdown('SCALING', $event)"
-                            class="label-text">
-                            Affected features
-                        </label>
-                        <div class="custom-dropdown" ng-click="openCustomDropdown('SCALING', $event)">
-                            <div class="flex custom-dropdown__title">
-                                {{ getFeatureDropdownPlaceholder('SCALING') }}
-                                <i class="icon-caret-down"></i>
-                            </div>
-                            <div class="custom-dropdown__body" ng-if="uiState.openCustomDropdowns.SCALING">
-                                <div class="custom-dropdown-row"
-                                    ng-click="feature.$selected = !feature.$selected; $event.stopPropagation()"
-                                    ng-repeat="feature in perturbations.SCALING.available_columns">
-                                    <i class="icon-ok" ng-class="{'icon--hidden': !feature.$selected}"></i>
-                                    <i class="icon-font" ng-show="feature.feature_type === 'CATEGORY'"></i>
-                                    <i class="numerical" ng-show="feature.feature_type === 'NUMERIC'"></i>
-                                    <div>{{ feature.name }}</div>
-                                </div>
-                            </div>
-                        </div>
+                    <div custom-dropdown
+                         possible-values="perturbations.SCALING.availableColumns"
+                         items="perturbations.SCALING.selected_features"
+                         item-name="feature"
+                         item-image="featureToTypeIcon"
+                         label="Affected features">
                     </div>
                     <div class="control-group">
                         <label for="scaling" class="label-text">Proportion of affected samples</label>

@@ -36,13 +36,11 @@ def get_model_info():
         stressor.model_accessor = ModelAccessor(original_model_handler)
         return jsonify(
             target_classes=[] if is_regression else list(original_model_handler.get_target_map().keys()),
-            columns=[
-                {
-                    "name": feature,
-                    "feature_type": preprocessing["type"]
-                } for (feature, preprocessing) in stressor.model_accessor.get_per_feature().items()
+            features={
+                feature: preprocessing["type"]
+                for (feature, preprocessing) in stressor.model_accessor.get_per_feature().items()
                     if preprocessing["role"] == "INPUT"
-            ]
+            }
         )
     except:
         logger.error(traceback.format_exc())
