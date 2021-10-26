@@ -3,7 +3,6 @@
 form {
     position: relative;
     max-width: 100%;
-    margin: 0;
 }
 
 label {
@@ -41,6 +40,12 @@ form input[type="text"] {
     box-shadow: 0em 0em 0em 0em transparent inset;
     -webkit-transition: color 0.1s ease, border-color 0.5s ease;
     transition: color 0.1s ease, border-color 0.5s ease;
+}
+
+form input[type="number"].ng-invalid,
+form input[type="search"].ng-invalid,
+form input[type="text"].ng-invalid {
+    border-color: var(--error-red);
 }
 
 input:focus-visible {
@@ -146,6 +151,10 @@ input:focus-visible {
 
 /** TEXT**/
 
+.text-tiny {
+    font-size: 10px;
+}
+
 .text-lighter {
     color: var(--grey-lighten-4);
 }
@@ -231,25 +240,30 @@ input:focus-visible {
     background: #3194fc;
 }
 
+.dku-btn-container--right-align {
+    display: flex;
+    justify-content: flex-end;
+}
+
 /** SETTINGS **/
 
-.feature-selector {
+.custom-dropdown {
     border: 1px solid var(--grey-lighten-6);
     cursor: pointer;
     padding: 4px 8px;
     position: relative;
 }
 
-.feature-selector:hover {
+.custom-dropdown:hover {
     background: var(--grey-lighten-7);
 }
 
-.feature-selector__title {
+.custom-dropdown__title {
     align-items: center;
     justify-content: space-between;
 }
 
-.feature-selector__body {
+.custom-dropdown__body {
     cursor: pointer;
     overflow-y: auto;
     position: absolute;
@@ -257,19 +271,19 @@ input:focus-visible {
     left: 0;
     background: var(--white);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    width: 200px;
+    width: 250px;
     max-height: 200px;
     z-index: 10;
 }
 
-.feature-selector-row {
+.custom-dropdown-row {
     padding: 5px;
     display: flex;
     align-items: center;
     height: 20px;
 }
 
-.feature-selector-row:hover {
+.custom-dropdown-row:hover {
     background: var(--blue-lighten-5);
 }
 
@@ -302,12 +316,12 @@ input:focus-visible {
     content: "#";
 }
 
-.feature-selector-row .icon-font, .feature-selector-row .numerical {
+.custom-dropdown-row .icon-font, .custom-dropdown-row .numerical {
     width: 12px;
     margin-right: 4px;
 }
 
-.feature-selector-row .icon-font {
+.custom-dropdown-row .icon-font {
     font-size: 11px;
 }
 
@@ -360,6 +374,11 @@ input:focus-visible {
   border-left: 1px solid var(--grey-lighten-6);
 }
 
+.settings__subsection-form {
+    margin: 0;
+    padding: 0;
+}
+
 .settings__subsection-header {
     justify-content: space-between;
     align-items: center;
@@ -368,6 +387,7 @@ input:focus-visible {
 
 .settings__help-text {
     font-family: var(--font-family);
+    max-width: 400px;
     position: absolute;
     left: 316px;
     padding: 8px;
