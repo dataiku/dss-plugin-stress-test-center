@@ -14,13 +14,24 @@ let versionId = webAppConfig['versionId'];
         $scope.createModal = ModalService.create($scope.modal);
 
         $scope.uiState = {
-            openFeatureSelectors: {}
+            openCustomDropdowns: {}
         };
         $scope.perturbations = {};
         $scope.modelInfo = {};
 
-        $scope.openFeatureSelector = function(perturbation, event) {
-            $scope.uiState.openFeatureSelectors[perturbation] = !$scope.uiState.openFeatureSelectors[perturbation];
+        $scope.closeAllDropdowns = function() {
+            if (Object.values($scope.uiState.openCustomDropdowns)
+                .reduce((openDropdown, atLeastOneOpenDropdown) => openDropdown || atLeastOneOpenDropdown, false)) {
+                $scope.uiState.openCustomDropdowns = {};
+            }
+        }
+
+        $scope.openCustomDropdown = function(perturbation, event) {
+            const isOpen = $scope.uiState.openCustomDropdowns[perturbation];
+            if (!isOpen) {
+                $scope.closeAllDropdowns()
+            }
+            $scope.uiState.openCustomDropdowns[perturbation] = !isOpen;
             event.stopPropagation();
         }
 
