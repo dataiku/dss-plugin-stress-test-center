@@ -21,15 +21,9 @@ let versionId = webAppConfig['versionId'];
             NUMERIC: "numerical",
             CATEGORY: "icon-font"
         };
+
         $scope.featureToTypeIcon = function(feature) {
             return featureTypesToIconClass[features[feature]];
-        }
-
-        $scope.showTooltip = function($event) {
-            const top = $event.target.getBoundingClientRect().top;
-            const tooltip = angular.element($event.target).find(".settings__help-text");
-            tooltip.css("top", (top - 8) + "px");
-            tooltip.toggleClass("tooltip--hidden");
         }
 
         $scope.runAnalysis = function () {

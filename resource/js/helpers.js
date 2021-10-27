@@ -152,3 +152,27 @@ app.directive("customDropdown", function() {
         }
     }
 })
+
+app.directive("helpIcon", function () {
+    return {
+        restrict: 'E',
+        scope: {
+            helpText: '@',
+
+        },
+        template: `<i class="icon-info-sign icon--hoverable" ng-mouseover="showTooltip()" ng-mouseleave="showTooltip()">
+            <div class="settings__help-text tooltip--hidden">
+                <i class="icon-info-sign"></i>
+                {{ helpText }}
+            </div>
+        </i>`,
+        link: function(scope, elem) {
+            scope.showTooltip = function() {
+                const top = elem[0].getBoundingClientRect().top;
+                const tooltip = elem.find(".settings__help-text");
+                tooltip.css("top", (top - 8) + "px");
+                tooltip.toggleClass("tooltip--hidden");
+            }
+        }
+    }
+});

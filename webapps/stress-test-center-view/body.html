@@ -25,12 +25,7 @@
             <div class="settings__subsection">
                 <div class="grand-title-b flex settings__subsection-header">
                     Stress tests
-                    <i class="small-title-b icon-info-sign icon--hoverable" ng-mouseover="showTooltip($event)" ng-mouseleave="showTooltip($event)">
-                        <div class="settings__help-text tooltip--hidden">
-                            <i class="icon-info-sign"></i>
-                            Select the tests corresponding to corruptions you expect to have at deployment time, and assess the robustness of your model
-                        </div>
-                    </i>
+                    <help-icon class="small-title-b" help-text="Select the tests corresponding to corruptions you expect to have at deployment time, and assess the robustness of your model"></help-icon>
                 </div>
                 <form class="settings__subsection-form">
                     <div class="control-group">
@@ -59,12 +54,7 @@
                         <div class="slider round"></div>
                     </label>
                     {{ perturbations.PRIOR_SHIFT.displayName }}
-                    <i class="icon-info-sign icon--hoverable" ng-mouseover="showTooltip($event)" ng-mouseleave="showTooltip($event)">
-                        <div class="settings__help-text tooltip--hidden">
-                            <i class="icon-info-sign"></i>
-                            Modifies the target distribution by resampling
-                        </div>
-                    </i>
+                    <help-icon help-text="Modifies the target distribution by resampling"></help-icon>
                 </div>
                 <form class="settings__subsection-form">
                     <div custom-dropdown
@@ -87,12 +77,7 @@
                         <div class="slider round"></div>
                     </label>
                     {{ perturbations.MISSING_VALUES.displayName }}
-                    <i class="icon-info-sign icon--hoverable" ng-mouseover="showTooltip($event)" ng-mouseleave="showTooltip($event)">
-                        <div class="settings__help-text tooltip--hidden">
-                            <i class="icon-info-sign"></i>
-                            Randomly inserts missing values
-                        </div>
-                    </i>
+                    <help-icon help-text="Randomly inserts missing values"></help-icon>
                 </div>
                 <form class="settings__subsection-form">
                     <div custom-dropdown
@@ -116,12 +101,7 @@
                         <div class="slider round"></div>
                     </label>
                     {{ perturbations.SCALING.displayName }}
-                    <i class="icon-info-sign icon--hoverable" ng-mouseover="showTooltip($event)" ng-mouseleave="showTooltip($event)">
-                        <div class="settings__help-text tooltip--hidden">
-                            <i class="icon-info-sign"></i>
-                            Changes the order of magnitude of each feature by some random scaling
-                        </div>
-                    </i>
+                    <help-icon help-text="Changes the order of magnitude of each feature by some random scaling"></help-icon>
                 </div>
                 <form class="settings__subsection-form">
                     <div custom-dropdown
