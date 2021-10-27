@@ -75,17 +75,11 @@ def compute():
         metrics_df = build_stress_metric(y_true=perturbed_df[target],
                                          y_pred=perturbed_df_with_prediction['prediction'],
                                          stress_test_indicator=perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE],
-                                         pos_label=pos_label)
+                                         pos_label=pos_label).rename(columns={DkuStressTestCenterConstants.STRESS_TEST_TYPE: "attack_type"})
+        metrics_df_sample_perturbations = metrics_df[metrics_df["attack_type"].isin(DkuStressTestCenterConstants.PERTURBATION_BASED_STRESS_TYPES)]
+        metrics_df_subpop_perturbations = metrics_df[metrics_df["attack_type"].isin(DkuStressTestCenterConstants.SUBPOP_SHIFT_BASED_STRESS_TYPES)]
 
-        metrics_list = []
-        for index, row in metrics_df.iterrows():
-            dct = dict()
-            dct['attack_type'] = row['_dku_stress_test_type']
-            dct['accuracy_drop'] = round(100 * row['accuracy_drop'], 3)
-            dct['robustness'] = round(100 * row['robustness'], 3)
-            metrics_list.append(dct)
-
-
+        # Compute the critical samples
         y_true = perturbed_df[target]
 
         original_target_value = list(model_accessor.model_handler.get_target_map().keys())
@@ -102,11 +96,20 @@ def compute():
             perturbed_df=perturbed_df
         )
 
-        data = {
-            'metrics': metrics_list,
-            'critical_samples': critical_samples_df.to_dict('records'),
-            'uncertainties': uncertainties
-        }
+        data = {}
+        if not metrics_df_sample_perturbations.empty:
+            data['SAMPLE_PERTURBATION'] = {
+                'metrics': metrics_df_sample_perturbations.to_dict('records'),
+                'critical_samples': {
+                    'samples': critical_samples_df.to_dict('records'),
+                    'uncertainties': uncertainties
+                }
+            }
+
+        if not metrics_df_subpop_perturbations.empty:
+            data['SUBPOPULATION_PERTURBATION'] = {
+                'metrics': metrics_df_subpop_perturbations.to_dict('records'),
+            }
         return simplejson.dumps(pretty_floats(data), ignore_nan=True, default=convert_numpy_int64_to_int)
     except:
         logger.error("When trying to call compute endpoint: {}.".format(traceback.format_exc()))

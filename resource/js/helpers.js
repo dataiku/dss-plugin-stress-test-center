@@ -161,7 +161,7 @@ app.directive("helpIcon", function () {
 
         },
         template: `<i class="icon-info-sign icon--hoverable" ng-mouseover="showTooltip()" ng-mouseleave="showTooltip()">
-            <div class="settings__help-text tooltip--hidden">
+            <div class="help-text__tooltip tooltip--hidden">
                 <i class="icon-info-sign"></i>
                 {{ helpText }}
             </div>
@@ -169,10 +169,19 @@ app.directive("helpIcon", function () {
         link: function(scope, elem) {
             scope.showTooltip = function() {
                 const top = elem[0].getBoundingClientRect().top;
-                const tooltip = elem.find(".settings__help-text");
+                const tooltip = elem.find(".help-text__tooltip");
                 tooltip.css("top", (top - 8) + "px");
                 tooltip.toggleClass("tooltip--hidden");
             }
         }
+    }
+});
+
+app.filter("toFixedIfNeeded", function() {
+    return function(number, decimals) {
+        if(Math.round(number) !== number) {
+            return parseFloat(number.toFixed(decimals));
+        }
+        return number;
     }
 });

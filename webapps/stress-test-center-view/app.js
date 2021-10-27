@@ -16,6 +16,7 @@ let versionId = webAppConfig['versionId'];
         $scope.uiState = {};
         $scope.perturbations = {};
         $scope.modelInfo = {};
+        $scope.samples = 100;
 
         const featureTypesToIconClass = {
             NUMERIC: "numerical",
@@ -49,9 +50,7 @@ let versionId = webAppConfig['versionId'];
                     $http.get(getWebAppBackendUrl("compute"))
                         .then(function(response) {
                             $scope.uiState.loadingResult = false;
-                            $scope.metrics = response.data['metrics'];
-                            $scope.critical_samples = response.data['critical_samples']
-                            $scope.uncertainties = response.data['uncertainties']
+                            $scope.results = response.data;
                     }, function(e) {
                         $scope.uiState.loadingResult = false;
                         $scope.createModal.error(e.data);
@@ -62,7 +61,6 @@ let versionId = webAppConfig['versionId'];
                 });
         }
 
-        $scope.samples = 100;
         let features;
         $http.get(getWebAppBackendUrl("model-info"))
             .then(function(response){

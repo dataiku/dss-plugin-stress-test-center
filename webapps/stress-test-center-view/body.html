@@ -22,13 +22,13 @@
 
     <div class="webapp-main">
         <div class="webapp-section webapp-section__settings">
-            <div class="settings__subsection">
-                <div class="grand-title-b flex settings__subsection-header">
+            <div class="webapp__subsection">
+                <div class="grand-title-b flex settings-section__header">
                     Stress tests
                     <help-icon class="small-title-b" help-text="Select the tests corresponding to corruptions you expect to have at deployment time, and assess the robustness of your model"></help-icon>
                 </div>
-                <form class="settings__subsection-form">
-                    <div class="control-group settings__subsection-form_field">
+                <form class="settings-subsection__form">
+                    <div class="control-group settings-subsection__form_field">
                         <label for="samples" class="label-text">Sample for perturbation tests</label>
                         <input type="number" id="samples" ng-model="samples" value="100"  step="0.01" min="0" max="100">
                         <div class="text-tiny">
@@ -47,9 +47,9 @@
                 </div>
             </div>
 
-            <div class="settings__subsection">
-                <div class="flex small-title-b settings__subsection-header">
-                    <label class="settings__subsection-header_title flex">
+            <div class="webapp__subsection">
+                <div class="flex small-title-b settings-subsection__header">
+                    <label class="flex">
                         <label class="switch">
                             <input type="checkbox" ng-model="perturbations.PRIOR_SHIFT.$activated">
                             <div class="slider round"></div>
@@ -58,24 +58,24 @@
                     </label>
                     <help-icon help-text="Modifies the target distribution by resampling"></help-icon>
                 </div>
-                <form class="settings__subsection-form">
+                <form class="settings-subsection__form">
                     <div custom-dropdown
                          possible-values="modelInfo.targetClasses"
                          item="perturbations.PRIOR_SHIFT.params.cl"
                          item-name="class"
                          label="Affected class"
-                         class="settings__subsection-form_field">
+                         class="settings-subsection__form_field">
                     </div>
-                    <div class="control-group settings__subsection-form_field">
+                    <div class="control-group settings-subsection__form_field">
                         <label for="priorShift" class="label-text">Proportion of affected class</label>
                         <input type="number" id="priorShift" ng-model="perturbations.PRIOR_SHIFT.params.samples_fraction" placeholder="0.5"  step="0.01" min="0">
                     </div>
                 </form>
             </div>
 
-            <div class="settings__subsection">
-                <div class="flex small-title-b settings__subsection-header">
-                    <label class="settings__subsection-header_title flex">
+            <div class="webapp__subsection">
+                <div class="flex small-title-b settings-subsection__header">
+                    <label class="flex">
                         <label class="switch">
                             <input type="checkbox" ng-model="perturbations.MISSING_VALUES.$activated">
                             <div class="slider round"></div>
@@ -84,25 +84,25 @@
                     </label>
                     <help-icon help-text="Randomly inserts missing values"></help-icon>
                 </div>
-                <form class="settings__subsection-form">
+                <form class="settings-subsection__form">
                     <div custom-dropdown
                          possible-values="perturbations.MISSING_VALUES.availableColumns"
                          items="perturbations.MISSING_VALUES.selected_features"
                          item-name="feature"
                          item-image="featureToTypeIcon"
                          label="Affected features"
-                         class="settings__subsection-form_field">
+                         class="settings-subsection__form_field">
                     </div>
-                    <div class="control-group settings__subsection-form_field">
+                    <div class="control-group settings-subsection__form_field">
                         <label for="missingValues" class="label-text">Proportion of affected samples</label>
                         <input type="number" id="missingValues" ng-model="perturbations.MISSING_VALUES.params.samples_fraction" value="0.5" placeholder="0.5" step="0.01" min="0">
                     </div>
                 </form>
             </div>
 
-            <div class="settings__subsection">
-                <div class="flex small-title-b settings__subsection-header">
-                    <label class="settings__subsection-header_title flex">
+            <div class="webapp__subsection">
+                <div class="flex small-title-b settings-subsection__header">
+                    <label class="flex">
                         <label class="switch">
                             <input type="checkbox" ng-model="perturbations.SCALING.$activated">
                             <div class="slider round"></div>
@@ -111,16 +111,16 @@
                     </label>
                     <help-icon help-text="Changes the order of magnitude of each feature by some random scaling"></help-icon>
                 </div>
-                <form class="settings__subsection-form">
+                <form class="settings-subsection__form">
                     <div custom-dropdown
                          possible-values="perturbations.SCALING.availableColumns"
                          items="perturbations.SCALING.selected_features"
                          item-name="feature"
                          item-image="featureToTypeIcon"
                          label="Affected features"
-                         class="settings__subsection-form_field">
+                         class="settings-subsection__form_field">
                     </div>
-                    <div class="control-group settings__subsection-form_field">
+                    <div class="control-group settings-subsection__form_field">
                         <label for="scaling" class="label-text">Proportion of affected samples</label>
                         <input type="number" id="scaling" ng-model="perturbations.SCALING.params.samples_fraction" value="0.5" placeholder="0.5" step="0.01" min="0">
                     </div>
@@ -129,7 +129,7 @@
         </div>
 
         <div class="webapp-section webapp-section__results">
-            <div class="empty-state" ng-if="!metrics && !uiState.loadingResult">
+            <div class="empty-state" ng-if="!results && !uiState.loadingResult">
                 <div class="empty-state__title">
                     Put your model through a battery of tests to see how it handles the unexpected
                 </div>
@@ -151,12 +151,15 @@
                 <spinner></spinner>
             </div>
 
-            <div class="tutu" ng-if="metrics && !uiState.loadingResult">
-                <div class="metric-subsection">
-                    <div class="flex row-header grand-title-b">
-                        Robustness metrics
+            <div ng-if="results && !uiState.loadingResult">
+                <div class="webapp__subsection" ng-if="results.SUBPOPULATION_PERTURBATION">
+                    <div class="grand-title-b results-subsection__header">
+                        Subpopulation shift perturbations
                     </div>
-                    <div class="flex">
+                    <div class="results__subsection">
+                        <div class="small-title-b">
+                            Metrics
+                        </div>
                         <table class="table-metric">
                             <thead>
                                 <tr>
@@ -166,54 +169,77 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr ng-repeat="metric in metrics">
+                                <tr ng-repeat="metric in results.SUBPOPULATION_PERTURBATION.metrics">
                                     <td class="cell text-highlight">{{ perturbations[metric['attack_type']].displayName }}</td>
-                                    <td class="cell text-sb">{{ metric['accuracy_drop'] }}%</td>
-                                    <td class="cell text-sb">{{ metric['robustness'] }}%</td>
+                                    <td class="cell text-sb">{{ metric['accuracy_drop'] * 100 | toFixedIfNeeded: 3 }}%</td>
+                                    <td class="cell text-sb">{{ metric['robustness'] * 100 | toFixedIfNeeded: 3 }}%</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <hr/>
-
-                <div class="sample-subsection">
-                    <div class="flex row-header grand-title-b">
-                        Critical samples
+                <div class="webapp__subsection" ng-if="results.SAMPLE_PERTURBATION">
+                    <div class="grand-title-b results-subsection__header">
+                        Sample perturbations
                     </div>
-                    <div class="text-lighter">
-                        The critical samples are the most sensitive to perturbations, and highlight regions where the model prediction is highly uncertain (presenting large confidence fluctuations).
-                    </div>
-                    <div class="flex dku-grid">
-                        <div ng-repeat="sample in critical_samples">
-                            <table class="table-sample table-striped">
-                                <thead>
-                                    <tr>
-                                        <th class="top-cell--blue title-b">
-                                            <div class="flex top-cell__row">
-                                                <div>{{ uncertainties[$index] }}</div>
-                                                <div>0.63</div>
-                                            </div>
-                                            <div class="flex top-cell__row">
-                                                <div>Uncertainty score</div>
-                                                <div class="text-lighter">Probability</div>
-                                            </div>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="(key, value) in sample">
-                                    <td>
-                                        {{key}}
-                                        <span class="text-lighter">= {{value}}</span>
-                                    </td>
-                                    </tr>
-                                </tbody>
-
-                            </table>
+                    <div class="results__subsection">
+                        <div class="small-title-b">
+                            Metrics
                         </div>
-
+                        <table class="table-metric">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="fake-cell"></th>
+                                    <th scope="col" class="cell small-title-b top-cell--blue">Performance</th>
+                                    <th scope="col" class="cell small-title-b top-cell--orange">Robustness</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="metric in results.SAMPLE_PERTURBATION.metrics">
+                                    <td class="cell text-highlight">{{ perturbations[metric['attack_type']].displayName }}</td>
+                                    <td class="cell text-sb">{{ metric['accuracy_drop'] * 100 | toFixedIfNeeded: 3 }}%</td>
+                                    <td class="cell text-sb">{{ metric['robustness'] * 100 | toFixedIfNeeded: 3 }}%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="results__subsection">
+                        <div class="small-title-b">
+                            Critical samples
+                        </div>
+                        <p class="text-lighter">
+                            The critical samples are the most sensitive to perturbations. They highlight where the model predictions are highly uncertain (presenting large confidence fluctuations).
+                        </p>
+                        <div class="flex dku-grid">
+                            <div ng-repeat="sample in results.SAMPLE_PERTURBATION.critical_samples.samples">
+                                <table class="table-sample table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="top-cell--blue small-title-b">
+                                                <div class="flex top-cell__row">
+                                                    <div>{{ results.SAMPLE_PERTURBATION.critical_samples.uncertainties[$index] }}</div>
+                                                    <div>0.63</div>
+                                                </div>
+                                                <div class="flex top-cell__row">
+                                                    <div>Uncertainty score</div>
+                                                    <div class="text-lighter">Probability</div>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="(key, value) in sample">
+                                        <td>
+                                            {{key}}
+                                            <span class="text-lighter">= {{value}}</span>
+                                        </td>
+                                        </tr>
+                                    </tbody>
+    
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
