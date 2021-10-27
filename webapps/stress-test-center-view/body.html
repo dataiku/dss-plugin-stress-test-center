@@ -49,7 +49,7 @@
 
             <div class="webapp__subsection">
                 <div class="flex small-title-b settings-subsection__header">
-                    <label class="flex">
+                    <label class="flex" ng-class="{'text-lighter': !perturbations.PRIOR_SHIFT.$activated}">
                         <label class="switch">
                             <input type="checkbox" ng-model="perturbations.PRIOR_SHIFT.$activated">
                             <div class="slider round"></div>
@@ -58,7 +58,7 @@
                     </label>
                     <help-icon help-text="Modifies the target distribution by resampling"></help-icon>
                 </div>
-                <form class="settings-subsection__form">
+                <form class="settings-subsection__form" ng-if="perturbations.PRIOR_SHIFT.$activated">
                     <div custom-dropdown
                          possible-values="modelInfo.targetClasses"
                          item="perturbations.PRIOR_SHIFT.params.cl"
@@ -67,7 +67,7 @@
                          class="settings-subsection__form_field">
                     </div>
                     <div class="control-group settings-subsection__form_field">
-                        <label for="priorShift" class="label-text">Proportion of affected class</label>
+                        <label for="priorShift" class="label-text">Proportion of samples with affected class</label>
                         <input type="number" id="priorShift" ng-model="perturbations.PRIOR_SHIFT.params.samples_fraction" placeholder="0.5"  step="0.01" min="0">
                     </div>
                 </form>
@@ -75,7 +75,7 @@
 
             <div class="webapp__subsection">
                 <div class="flex small-title-b settings-subsection__header">
-                    <label class="flex">
+                    <label class="flex" ng-class="{'text-lighter': !perturbations.MISSING_VALUES.$activated}">
                         <label class="switch">
                             <input type="checkbox" ng-model="perturbations.MISSING_VALUES.$activated">
                             <div class="slider round"></div>
@@ -84,7 +84,7 @@
                     </label>
                     <help-icon help-text="Randomly inserts missing values"></help-icon>
                 </div>
-                <form class="settings-subsection__form">
+                <form class="settings-subsection__form" ng-if="perturbations.MISSING_VALUES.$activated">
                     <div custom-dropdown
                          possible-values="perturbations.MISSING_VALUES.availableColumns"
                          items="perturbations.MISSING_VALUES.selected_features"
@@ -102,7 +102,7 @@
 
             <div class="webapp__subsection">
                 <div class="flex small-title-b settings-subsection__header">
-                    <label class="flex">
+                    <label class="flex" ng-class="{'text-lighter': !perturbations.SCALING.$activated}">
                         <label class="switch">
                             <input type="checkbox" ng-model="perturbations.SCALING.$activated">
                             <div class="slider round"></div>
@@ -111,7 +111,7 @@
                     </label>
                     <help-icon help-text="Changes the order of magnitude of each feature by some random scaling"></help-icon>
                 </div>
-                <form class="settings-subsection__form">
+                <form class="settings-subsection__form" ng-if="perturbations.SCALING.$activated">
                     <div custom-dropdown
                          possible-values="perturbations.SCALING.availableColumns"
                          items="perturbations.SCALING.selected_features"
@@ -236,7 +236,6 @@
                                         </td>
                                         </tr>
                                     </tbody>
-    
                                 </table>
                             </div>
                         </div>

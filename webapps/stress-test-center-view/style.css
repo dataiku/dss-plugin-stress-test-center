@@ -153,6 +153,20 @@ transform: translate(-125%, -50%);
 
 /** TEXT**/
 
+.small-title-b {
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 20px;
+    color: var(--grey);
+}
+
+.grand-title-b {
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 22px;
+    color: var(--grey);
+}
+
 .text-tiny {
     font-size: 10px;
 }
@@ -167,26 +181,6 @@ transform: translate(-125%, -50%);
 
 .text-sb {
     font-weight: 500;
-}
-
-.small-title-b {
-    font-weight: 500;
-    font-size: 15px;
-    line-height: 20px;
-    color: var(--grey);
-}
-
-.title-b {
-    font-weight: 500;
-    font-size: 20px;
-    line-height: 20px;
-}
-
-.grand-title-b {
-    font-weight: 400;
-    font-size: 22px;
-    line-height: 22px;
-    color: var(--grey);
 }
 
 /** BUTTONS **/
@@ -297,12 +291,11 @@ transform: translate(-125%, -50%);
 .settings-subsection__header {
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
 }
 
 .settings-subsection__form {
     margin: 0;
-    padding: 0;
+    padding: 8px 0 0 0;
 }
 
 .settings-subsection__form_field + .settings-subsection__form_field {
