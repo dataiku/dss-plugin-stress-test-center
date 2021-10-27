@@ -28,8 +28,8 @@
                     <help-icon class="small-title-b" help-text="Select the tests corresponding to corruptions you expect to have at deployment time, and assess the robustness of your model"></help-icon>
                 </div>
                 <form class="settings__subsection-form">
-                    <div class="control-group">
-                        <label for="samples" class="label-text">Sample size for perturbation tests</label>
+                    <div class="control-group settings__subsection-form_field">
+                        <label for="samples" class="label-text">Sample for perturbation tests</label>
                         <input type="number" id="samples" ng-model="samples" value="100"  step="0.01" min="0" max="100">
                         <div class="text-tiny">
                             Set the percentage of rows to be used for the selected stress tests
@@ -49,11 +49,13 @@
 
             <div class="settings__subsection">
                 <div class="flex small-title-b settings__subsection-header">
-                    <label class="switch">
-                        <input type="checkbox" ng-model="perturbations.PRIOR_SHIFT.$activated">
-                        <div class="slider round"></div>
+                    <label class="settings__subsection-header_title flex">
+                        <label class="switch">
+                            <input type="checkbox" ng-model="perturbations.PRIOR_SHIFT.$activated">
+                            <div class="slider round"></div>
+                        </label>
+                        {{ perturbations.PRIOR_SHIFT.displayName }}
                     </label>
-                    {{ perturbations.PRIOR_SHIFT.displayName }}
                     <help-icon help-text="Modifies the target distribution by resampling"></help-icon>
                 </div>
                 <form class="settings__subsection-form">
@@ -61,10 +63,11 @@
                          possible-values="modelInfo.targetClasses"
                          item="perturbations.PRIOR_SHIFT.params.cl"
                          item-name="class"
-                         label="Affected class">
+                         label="Affected class"
+                         class="settings__subsection-form_field">
                     </div>
-                    <div class="control-group">
-                        <label for="priorShift" class="label-text">Selected class frequency after perturbation</label>
+                    <div class="control-group settings__subsection-form_field">
+                        <label for="priorShift" class="label-text">Proportion of affected class</label>
                         <input type="number" id="priorShift" ng-model="perturbations.PRIOR_SHIFT.params.samples_fraction" placeholder="0.5"  step="0.01" min="0">
                     </div>
                 </form>
@@ -72,11 +75,13 @@
 
             <div class="settings__subsection">
                 <div class="flex small-title-b settings__subsection-header">
-                    <label class="switch">
-                        <input type="checkbox" ng-model="perturbations.MISSING_VALUES.$activated">
-                        <div class="slider round"></div>
+                    <label class="settings__subsection-header_title flex">
+                        <label class="switch">
+                            <input type="checkbox" ng-model="perturbations.MISSING_VALUES.$activated">
+                            <div class="slider round"></div>
+                        </label>
+                        {{ perturbations.MISSING_VALUES.displayName }}
                     </label>
-                    {{ perturbations.MISSING_VALUES.displayName }}
                     <help-icon help-text="Randomly inserts missing values"></help-icon>
                 </div>
                 <form class="settings__subsection-form">
@@ -85,9 +90,10 @@
                          items="perturbations.MISSING_VALUES.selected_features"
                          item-name="feature"
                          item-image="featureToTypeIcon"
-                         label="Affected features">
+                         label="Affected features"
+                         class="settings__subsection-form_field">
                     </div>
-                    <div class="control-group">
+                    <div class="control-group settings__subsection-form_field">
                         <label for="missingValues" class="label-text">Proportion of affected samples</label>
                         <input type="number" id="missingValues" ng-model="perturbations.MISSING_VALUES.params.samples_fraction" value="0.5" placeholder="0.5" step="0.01" min="0">
                     </div>
@@ -96,11 +102,13 @@
 
             <div class="settings__subsection">
                 <div class="flex small-title-b settings__subsection-header">
-                    <label class="switch">
-                        <input type="checkbox" ng-model="perturbations.SCALING.$activated">
-                        <div class="slider round"></div>
+                    <label class="settings__subsection-header_title flex">
+                        <label class="switch">
+                            <input type="checkbox" ng-model="perturbations.SCALING.$activated">
+                            <div class="slider round"></div>
+                        </label>
+                        {{ perturbations.SCALING.displayName }}
                     </label>
-                    {{ perturbations.SCALING.displayName }}
                     <help-icon help-text="Changes the order of magnitude of each feature by some random scaling"></help-icon>
                 </div>
                 <form class="settings__subsection-form">
@@ -109,9 +117,10 @@
                          items="perturbations.SCALING.selected_features"
                          item-name="feature"
                          item-image="featureToTypeIcon"
-                         label="Affected features">
+                         label="Affected features"
+                         class="settings__subsection-form_field">
                     </div>
-                    <div class="control-group">
+                    <div class="control-group settings__subsection-form_field">
                         <label for="scaling" class="label-text">Proportion of affected samples</label>
                         <input type="number" id="scaling" ng-model="perturbations.SCALING.params.samples_fraction" value="0.5" placeholder="0.5" step="0.01" min="0">
                     </div>
@@ -173,7 +182,7 @@
                     <div class="flex row-header grand-title-b">
                         Critical samples
                     </div>
-                    <div class="explanation-box">
+                    <div class="text-lighter">
                         The critical samples are the most sensitive to perturbations, and highlight regions where the model prediction is highly uncertain (presenting large confidence fluctuations).
                     </div>
                     <div class="flex dku-grid">

@@ -81,7 +81,7 @@ input:focus-visible {
     position: relative;
     width: 50px;
     height: 20px;
-    margin-bottom: 0;
+    margin-right: 8px;
     display: inline-block;
     font-weight: normal;
   }
@@ -340,18 +340,6 @@ input:focus-visible {
     margin-bottom: 0;
 }
 
-.control-group + .control-group {
-    margin-top: 8px;
-}
-
-.explanation-box { /* try to keep in sync with DSS .doctor-explanation */
-    background: #d9e6ed;
-    padding: 20px;
-    border-radius: 5px;
-    color: #144c71;
-    margin-bottom: 24px;
-}
-
 .metric-subsection, .sample-subsection {
     padding: 0 16px 24px 16px;
 }
@@ -379,10 +367,18 @@ input:focus-visible {
     padding: 0;
 }
 
+.settings__subsection-form_field + .settings__subsection-form_field {
+    margin-top: 8px;
+}
+
 .settings__subsection-header {
     justify-content: space-between;
     align-items: center;
     padding-bottom: 8px;
+}
+
+.settings__subsection-header {
+    align-items: center;
 }
 
 .settings__help-text {
