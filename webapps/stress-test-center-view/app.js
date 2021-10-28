@@ -30,7 +30,7 @@ const versionId = webAppConfig['versionId'];
                     selected_features: new Set()
                 }
             },
-            samples: 100
+            samples: 1
         };
         $scope.modelInfo = {};
 

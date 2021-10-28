@@ -5,10 +5,10 @@
     </div>
     <form name="forms.SAMPLES" class="settings-subsection__form">
         <div class="control-group settings-subsection__form_field">
-            <label for="samples" class="label-text">Samples for perturbation tests</label>
-            <input type="number" id="samples" ng-model="tests.samples" step="0.1" min="0.1" max="100" required>
+            <label for="samples" class="label-text">Samples for stress tests</label>
+            <input type="number" id="samples" ng-model="tests.samples" step="0.01" min="0.01" max="1" required>
             <div class="text-tiny">
-                Set the percentage of rows to be used for the selected stress tests
+                Set the proportion of rows used to run the selected stress tests
             </div>
         </div>
     </form>
@@ -43,11 +43,11 @@
              possible-values="modelInfo.targetClasses"
              item="tests.perturbations.PRIOR_SHIFT.params.cl"
              item-name="class"
-             label="Affected class"
+             label="Selected class"
              class="settings-subsection__form_field">
         </div>
         <div class="control-group settings-subsection__form_field">
-            <label for="priorShift" class="label-text">Proportion of samples with affected class</label>
+            <label for="priorShift" class="label-text">Desired proportion of samples with selected class</label>
             <input type="number" id="priorShift"
                    ng-model="tests.perturbations.PRIOR_SHIFT.params.samples_fraction"
                    placeholder="0.5" step="0.01" min="0" max="1" required>
@@ -73,11 +73,11 @@
              items="tests.perturbations.MISSING_VALUES.selected_features"
              item-name="feature"
              item-image="featureToTypeIcon"
-             label="Affected features"
+             label="Corrupted features"
              class="settings-subsection__form_field">
         </div>
         <div class="control-group settings-subsection__form_field">
-            <label for="missingValues" class="label-text">Proportion of affected samples</label>
+            <label for="missingValues" class="label-text">Proportion of corrupted samples</label>
             <input type="number" id="missingValues"
                    ng-model="tests.perturbations.MISSING_VALUES.params.samples_fraction"
                    placeholder="0.5" step="0.01" min="0.01" max="1" required>
@@ -103,11 +103,11 @@
              items="tests.perturbations.SCALING.selected_features"
              item-name="feature"
              item-image="featureToTypeIcon"
-             label="Affected features"
+             label="Corrupted features"
              class="settings-subsection__form_field">
         </div>
         <div class="control-group settings-subsection__form_field">
-            <label for="scaling" class="label-text">Proportion of affected samples</label>
+            <label for="scaling" class="label-text">Proportion of corrupted samples</label>
             <input type="number" id="scaling"
                    ng-model="tests.perturbations.SCALING.params.samples_fraction"
                    placeholder="0.5" step="0.01" min="0" max="1" required>

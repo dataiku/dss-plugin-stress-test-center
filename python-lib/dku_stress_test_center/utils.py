@@ -24,7 +24,6 @@ def get_stress_test_name(shift: Shift):
 
 
 class DkuStressTestCenterConstants(object):
-    CLEAN_DATASET_NUM_ROWS = 500
     CLEAN = 'CLEAN'
     MISSING_VALUES = 'MISSING_VALUES'
     SCALING = 'SCALING'

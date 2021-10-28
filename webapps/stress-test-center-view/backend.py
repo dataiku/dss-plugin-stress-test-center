@@ -50,7 +50,7 @@ def get_model_info():
 def set_stress_tests_config():
     try:
         config = json.loads(request.data)
-        stressor.set_config(config["perturbations"])
+        stressor.set_config(config)
         return {"result": "ok"}
     except:
         logger.error(traceback.format_exc())
