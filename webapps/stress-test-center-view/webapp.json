@@ -6,7 +6,7 @@
     },
     "baseType": "STANDARD",
     "hasBackend": "true",
-    "standardWebAppLibraries": ["dataiku"],
+    "standardWebAppLibraries": ["dataiku", "font_awesome"],
     "virtualWebAppAffinity": "PREFER_VIRTUAL",
     "roles": [
         {
