@@ -246,8 +246,8 @@ transform: translate(-125%, -50%);
     padding: 16px;
 }
 
-.webapp__subsection + .webapp__subsection {
-    border-top: 1px solid var(--grey-lighten-6);
+.webapp__subsection {
+    border-bottom: 1px solid var(--grey-lighten-6);
 }
 
 .flex {

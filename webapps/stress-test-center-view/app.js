@@ -14,6 +14,7 @@ const versionId = webAppConfig['versionId'];
         $scope.createModal = ModalService.create($scope.modal);
 
         $scope.loading = {};
+        $scope.forms = {};
         $scope.tests = {
             perturbations: {
                 MISSING_VALUES: {
@@ -43,15 +44,15 @@ const versionId = webAppConfig['versionId'];
         }
 
         $scope.checkTestConfig = function() {
-            if ($scope.form.SAMPLES.$invalid) return { canRun: false };
+            if ($scope.forms.SAMPLES.$invalid) return { canRun: false };
             const testEntries = Object.entries($scope.tests.perturbations);
             const validActivatedTests = testEntries.filter(function(entry) {
                 const [testName, testSettings] = entry;
-                return testSettings.$activated && $scope.form[testName].$valid;
+                return testSettings.$activated && $scope.forms[testName].$valid;
             });
             const invalidActivatedTests = testEntries.filter(function(entry) {
                 const [testName, testSettings] = entry;
-                return testSettings.$activated && $scope.form[testName].$invalid;
+                return testSettings.$activated && $scope.forms[testName].$invalid;
             });
             return {
                 canRun: validActivatedTests.length && !invalidActivatedTests.length,
