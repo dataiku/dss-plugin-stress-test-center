@@ -151,8 +151,10 @@ app.directive("customDropdown", function() {
             }
 
             const dropdownElem = elem.find(".custom-dropdown");
+            const labelElem = elem.find(".label-text");
             scope.$on("closeDropdowns", function(e, target) {
-                if (target && angular.element(target).closest(dropdownElem)[0]) return;
+                if ((target) && ( angular.element(target).closest(dropdownElem)[0]
+                    || angular.element(target).closest(labelElem)[0] )) { return; }
                 scope.isOpen = false;
             })
         }
