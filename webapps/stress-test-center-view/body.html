@@ -27,10 +27,10 @@
                     Stress tests
                     <help-icon class="small-title-b" help-text="Select the tests corresponding to corruptions you expect to have at deployment time, and assess the robustness of your model"></help-icon>
                 </div>
-                <form name="settings_SAMPLES" class="settings-subsection__form">
+                <form name="form.SAMPLES" class="settings-subsection__form">
                     <div class="control-group settings-subsection__form_field">
-                        <label for="samples" class="label-text">Sample for perturbation tests</label>
-                        <input type="number" id="samples" ng-model="samples" step="0.1" min="0.1" max="100" required>
+                        <label for="samples" class="label-text">Samples for perturbation tests</label>
+                        <input type="number" id="samples" ng-model="tests.samples" step="0.1" min="0.1" max="100" required>
                         <div class="text-tiny">
                             Set the percentage of rows to be used for the selected stress tests
                         </div>
@@ -39,29 +39,33 @@
                 <div class="dku-btn-container--right-align">
                     <button class="dku-btn dku-btn-primary"
                             type="button"
-                            ng-disabled="uiState.loadingResult || !checkTestConfig().canRun"
+                            ng-disabled="loading.results || !checkTestConfig().canRun"
                             ng-click="runAnalysis()">
                         Run tests
                     </button>
                 </div>
             </div>
 
-            <div class="webapp__subsection">
+            <div ng-if="loading.modelInfo" class="webapp__subsection spinner-div">
+                <spinner></spinner>
+            </div>
+
+            <div ng-if="!loading.modelInfo && tests.perturbations.PRIOR_SHIFT" class="webapp__subsection">
                 <div class="flex small-title-b settings-subsection__header">
-                    <label class="flex" ng-class="{'text-lighter': !perturbations.PRIOR_SHIFT.$activated}">
+                    <label class="flex" ng-class="{'text-lighter': !tests.perturbations.PRIOR_SHIFT.$activated}">
                         <label class="switch">
-                            <input type="checkbox" ng-model="perturbations.PRIOR_SHIFT.$activated">
+                            <input type="checkbox" ng-model="tests.perturbations.PRIOR_SHIFT.$activated">
                             <div class="slider round"></div>
                         </label>
-                        {{ perturbations.PRIOR_SHIFT.displayName }}
+                        {{ tests.perturbations.PRIOR_SHIFT.displayName }}
                     </label>
                     <help-icon help-text="Modifies the target distribution by resampling"></help-icon>
                 </div>
-                <form name="settings_PRIOR_SHIFT" class="settings-subsection__form" ng-show="perturbations.PRIOR_SHIFT.$activated">
+                <form name="form.PRIOR_SHIFT" class="settings-subsection__form" ng-show="tests.perturbations.PRIOR_SHIFT.$activated">
                     <div custom-dropdown
-                         form="settings_PRIOR_SHIFT"
+                         form="form.PRIOR_SHIFT"
                          possible-values="modelInfo.targetClasses"
-                         item="perturbations.PRIOR_SHIFT.params.cl"
+                         item="tests.perturbations.PRIOR_SHIFT.params.cl"
                          item-name="class"
                          label="Affected class"
                          class="settings-subsection__form_field">
@@ -69,28 +73,28 @@
                     <div class="control-group settings-subsection__form_field">
                         <label for="priorShift" class="label-text">Proportion of samples with affected class</label>
                         <input type="number" id="priorShift"
-                               ng-model="perturbations.PRIOR_SHIFT.params.samples_fraction"
+                               ng-model="tests.perturbations.PRIOR_SHIFT.params.samples_fraction"
                                placeholder="0.5" step="0.01" min="0" max="1" required>
                     </div>
                 </form>
             </div>
 
-            <div class="webapp__subsection">
+            <div ng-if="!loading.modelInfo" class="webapp__subsection">
                 <div class="flex small-title-b settings-subsection__header">
-                    <label class="flex" ng-class="{'text-lighter': !perturbations.MISSING_VALUES.$activated}">
+                    <label class="flex" ng-class="{'text-lighter': !tests.perturbations.MISSING_VALUES.$activated}">
                         <label class="switch">
-                            <input type="checkbox" ng-model="perturbations.MISSING_VALUES.$activated">
+                            <input type="checkbox" ng-model="tests.perturbations.MISSING_VALUES.$activated">
                             <div class="slider round"></div>
                         </label>
-                        {{ perturbations.MISSING_VALUES.displayName }}
+                        {{ tests.perturbations.MISSING_VALUES.displayName }}
                     </label>
                     <help-icon help-text="Randomly inserts missing values"></help-icon>
                 </div>
-                <form name="settings_MISSING_VALUES" class="settings-subsection__form" ng-show="perturbations.MISSING_VALUES.$activated">
+                <form name="form.MISSING_VALUES" class="settings-subsection__form" ng-show="tests.perturbations.MISSING_VALUES.$activated">
                     <div custom-dropdown
-                         form="settings_MISSING_VALUES"
-                         possible-values="perturbations.MISSING_VALUES.availableColumns"
-                         items="perturbations.MISSING_VALUES.selected_features"
+                         form="form.MISSING_VALUES"
+                         possible-values="tests.perturbations.MISSING_VALUES.availableColumns"
+                         items="tests.perturbations.MISSING_VALUES.selected_features"
                          item-name="feature"
                          item-image="featureToTypeIcon"
                          label="Affected features"
@@ -99,28 +103,28 @@
                     <div class="control-group settings-subsection__form_field">
                         <label for="missingValues" class="label-text">Proportion of affected samples</label>
                         <input type="number" id="missingValues"
-                               ng-model="perturbations.MISSING_VALUES.params.samples_fraction"
+                               ng-model="tests.perturbations.MISSING_VALUES.params.samples_fraction"
                                placeholder="0.5" step="0.01" min="0.01" max="1" required>
                     </div>
                 </form>
             </div>
 
-            <div class="webapp__subsection">
+            <div ng-if="!loading.modelInfo" class="webapp__subsection">
                 <div class="flex small-title-b settings-subsection__header">
-                    <label class="flex" ng-class="{'text-lighter': !perturbations.SCALING.$activated}">
+                    <label class="flex" ng-class="{'text-lighter': !tests.perturbations.SCALING.$activated}">
                         <label class="switch">
-                            <input type="checkbox" ng-model="perturbations.SCALING.$activated">
+                            <input type="checkbox" ng-model="tests.perturbations.SCALING.$activated">
                             <div class="slider round"></div>
                         </label>
-                        {{ perturbations.SCALING.displayName }}
+                        {{ tests.perturbations.SCALING.displayName }}
                     </label>
                     <help-icon help-text="Changes the order of magnitude of each feature by some random scaling"></help-icon>
                 </div>
-                <form name="settings_SCALING" class="settings-subsection__form" ng-show="perturbations.SCALING.$activated">
+                <form name="form.SCALING" class="settings-subsection__form" ng-show="tests.perturbations.SCALING.$activated">
                     <div custom-dropdown
-                         form="settings_SCALING"
-                         possible-values="perturbations.SCALING.availableColumns"
-                         items="perturbations.SCALING.selected_features"
+                         form="form.SCALING"
+                         possible-values="tests.perturbations.SCALING.availableColumns"
+                         items="tests.perturbations.SCALING.selected_features"
                          item-name="feature"
                          item-image="featureToTypeIcon"
                          label="Affected features"
@@ -129,7 +133,7 @@
                     <div class="control-group settings-subsection__form_field">
                         <label for="scaling" class="label-text">Proportion of affected samples</label>
                         <input type="number" id="scaling"
-                               ng-model="perturbations.SCALING.params.samples_fraction"
+                               ng-model="tests.perturbations.SCALING.params.samples_fraction"
                                placeholder="0.5" step="0.01" min="0" max="1" required>
                     </div>
                 </form>
@@ -137,7 +141,7 @@
         </div>
 
         <div class="webapp-section webapp-section__results">
-            <div class="empty-state" ng-if="!results && !uiState.loadingResult">
+            <div class="empty-state" ng-if="!results && !loading.results">
                 <div class="empty-state__title">
                     Put your model through a battery of tests to see how it handles the unexpected
                 </div>
@@ -154,11 +158,11 @@
                 </div>
             </div>
 
-            <div class="spinner-div" ng-if="uiState.loadingResult">
+            <div class="spinner-div" ng-if="loading.results">
                 <spinner></spinner>
             </div>
 
-            <div ng-if="results && !uiState.loadingResult">
+            <div ng-if="results && !loading.results">
                 <div class="webapp__subsection" ng-if="results.SUBPOPULATION_PERTURBATION">
                     <div class="grand-title-b results-subsection__header">
                         Subpopulation shift perturbations
@@ -177,7 +181,7 @@
                             </thead>
                             <tbody>
                                 <tr ng-repeat="metric in results.SUBPOPULATION_PERTURBATION.metrics">
-                                    <td class="cell text-highlight">{{ perturbations[metric['attack_type']].displayName }}</td>
+                                    <td class="cell text-highlight">{{ tests.perturbations[metric['attack_type']].displayName }}</td>
                                     <td class="cell text-sb">{{ metric['accuracy_drop'] * 100 | toFixedIfNeeded: 3 }}%</td>
                                     <td class="cell text-sb">{{ metric['robustness'] * 100 | toFixedIfNeeded: 3 }}%</td>
                                 </tr>
@@ -204,7 +208,7 @@
                             </thead>
                             <tbody>
                                 <tr ng-repeat="metric in results.SAMPLE_PERTURBATION.metrics">
-                                    <td class="cell text-highlight">{{ perturbations[metric['attack_type']].displayName }}</td>
+                                    <td class="cell text-highlight">{{ tests.perturbations[metric['attack_type']].displayName }}</td>
                                     <td class="cell text-sb">{{ metric['accuracy_drop'] * 100 | toFixedIfNeeded: 3 }}%</td>
                                     <td class="cell text-sb">{{ metric['robustness'] * 100 | toFixedIfNeeded: 3 }}%</td>
                                 </tr>
@@ -229,7 +233,7 @@
                                                     <div>0.63</div>
                                                 </div>
                                                 <div class="flex top-cell__row">
-                                                    <div>Uncertainty score</div>
+                                                    <div class="text-lighter">Uncertainty score</div>
                                                     <div class="text-lighter">Probability</div>
                                                 </div>
                                             </th>
