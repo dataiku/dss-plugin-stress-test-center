@@ -3,7 +3,6 @@ import logging
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, ExtraTreesClassifier
 from sklearn.tree import DecisionTreeClassifier
-from dku_stress_test_center.model_tools import SurrogateModel
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
 
 logger = logging.getLogger(__name__)
@@ -47,58 +46,5 @@ class ModelAccessor(object):
     def get_predictor(self):
         return self.model_handler.get_predictor()
 
-    def get_feature_importance(self,
-                               cumulative_percentage_threshold=DkuStressTestCenterConstants.FEAT_IMP_CUMULATIVE_PERCENTAGE_THRESHOLD):
-        """
-        :param cumulative_percentage_threshold: only return the top n features whose sum of importance reaches this threshold
-        :return:
-        """
-        if self._algorithm_is_tree_based():
-            predictor = self.get_predictor()
-            clf = predictor._clf
-            feature_names = predictor.get_features()
-            feature_importances = clf.feature_importances_
-
-        else:  # use surrogate model
-            logger.info('Fitting surrogate model ...')
-            surrogate_model = SurrogateModel(self.get_prediction_type())
-            original_test_df = self.get_original_test_df()
-            predictions_on_original_test_df = self.get_predictor().predict(original_test_df)
-            surrogate_df = original_test_df[self.get_selected_features()]
-            surrogate_df[DkuStressTestCenterConstants.SURROGATE_TARGET] = predictions_on_original_test_df['prediction']
-            surrogate_model.fit(surrogate_df, DkuStressTestCenterConstants.SURROGATE_TARGET)
-            feature_names = surrogate_model.get_features()
-            feature_importances = surrogate_model.clf.feature_importances_
-
-        feature_importance = []
-        for feature_name, feat_importance in zip(feature_names, feature_importances):
-            feature_importance.append({
-                DkuStressTestCenterConstants.FEATURE: feature_name,
-                DkuStressTestCenterConstants.IMPORTANCE: 100 * feat_importance / sum(feature_importances)
-            })
-
-        dfx = pd.DataFrame(feature_importance).sort_values(by=DkuStressTestCenterConstants.IMPORTANCE,
-                                                           ascending=False).reset_index(drop=True)
-        dfx[DkuStressTestCenterConstants.CUMULATIVE_IMPORTANCE] = dfx[DkuStressTestCenterConstants.IMPORTANCE].cumsum()
-        dfx_top = dfx.loc[dfx[DkuStressTestCenterConstants.CUMULATIVE_IMPORTANCE] <= cumulative_percentage_threshold]
-        return dfx_top.rename_axis(DkuStressTestCenterConstants.RANK).reset_index().set_index(DkuStressTestCenterConstants.FEATURE)
-
-    def get_selected_features(self):
-        selected_features = []
-        for feat, feat_info in self.get_per_feature().items():
-            if feat_info.get('role') == 'INPUT':
-                selected_features.append(feat)
-        return selected_features
-
     def predict(self, df):
         return self.get_predictor().predict(df)
-
-    def _algorithm_is_tree_based(self):
-        predictor = self.get_predictor()
-        algo = predictor._clf
-        for algorithm in ALGORITHMS_WITH_VARIABLE_IMPORTANCE:
-            if isinstance(algo, algorithm):
-                return True
-            elif predictor.params.modeling_params.get('algorithm') == 'XGBOOST_CLASSIFICATION':
-                return True
-        return False
