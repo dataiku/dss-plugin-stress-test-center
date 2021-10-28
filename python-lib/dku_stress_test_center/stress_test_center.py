@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from dku_stress_test_center.utils import DkuStressTestCenterConstants, get_stress_test_name
 from drift_dac.perturbation_shared_utils import Shift, PerturbationConstants
-from sklearn.metrics import accuracy_score, f1_score, balanced_accuracy_score
+from sklearn.metrics import accuracy_score, balanced_accuracy_score
 from drift_dac.prior_shift import KnockOut
 from drift_dac.covariate_shift import MissingValues, Scaling, Adversarial, ReplaceWord, Typos
 
@@ -41,7 +41,7 @@ class StressTestGenerator(object):
     def set_config(self, shift_configs: dict):
         self.config_list = []
         for shift_type, shift_config in shift_configs.items():
-            params, features = shift_config["params"], shift_config.get("available_columns")
+            params, features = shift_config["params"], shift_config.get("selected_features")
             self.config_list.append(StressTestConfiguration.create_conf(shift_type, params, features))
 
     def _subsample_clean_df(self,
@@ -94,19 +94,16 @@ def build_stress_metric(y_true: np.array,
                         pos_label: str or int):
     # batch evaluation
     # return average accuracy drop
-    # return average f1 drop
     # return robustness metrics: 1-ASR or imbalanced accuracy for prior shift
 
     metrics_df = pd.DataFrame(columns=[DkuStressTestCenterConstants.STRESS_TEST_TYPE,
                                        DkuStressTestCenterConstants.ACCURACY_DROP,
-                                       DkuStressTestCenterConstants.F1_DROP,
                                        DkuStressTestCenterConstants.ROBUSTNESS])
 
     clean_filter = stress_test_indicator == DkuStressTestCenterConstants.CLEAN
     clean_y_true = y_true[clean_filter]
     clean_y_pred = y_pred[clean_filter]
     clean_accuracy = accuracy_score(clean_y_true, clean_y_pred)
-    clean_f1_score = f1_score(clean_y_true, clean_y_pred, pos_label=pos_label)
 
     stress_ids = np.unique(stress_test_indicator)
     stress_ids = np.delete(stress_ids, np.where(stress_ids==DkuStressTestCenterConstants.CLEAN))
@@ -116,10 +113,8 @@ def build_stress_metric(y_true: np.array,
         stress_y_pred = y_pred[stress_filter]
 
         stress_accuracy = accuracy_score(stress_y_true, stress_y_pred)
-        stress_f1_score = f1_score(stress_y_true, stress_y_pred, pos_label=pos_label)
 
         stress_acc_drop = stress_accuracy - clean_accuracy
-        stress_f1_drop = stress_f1_score - clean_f1_score
 
         if stress_id == DkuStressTestCenterConstants.PRIOR_SHIFT:
             robustness = balanced_accuracy_score(stress_y_true, stress_y_pred)
@@ -132,7 +127,6 @@ def build_stress_metric(y_true: np.array,
         metrics_df = metrics_df.append({
             DkuStressTestCenterConstants.STRESS_TEST_TYPE: stress_id,
             DkuStressTestCenterConstants.ACCURACY_DROP: stress_acc_drop,
-            DkuStressTestCenterConstants.F1_DROP: stress_f1_drop,
             DkuStressTestCenterConstants.ROBUSTNESS: robustness
         }, ignore_index=True)
 

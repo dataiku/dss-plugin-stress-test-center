@@ -97,3 +97,99 @@ app.directive("spinner", function () {
         }
     }
 });
+
+app.directive("customDropdown", function() {
+    return {
+        scope: {
+            form: '=',
+            itemImage: '=?',
+            label: '@',
+            itemName: '@',
+            item: '=',
+            items: '=',
+            possibleValues: '='
+        },
+        restrict: 'A',
+        templateUrl:'/plugins/stress-test-center/resource/templates/custom-dropdown.html',
+        link: function(scope, elem, attrs) {
+            scope.form.$setValidity("dropdown-not-empty", false);
+
+            const isMulti = attrs.items;
+
+            scope.isSelected = function(value) {
+                if (isMulti) {
+                    return scope.items.has(value);
+                }
+                return scope.item === value;
+            }
+
+            scope.updateSelection = function(value, event) {
+                if (isMulti) {
+                    if (scope.isSelected(value)) {
+                        scope.items.delete(value);
+                    } else {
+                        scope.items.add(value);
+                    }
+                    event.stopPropagation();
+                } else {
+                    scope.item = value;
+                }
+                scope.form.$setValidity("dropdown-not-empty", !!scope.item || !!(scope.items || {}).size);
+            }
+
+            scope.getPlaceholder = function() {
+                if (isMulti) {
+                    if (!(scope.items || {}).size) return "Select " + scope.itemName + "s";
+                    return scope.items.size + " " + scope.itemName + (scope.items.size > 1 ? "s" : "");
+                }
+                if (!scope.item) return "Select a " + scope.itemName;
+                return scope.item;
+            }
+
+            scope.toggleDropdown = function() {
+                scope.isOpen = !scope.isOpen;
+            }
+
+            const dropdownElem = elem.find(".custom-dropdown");
+            const labelElem = elem.find(".label-text");
+            scope.$on("closeDropdowns", function(e, target) {
+                if ((target) && ( angular.element(target).closest(dropdownElem)[0]
+                    || angular.element(target).closest(labelElem)[0] )) { return; }
+                scope.isOpen = false;
+            })
+        }
+    }
+})
+
+app.directive("helpIcon", function () {
+    return {
+        restrict: 'E',
+        scope: {
+            helpText: '@',
+
+        },
+        template: `<i class="icon-info-sign icon--hoverable" ng-mouseover="showTooltip()" ng-mouseleave="showTooltip()">
+            <div class="help-text__tooltip tooltip--hidden">
+                <i class="icon-info-sign"></i>
+                {{ helpText }}
+            </div>
+        </i>`,
+        link: function(scope, elem) {
+            scope.showTooltip = function() {
+                const top = elem[0].getBoundingClientRect().top;
+                const tooltip = elem.find(".help-text__tooltip");
+                tooltip.css("top", (top - 8) + "px");
+                tooltip.toggleClass("tooltip--hidden");
+            }
+        }
+    }
+});
+
+app.filter("toFixedIfNeeded", function() {
+    return function(number, decimals) {
+        if(Math.round(number) !== number) {
+            return parseFloat(number.toFixed(decimals));
+        }
+        return number;
+    }
+});

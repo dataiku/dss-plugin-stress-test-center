@@ -1,0 +1,112 @@
+<div class="empty-state" ng-if="!results && !loading.results">
+    <div class="empty-state__title">
+        Put your model through a battery of tests to see how it handles the unexpected
+    </div>
+    <div class="empty-state__subtitle">
+        Select the tests corresponding to corruptions you expect to have at deployment time, and assess the robustness of your model.
+    </div>
+    <div>
+        <button class="dku-btn dku-btn-primary"
+                type="button"
+                ng-disabled="!checkTestConfig().canRun"
+                ng-click="runAnalysis()">
+            Run tests
+        </button>
+    </div>
+</div>
+
+<div class="spinner-div" ng-if="loading.results">
+    <spinner></spinner>
+</div>
+
+<div ng-if="results && !loading.results">
+    <div class="webapp__subsection" ng-if="results.SUBPOPULATION_PERTURBATION">
+        <div class="grand-title-b results-subsection__header">
+            Subpopulation shift perturbations
+        </div>
+        <div class="results__subsection">
+            <div class="small-title-b">
+                Metrics
+            </div>
+            <table class="table-metric">
+                <thead>
+                    <tr>
+                        <th scope="col" class="fake-cell"></th>
+                        <th scope="col" class="cell small-title-b top-cell--blue">Performance</th>
+                        <th scope="col" class="cell small-title-b top-cell--orange">Robustness</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="metric in results.SUBPOPULATION_PERTURBATION.metrics">
+                        <td class="cell text-highlight">{{ tests.perturbations[metric['attack_type']].displayName }}</td>
+                        <td class="cell text-sb">{{ metric['accuracy_drop'] * 100 | toFixedIfNeeded: 3 }}%</td>
+                        <td class="cell text-sb">{{ metric['robustness'] * 100 | toFixedIfNeeded: 3 }}%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="webapp__subsection" ng-if="results.SAMPLE_PERTURBATION">
+        <div class="grand-title-b results-subsection__header">
+            Sample perturbations
+        </div>
+        <div class="results__subsection">
+            <div class="small-title-b">
+                Metrics
+            </div>
+            <table class="table-metric">
+                <thead>
+                    <tr>
+                        <th scope="col" class="fake-cell"></th>
+                        <th scope="col" class="cell small-title-b top-cell--blue">Performance</th>
+                        <th scope="col" class="cell small-title-b top-cell--orange">Robustness</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="metric in results.SAMPLE_PERTURBATION.metrics">
+                        <td class="cell text-highlight">{{ tests.perturbations[metric['attack_type']].displayName }}</td>
+                        <td class="cell text-sb">{{ metric['accuracy_drop'] * 100 | toFixedIfNeeded: 3 }}%</td>
+                        <td class="cell text-sb">{{ metric['robustness'] * 100 | toFixedIfNeeded: 3 }}%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="results__subsection">
+            <div class="small-title-b">
+                Critical samples
+            </div>
+            <p class="text-lighter">
+                The critical samples are the most sensitive to perturbations. They highlight where the model predictions are highly uncertain (presenting large confidence fluctuations).
+            </p>
+            <div class="flex dku-grid">
+                <div ng-repeat="sample in results.SAMPLE_PERTURBATION.critical_samples.samples">
+                    <table class="table-sample table-striped">
+                        <thead>
+                            <tr>
+                                <th class="top-cell--blue small-title-b">
+                                    <div class="flex top-cell__row">
+                                        <div>{{ results.SAMPLE_PERTURBATION.critical_samples.uncertainties[$index] }}</div>
+                                        <div>0.63</div>
+                                    </div>
+                                    <div class="flex top-cell__row">
+                                        <div class="text-lighter">Uncertainty score</div>
+                                        <div class="text-lighter">Probability</div>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="(key, value) in sample">
+                            <td>
+                                {{key}}
+                                <span class="text-lighter">= {{value}}</span>
+                            </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
