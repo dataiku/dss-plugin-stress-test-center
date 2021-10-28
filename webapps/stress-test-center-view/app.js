@@ -27,25 +27,39 @@ let versionId = webAppConfig['versionId'];
             return featureTypesToIconClass[features[feature]];
         }
 
-        $scope.runAnalysis = function () {
-            const perturbationsToCompute = {};
-            for (let key in $scope.perturbations) {
-                const perturbation = $scope.perturbations[key];
-                if (perturbation.$activated) {
-                    if (perturbation.testType === "SAMPLE_PERTURBATION") {
-                        if (!perturbation.selected_features.size) continue;
-                        perturbationsToCompute[key] = {params: perturbation.params};
-                        perturbationsToCompute[key].selected_features = Array.from(perturbation.selected_features);
-                    } else {
-                        if (!$scope.perturbations[key].params.cl) continue; // TODO: cleaner
-                        perturbationsToCompute[key] = {params: perturbation.params};
-                    }
-                }
+        $scope.checkTestConfig = function() {
+            if ($scope.settings_SAMPLES.$invalid) return { canRun: false };
+            const testEntries = Object.entries($scope.perturbations);
+            const validActivatedTests = testEntries.filter(function(entry) {
+                const [testName, testSettings] = entry;
+                return testSettings.$activated && $scope["settings_" + testName].$valid;
+            });
+            const invalidActivatedTests = testEntries.filter(function(entry) {
+                const [testName, testSettings] = entry;
+                return testSettings.$activated && $scope["settings_" + testName].$invalid;
+            });
+            return {
+                canRun: validActivatedTests.length && !invalidActivatedTests.length,
+                config: validActivatedTests
             }
-            if (!Object.keys(perturbationsToCompute).length) return;
+        }
+
+        $scope.runAnalysis = function () {
+            const { canRun, config} = $scope.checkTestConfig();
+            if (!canRun) return;
+            const requestParams = config.reduce(function(fullParams, currentEntry) {
+                const [testName, testSettings] = currentEntry;
+                fullParams[testName] = {
+                    params: testSettings.params
+                }
+                if (testSettings.testType === "SAMPLE_PERTURBATION") {
+                    fullParams[testName].selected_features = Array.from(testSettings.selected_features);
+                }
+                return fullParams;
+            }, {});
 
             $scope.uiState.loadingResult = true;
-            $http.post(getWebAppBackendUrl("stress-tests-config"), perturbationsToCompute)
+            $http.post(getWebAppBackendUrl("stress-tests-config"), requestParams)
                 .then(function() {
                     $http.get(getWebAppBackendUrl("compute"))
                         .then(function(response) {

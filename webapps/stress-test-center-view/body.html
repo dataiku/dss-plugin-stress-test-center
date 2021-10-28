@@ -27,10 +27,10 @@
                     Stress tests
                     <help-icon class="small-title-b" help-text="Select the tests corresponding to corruptions you expect to have at deployment time, and assess the robustness of your model"></help-icon>
                 </div>
-                <form class="settings-subsection__form">
+                <form name="settings_SAMPLES" class="settings-subsection__form">
                     <div class="control-group settings-subsection__form_field">
                         <label for="samples" class="label-text">Sample for perturbation tests</label>
-                        <input type="number" id="samples" ng-model="samples" value="100"  step="0.01" min="0" max="100">
+                        <input type="number" id="samples" ng-model="samples" step="0.1" min="0.1" max="100" required>
                         <div class="text-tiny">
                             Set the percentage of rows to be used for the selected stress tests
                         </div>
@@ -38,9 +38,8 @@
                 </form>
                 <div class="dku-btn-container--right-align">
                     <button class="dku-btn dku-btn-primary"
-                            id="run-button"
                             type="button"
-                            ng-class="{'dku-btn-primary--disabled': uiState.loadingResult}"
+                            ng-disabled="uiState.loadingResult || !checkTestConfig().canRun"
                             ng-click="runAnalysis()">
                         Run tests
                     </button>
@@ -58,8 +57,9 @@
                     </label>
                     <help-icon help-text="Modifies the target distribution by resampling"></help-icon>
                 </div>
-                <form class="settings-subsection__form" ng-if="perturbations.PRIOR_SHIFT.$activated">
+                <form name="settings_PRIOR_SHIFT" class="settings-subsection__form" ng-show="perturbations.PRIOR_SHIFT.$activated">
                     <div custom-dropdown
+                         form="settings_PRIOR_SHIFT"
                          possible-values="modelInfo.targetClasses"
                          item="perturbations.PRIOR_SHIFT.params.cl"
                          item-name="class"
@@ -68,7 +68,9 @@
                     </div>
                     <div class="control-group settings-subsection__form_field">
                         <label for="priorShift" class="label-text">Proportion of samples with affected class</label>
-                        <input type="number" id="priorShift" ng-model="perturbations.PRIOR_SHIFT.params.samples_fraction" placeholder="0.5"  step="0.01" min="0">
+                        <input type="number" id="priorShift"
+                               ng-model="perturbations.PRIOR_SHIFT.params.samples_fraction"
+                               placeholder="0.5" step="0.01" min="0" max="1" required>
                     </div>
                 </form>
             </div>
@@ -84,8 +86,9 @@
                     </label>
                     <help-icon help-text="Randomly inserts missing values"></help-icon>
                 </div>
-                <form class="settings-subsection__form" ng-if="perturbations.MISSING_VALUES.$activated">
+                <form name="settings_MISSING_VALUES" class="settings-subsection__form" ng-show="perturbations.MISSING_VALUES.$activated">
                     <div custom-dropdown
+                         form="settings_MISSING_VALUES"
                          possible-values="perturbations.MISSING_VALUES.availableColumns"
                          items="perturbations.MISSING_VALUES.selected_features"
                          item-name="feature"
@@ -95,7 +98,9 @@
                     </div>
                     <div class="control-group settings-subsection__form_field">
                         <label for="missingValues" class="label-text">Proportion of affected samples</label>
-                        <input type="number" id="missingValues" ng-model="perturbations.MISSING_VALUES.params.samples_fraction" value="0.5" placeholder="0.5" step="0.01" min="0">
+                        <input type="number" id="missingValues"
+                               ng-model="perturbations.MISSING_VALUES.params.samples_fraction"
+                               placeholder="0.5" step="0.01" min="0.01" max="1" required>
                     </div>
                 </form>
             </div>
@@ -111,8 +116,9 @@
                     </label>
                     <help-icon help-text="Changes the order of magnitude of each feature by some random scaling"></help-icon>
                 </div>
-                <form class="settings-subsection__form" ng-if="perturbations.SCALING.$activated">
+                <form name="settings_SCALING" class="settings-subsection__form" ng-show="perturbations.SCALING.$activated">
                     <div custom-dropdown
+                         form="settings_SCALING"
                          possible-values="perturbations.SCALING.availableColumns"
                          items="perturbations.SCALING.selected_features"
                          item-name="feature"
@@ -122,7 +128,9 @@
                     </div>
                     <div class="control-group settings-subsection__form_field">
                         <label for="scaling" class="label-text">Proportion of affected samples</label>
-                        <input type="number" id="scaling" ng-model="perturbations.SCALING.params.samples_fraction" value="0.5" placeholder="0.5" step="0.01" min="0">
+                        <input type="number" id="scaling"
+                               ng-model="perturbations.SCALING.params.samples_fraction"
+                               placeholder="0.5" step="0.01" min="0" max="1" required>
                     </div>
                 </form>
             </div>
@@ -138,9 +146,8 @@
                 </div>
                 <div>
                     <button class="dku-btn dku-btn-primary"
-                            id="run-button"
                             type="button"
-                            ng-class="{'dku-btn-primary--disabled': uiState.loadingResult}"
+                            ng-disabled="!checkTestConfig().canRun"
                             ng-click="runAnalysis()">
                         Run tests
                     </button>
