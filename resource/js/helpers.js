@@ -101,6 +101,7 @@ app.directive("spinner", function () {
 app.directive("customDropdown", function() {
     return {
         scope: {
+            form: '=',
             itemImage: '=?',
             label: '@',
             itemName: '@',
@@ -110,16 +111,20 @@ app.directive("customDropdown", function() {
         },
         restrict: 'A',
         templateUrl:'/plugins/stress-test-center/resource/templates/custom-dropdown.html',
-        link: function(scope, elem) {
+        link: function(scope, elem, attrs) {
+            scope.form.$setValidity("dropdown-not-empty", false);
+
+            const isMulti = attrs.items;
+
             scope.isSelected = function(value) {
-                if (scope.items) {
+                if (isMulti) {
                     return scope.items.has(value);
                 }
                 return scope.item === value;
             }
 
             scope.updateSelection = function(value, event) {
-                if (scope.items) {
+                if (isMulti) {
                     if (scope.isSelected(value)) {
                         scope.items.delete(value);
                     } else {
@@ -129,11 +134,12 @@ app.directive("customDropdown", function() {
                 } else {
                     scope.item = value;
                 }
+                scope.form.$setValidity("dropdown-not-empty", !!scope.item || !!(scope.items || {}).size);
             }
 
             scope.getPlaceholder = function() {
-                if (scope.items) {
-                    if (!(scope.items || []).size) return "Select " + scope.itemName + "s";
+                if (isMulti) {
+                    if (!(scope.items || {}).size) return "Select " + scope.itemName + "s";
                     return scope.items.size + " " + scope.itemName + (scope.items.size > 1 ? "s" : "");
                 }
                 if (!scope.item) return "Select a " + scope.itemName;
@@ -144,7 +150,7 @@ app.directive("customDropdown", function() {
                 scope.isOpen = !scope.isOpen;
             }
 
-            const dropdownElem = angular.element(elem[0]).find(".custom-dropdown");
+            const dropdownElem = elem.find(".custom-dropdown");
             scope.$on("closeDropdowns", function(e, target) {
                 if (target && angular.element(target).closest(dropdownElem)[0]) return;
                 scope.isOpen = false;
