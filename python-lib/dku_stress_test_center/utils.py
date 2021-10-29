@@ -43,8 +43,6 @@ class DkuStressTestCenterConstants(object):
     STRESS_TEST_TYPE = '_dku_stress_test_type'
     DKU_ROW_ID = '_dku_row_identifier_'
 
-    MAX_NUM_ROW = 100000
-
     REGRESSION_TYPE = 'REGRESSION'
     CLASSIFICATION_TYPE = 'CLASSIFICATION'
     CLUSTERING_TYPE = 'CLUSTERING'

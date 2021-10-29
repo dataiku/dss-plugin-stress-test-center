@@ -34,22 +34,19 @@ class StressTestGenerator(object):
         self.model_accessor = None
 
         self._random_state = random_state
-        self._clean_dataset_size = None
+        self._sampling_proportion = None
 
     def set_config(self, config: dict):
-        self._clean_dataset_size = config["samples"]
+        self._sampling_proportion = config["samples"]
         tests_config = config["perturbations"]
         self.config_list = []
         for shift_type, shift_config in tests_config.items():
             params, features = shift_config["params"], shift_config.get("selected_features")
             self.config_list.append(StressTestConfiguration.create_conf(shift_type, params, features))
 
-    def _subsample_clean_df(self, clean_df: pd.DataFrame):
-        np.random.seed(self._random_state)
-        return clean_df.sample(frac=self._clean_dataset_size, random_state=self._random_state)
-
     def fit_transform(self):
-        clean_df = self._subsample_clean_df(self.model_accessor.get_original_test_df())
+        clean_df = self.model_accessor.get_original_test_df(sample_fraction=self._sampling_proportion,
+                                                            random_state=self._random_state)
         target_column = self.model_accessor.get_target_variable()
 
         perturbed_datasets_df = clean_df.copy(deep=True)
