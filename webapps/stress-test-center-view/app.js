@@ -17,15 +17,20 @@ const versionId = webAppConfig['versionId'];
         $scope.forms = {};
         $scope.tests = {
             perturbations: {
+                PRIOR_SHIFT: {
+                    displayName: "Target distribution",
+                    needsTargetClasses: true,
+                    params: { samples_fraction: .5 }
+                },
                 MISSING_VALUES: {
                     displayName: "Missing values",
-                    testType: "SAMPLE_PERTURBATION",
+                    allowedFeatureTypes: ["NUMERIC", "CATEGORY"],
                     params: { samples_fraction: .5 },
                     selected_features: new Set()
                 },
                 SCALING: {
                     displayName: "Scaling",
-                    testType: "SAMPLE_PERTURBATION",
+                    allowedFeatureTypes: ["NUMERIC"],
                     params: { samples_fraction: .5 },
                     selected_features: new Set()
                 }
@@ -68,7 +73,7 @@ const versionId = webAppConfig['versionId'];
                 fullParams[testName] = {
                     params: testSettings.params
                 }
-                if (testSettings.testType === "SAMPLE_PERTURBATION") {
+                if (testSettings.selected_features) { // test is a sample perturbation
                     fullParams[testName].selected_features = Array.from(testSettings.selected_features);
                 }
                 return fullParams;
@@ -99,22 +104,26 @@ const versionId = webAppConfig['versionId'];
             .then(function(response) {
                 $scope.loading.modelInfo = false;
                 $scope.modelInfo.targetClasses = response.data["target_classes"];
-                if ($scope.modelInfo.targetClasses.length) {
-                    $scope.tests.perturbations.PRIOR_SHIFT = {
-                        displayName: "Target distribution",
-                        testType: "SUBPOPULATION_PERTURBATION",
-                        params: { samples_fraction: .5 }
-                    };
-                }
 
                 features = response.data["features"];
-                const featureNames = Object.keys(features);
-                $scope.tests.perturbations.MISSING_VALUES.availableColumns = featureNames.filter(function(name) {
-                    return ["NUMERIC", "CATEGORY"].includes(features[name]);
-                });
 
-                $scope.tests.perturbations.SCALING.availableColumns = featureNames.filter(function(name) {
-                    return ["NUMERIC"].includes(features[name]);
+                // Only display relevant tests for the current model
+                const featureNames = Object.keys(features);
+                Object.keys($scope.tests.perturbations).forEach(function(testName) {
+                    const testConfig = $scope.tests.perturbations[testName];
+                    if (testConfig.allowedFeatureTypes) {
+                        testConfig.availableColumns = featureNames.filter(function(name) {
+                            return testConfig.allowedFeatureTypes.includes(features[name]);
+                        });
+                        if (!testConfig.availableColumns.length) {
+                            delete $scope.tests.perturbations[testName];
+                        }
+                    }
+                    if (testConfig.needsTargetClasses) {
+                        if (!$scope.modelInfo.targetClasses.length) { // model is a regression
+                            delete $scope.tests.perturbations[testName];
+                        }
+                    }
                 });
         }, function(e) {
             $scope.createModal.error(e.data);
