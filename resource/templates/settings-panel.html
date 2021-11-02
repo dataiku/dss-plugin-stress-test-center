@@ -56,7 +56,7 @@
     </form>
 </div>
 
-<div ng-if="!loading.modelInfo" class="webapp__subsection">
+<div ng-if="!loading.modelInfo && tests.perturbations.MISSING_VALUES" class="webapp__subsection">
     <div class="flex small-title-b settings-subsection__header">
         <label class="flex" ng-class="{'text-lighter': !tests.perturbations.MISSING_VALUES.$activated}">
             <label class="switch">
@@ -87,7 +87,7 @@
     </form>
 </div>
 
-<div ng-if="!loading.modelInfo" class="webapp__subsection">
+<div ng-if="!loading.modelInfo && tests.perturbations.SCALING" class="webapp__subsection">
     <div class="flex small-title-b settings-subsection__header">
         <label class="flex" ng-class="{'text-lighter': !tests.perturbations.SCALING.$activated}">
             <label class="switch">
