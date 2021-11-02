@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
-import pandas as pd
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, ExtraTreesClassifier
-from sklearn.tree import DecisionTreeClassifier
+import numpy as np
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
 
 logger = logging.getLogger(__name__)
-
-ALGORITHMS_WITH_VARIABLE_IMPORTANCE = [RandomForestClassifier, GradientBoostingClassifier, ExtraTreesClassifier,
-                                       DecisionTreeClassifier]
 
 
 class ModelAccessor(object):
@@ -32,13 +27,16 @@ class ModelAccessor(object):
         """
         return self.model_handler.get_target_variable()
 
-    def get_original_test_df(self, limit=DkuStressTestCenterConstants.MAX_NUM_ROW):
+    def get_original_test_df(self, sample_fraction, random_state):
+        np.random.seed(random_state)
         try:
-            return self.model_handler.get_test_df()[0][:limit]
+            test_df, _ = self.model_handler.get_test_df()
         except Exception as e:
             logger.warning(
-                'Can not retrieve original test set: {}. The plugin will take the whole original dataset.'.format(e))
-            return self.model_handler.get_full_df()[0][:limit]
+                'Cannot retrieve original test set: {}. The plugin will take the whole original dataset.'.format(e))
+            test_df, _ = self.model_handler.get_full_df()
+        finally:
+            return test_df.sample(frac=sample_fraction, random_state=random_state)
 
     def get_per_feature(self):
         return self.model_handler.get_per_feature()

@@ -24,7 +24,6 @@ def get_stress_test_name(shift: Shift):
 
 
 class DkuStressTestCenterConstants(object):
-    CLEAN_DATASET_NUM_ROWS = 500
     CLEAN = 'CLEAN'
     MISSING_VALUES = 'MISSING_VALUES'
     SCALING = 'SCALING'
@@ -43,8 +42,6 @@ class DkuStressTestCenterConstants(object):
     ROBUSTNESS = 'robustness'
     STRESS_TEST_TYPE = '_dku_stress_test_type'
     DKU_ROW_ID = '_dku_row_identifier_'
-
-    MAX_NUM_ROW = 100000
 
     REGRESSION_TYPE = 'REGRESSION'
     CLASSIFICATION_TYPE = 'CLASSIFICATION'
