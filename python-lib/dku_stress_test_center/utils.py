@@ -1,40 +1,22 @@
 # -*- coding: utf-8 -*-
 from drift_dac.covariate_shift import MissingValues, Scaling, Adversarial, ReplaceWord, Typos, WordDeletion
 from drift_dac.prior_shift import KnockOut
-from drift_dac.perturbation_shared_utils import Shift
-
-
-def get_stress_test_name(shift: Shift):
-    if isinstance(shift, MissingValues):
-        return DkuStressTestCenterConstants.MISSING_VALUES
-    elif isinstance(shift, Scaling):
-        return DkuStressTestCenterConstants.SCALING
-    elif isinstance(shift, Adversarial):
-        return DkuStressTestCenterConstants.ADVERSARIAL
-    elif isinstance(shift, KnockOut):
-        return DkuStressTestCenterConstants.PRIOR_SHIFT
-    elif isinstance(shift, ReplaceWord):
-        return DkuStressTestCenterConstants.REPLACE_WORD
-    elif isinstance(shift, Typos):
-        return DkuStressTestCenterConstants.TYPOS
-    elif isinstance(shift,WordDeletion):
-        return DkuStressTestCenterConstants.WORD_DELETION
-    else:
-        raise NotImplementedError()
 
 
 class DkuStressTestCenterConstants(object):
     CLEAN = 'CLEAN'
-    MISSING_VALUES = 'MISSING_VALUES'
-    SCALING = 'SCALING'
-    ADVERSARIAL = 'ADVERSARIAL'
-    PRIOR_SHIFT = 'PRIOR_SHIFT'
-    REPLACE_WORD = 'REPLACE_WORD'
-    TYPOS = 'TYPOS'
-    WORD_DELETION = 'WORD_DELETION'
+    TESTS = {
+        MissingValues.__name__: MissingValues,
+        Scaling.__name__: Scaling,
+        Adversarial.__name__: Adversarial,
+        KnockOut.__name__: KnockOut,
+        ReplaceWord.__name__: ReplaceWord,
+        WordDeletion.__name__: WordDeletion,
+        Typos.__name__: Typos
+    }
 
-    PERTURBATION_BASED_STRESS_TYPES = [MISSING_VALUES, SCALING, ADVERSARIAL, REPLACE_WORD, TYPOS, WORD_DELETION]
-    SUBPOP_SHIFT_BASED_STRESS_TYPES = [PRIOR_SHIFT]
+    FEATURE_PERTURBATIONS = [MissingValues, Scaling, Adversarial, ReplaceWord, Typos, WordDeletion]
+    SAMPLING_PERTURBATIONS = [KnockOut]
 
     CONFIDENCE = 'confidence'
     UNCERTAINTY = 'uncertainty'

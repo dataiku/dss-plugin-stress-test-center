@@ -26,23 +26,23 @@
     <spinner></spinner>
 </div>
 
-<div ng-if="!loading.modelInfo && tests.perturbations.PRIOR_SHIFT" class="webapp__subsection">
+<div ng-if="!loading.modelInfo && tests.perturbations.KnockOut" class="webapp__subsection">
     <div class="flex small-title-b settings-subsection__header">
-        <label class="flex" ng-class="{'text-lighter': !tests.perturbations.PRIOR_SHIFT.$activated}">
+        <label class="flex" ng-class="{'text-lighter': !tests.perturbations.KnockOut.$activated}">
             <label class="switch">
-                <input type="checkbox" ng-model="tests.perturbations.PRIOR_SHIFT.$activated">
+                <input type="checkbox" ng-model="tests.perturbations.KnockOut.$activated">
                 <div class="slider round"></div>
             </label>
-            {{ tests.perturbations.PRIOR_SHIFT.displayName }}
+            {{ tests.perturbations.KnockOut.displayName }}
         </label>
         <help-icon help-text="Modifies the target distribution by resampling"></help-icon>
     </div>
-    <form name="forms.PRIOR_SHIFT" class="settings-subsection__form"
-          ng-show="tests.perturbations.PRIOR_SHIFT.$activated" ng-submit="runAnalysis()">
+    <form name="forms.KnockOut" class="settings-subsection__form"
+          ng-show="tests.perturbations.KnockOut.$activated" ng-submit="runAnalysis()">
         <div custom-dropdown
-             form="forms.PRIOR_SHIFT"
+             form="forms.KnockOut"
              possible-values="modelInfo.targetClasses"
-             item="tests.perturbations.PRIOR_SHIFT.params.cl"
+             item="tests.perturbations.KnockOut.params.cl"
              item-name="class"
              label="Selected class"
              class="settings-subsection__form_field">
@@ -50,29 +50,29 @@
         <div class="control-group settings-subsection__form_field">
             <label for="priorShift" class="label-text">Desired proportion of samples with selected class</label>
             <input type="number" id="priorShift"
-                   ng-model="tests.perturbations.PRIOR_SHIFT.params.samples_fraction"
+                   ng-model="tests.perturbations.KnockOut.params.samples_fraction"
                    placeholder="0.5" step="0.01" min="0" max="1" required>
         </div>
     </form>
 </div>
 
-<div ng-if="!loading.modelInfo && tests.perturbations.MISSING_VALUES" class="webapp__subsection">
+<div ng-if="!loading.modelInfo && tests.perturbations.MissingValues" class="webapp__subsection">
     <div class="flex small-title-b settings-subsection__header">
-        <label class="flex" ng-class="{'text-lighter': !tests.perturbations.MISSING_VALUES.$activated}">
+        <label class="flex" ng-class="{'text-lighter': !tests.perturbations.MissingValues.$activated}">
             <label class="switch">
-                <input type="checkbox" ng-model="tests.perturbations.MISSING_VALUES.$activated">
+                <input type="checkbox" ng-model="tests.perturbations.MissingValues.$activated">
                 <div class="slider round"></div>
             </label>
-            {{ tests.perturbations.MISSING_VALUES.displayName }}
+            {{ tests.perturbations.MissingValues.displayName }}
         </label>
         <help-icon help-text="Randomly inserts missing values"></help-icon>
     </div>
-    <form name="forms.MISSING_VALUES" class="settings-subsection__form"
-          ng-show="tests.perturbations.MISSING_VALUES.$activated" ng-submit="runAnalysis()">
+    <form name="forms.MissingValues" class="settings-subsection__form"
+          ng-show="tests.perturbations.MissingValues.$activated" ng-submit="runAnalysis()">
         <div custom-dropdown
-             form="forms.MISSING_VALUES"
-             possible-values="tests.perturbations.MISSING_VALUES.availableColumns"
-             items="tests.perturbations.MISSING_VALUES.selected_features"
+             form="forms.MissingValues"
+             possible-values="tests.perturbations.MissingValues.availableColumns"
+             items="tests.perturbations.MissingValues.selected_features"
              item-name="feature"
              item-image="featureToTypeIcon"
              label="Corrupted features"
@@ -81,29 +81,29 @@
         <div class="control-group settings-subsection__form_field">
             <label for="missingValues" class="label-text">Proportion of corrupted samples</label>
             <input type="number" id="missingValues"
-                   ng-model="tests.perturbations.MISSING_VALUES.params.samples_fraction"
+                   ng-model="tests.perturbations.MissingValues.params.samples_fraction"
                    placeholder="0.5" step="0.01" min="0.01" max="1" required>
         </div>
     </form>
 </div>
 
-<div ng-if="!loading.modelInfo && tests.perturbations.SCALING" class="webapp__subsection">
+<div ng-if="!loading.modelInfo && tests.perturbations.Scaling" class="webapp__subsection">
     <div class="flex small-title-b settings-subsection__header">
-        <label class="flex" ng-class="{'text-lighter': !tests.perturbations.SCALING.$activated}">
+        <label class="flex" ng-class="{'text-lighter': !tests.perturbations.Scaling.$activated}">
             <label class="switch">
-                <input type="checkbox" ng-model="tests.perturbations.SCALING.$activated">
+                <input type="checkbox" ng-model="tests.perturbations.Scaling.$activated">
                 <div class="slider round"></div>
             </label>
-            {{ tests.perturbations.SCALING.displayName }}
+            {{ tests.perturbations.Scaling.displayName }}
         </label>
         <help-icon help-text="Changes the order of magnitude of each feature by some random scaling"></help-icon>
     </div>
-    <form name="forms.SCALING" class="settings-subsection__form"
-          ng-show="tests.perturbations.SCALING.$activated" ng-submit="runAnalysis()">
+    <form name="forms.Scaling" class="settings-subsection__form"
+          ng-show="tests.perturbations.Scaling.$activated" ng-submit="runAnalysis()">
         <div custom-dropdown
-             form="forms.SCALING"
-             possible-values="tests.perturbations.SCALING.availableColumns"
-             items="tests.perturbations.SCALING.selected_features"
+             form="forms.Scaling"
+             possible-values="tests.perturbations.Scaling.availableColumns"
+             items="tests.perturbations.Scaling.selected_features"
              item-name="feature"
              item-image="featureToTypeIcon"
              label="Corrupted features"
@@ -112,7 +112,7 @@
         <div class="control-group settings-subsection__form_field">
             <label for="scaling" class="label-text">Proportion of corrupted samples</label>
             <input type="number" id="scaling"
-                   ng-model="tests.perturbations.SCALING.params.samples_fraction"
+                   ng-model="tests.perturbations.Scaling.params.samples_fraction"
                    placeholder="0.5" step="0.01" min="0" max="1" required>
         </div>
     </form>

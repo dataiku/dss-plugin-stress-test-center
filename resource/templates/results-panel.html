@@ -37,10 +37,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="metric in results.SUBPOPULATION_PERTURBATION.metrics">
-                        <td class="cell text-highlight">{{ tests.perturbations[metric['attack_type']].displayName }}</td>
-                        <td class="cell text-sb">{{ metric['accuracy_drop'] * 100 | toFixedIfNeeded: 3 }}%</td>
-                        <td class="cell text-sb">{{ metric['robustness'] * 100 | toFixedIfNeeded: 3 }}%</td>
+                    <tr ng-repeat="(testName, metrics) in results.SUBPOPULATION_PERTURBATION.metrics">
+                        <td class="cell text-highlight">{{ tests.perturbations[testName].displayName }}</td>
+                        <td class="cell text-sb">{{ metrics['performance_variation'] * 100 | toFixedIfNeeded: 3 }}%</td>
+                        <td class="cell text-sb">{{ metrics['robustness'] * 100 | toFixedIfNeeded: 3 }}%</td>
                     </tr>
                 </tbody>
             </table>
@@ -64,10 +64,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="metric in results.SAMPLE_PERTURBATION.metrics">
-                        <td class="cell text-highlight">{{ tests.perturbations[metric['attack_type']].displayName }}</td>
-                        <td class="cell text-sb">{{ metric['accuracy_drop'] * 100 | toFixedIfNeeded: 3 }}%</td>
-                        <td class="cell text-sb">{{ metric['robustness'] * 100 | toFixedIfNeeded: 3 }}%</td>
+                    <tr ng-repeat="(testName, metrics) in results.SAMPLE_PERTURBATION.metrics">
+                        <td class="cell text-highlight">{{ tests.perturbations[testName].displayName }}</td>
+                        <td class="cell text-sb">{{ metrics['performance_variation'] * 100 | toFixedIfNeeded: 3 }}%</td>
+                        <td class="cell text-sb">{{ metrics['robustness'] * 100 | toFixedIfNeeded: 3 }}%</td>
                     </tr>
                 </tbody>
             </table>

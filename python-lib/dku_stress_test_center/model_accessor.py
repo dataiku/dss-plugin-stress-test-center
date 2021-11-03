@@ -16,16 +16,20 @@ class ModelAccessor(object):
         """
         if self.model_handler.get_prediction_type() in DkuStressTestCenterConstants.DKU_CLASSIFICATION_TYPE:
             return DkuStressTestCenterConstants.CLASSIFICATION_TYPE
-        elif DkuStressTestCenterConstants.REGRESSION_TYPE in self.model_handler.get_prediction_type():
+        if DkuStressTestCenterConstants.REGRESSION_TYPE in self.model_handler.get_prediction_type():
             return DkuStressTestCenterConstants.REGRESSION_TYPE
-        else:
-            return DkuStressTestCenterConstants.CLUSTERING_TYPE
+        return DkuStressTestCenterConstants.CLUSTERING_TYPE
 
     def get_target_variable(self):
         """
         Return the name of the target variable
         """
         return self.model_handler.get_target_variable()
+
+    def get_target_classes(self):
+        if self.get_prediction_type() == DkuStressTestCenterConstants.REGRESSION_TYPE:
+            return []
+        return list(self.model_handler.get_target_map().keys())
 
     def get_original_test_df(self, sample_fraction, random_state):
         np.random.seed(random_state)
