@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from drift_dac.covariate_shift import MissingValues, Scaling, Adversarial, ReplaceWord, Typos, WordDeletion
-from drift_dac.prior_shift import KnockOut
+from drift_dac.prior_shift import Rebalance
 from drift_dac.perturbation_shared_utils import Shift
 
 
@@ -11,7 +11,7 @@ def get_stress_test_name(shift: Shift):
         return DkuStressTestCenterConstants.SCALING
     elif isinstance(shift, Adversarial):
         return DkuStressTestCenterConstants.ADVERSARIAL
-    elif isinstance(shift, KnockOut):
+    elif isinstance(shift, Rebalance):
         return DkuStressTestCenterConstants.PRIOR_SHIFT
     elif isinstance(shift, ReplaceWord):
         return DkuStressTestCenterConstants.REPLACE_WORD
