@@ -11,7 +11,7 @@ class StressTest(object):
         self.shift = shift
         self.features = list_of_features
         self.perturbed_df = None
-        self.sample_perturbation = self.__class__ in DkuStressTestCenterConstants.FEATURE_PERTURBATIONS
+        self.sample_perturbation = shift.__class__ in DkuStressTestCenterConstants.FEATURE_PERTURBATIONS
         # TODO: check valid configurations
 
     @staticmethod
@@ -23,7 +23,7 @@ class StressTest(object):
         self.perturbed_df = df
 
         if self.sample_perturbation:
-            perturbed_columns = df.columns
+            perturbed_columns = self.features
         else:
             perturbed_columns = self.perturbed_df.columns != target
 
