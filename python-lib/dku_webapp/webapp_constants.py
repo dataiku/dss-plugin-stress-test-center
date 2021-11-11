@@ -1,6 +1,0 @@
-# -*- coding: utf-8 -*-
-
-class DkuWebappConstants(object):
-    PREDICTION = 'prediction'
-    SUBPOPULATION_PERTURBATION = 'SUBPOPULATION_PERTURBATION'
-    SAMPLE_PERTURBATION = 'SAMPLE_PERTURBATION'

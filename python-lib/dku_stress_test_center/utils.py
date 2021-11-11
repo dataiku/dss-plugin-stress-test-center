@@ -5,19 +5,21 @@ from drift_dac.prior_shift import KnockOut
 
 class DkuStressTestCenterConstants(object):
     CLEAN = 'CLEAN'
+
+    FEATURE_PERTURBATION = "FEATURE_PERTURBATION"
+    SUBPOPULATION_SHIFT = "SUBPOPULATION_SHIFT"
+
     TESTS = {
-        MissingValues.__name__: MissingValues,
-        Scaling.__name__: Scaling,
-        Adversarial.__name__: Adversarial,
-        KnockOut.__name__: KnockOut,
-        ReplaceWord.__name__: ReplaceWord,
-        WordDeletion.__name__: WordDeletion,
-        Typos.__name__: Typos
+        MissingValues.__name__: (MissingValues, FEATURE_PERTURBATION),
+        Scaling.__name__: (Scaling, FEATURE_PERTURBATION),
+        Adversarial.__name__: (Adversarial, FEATURE_PERTURBATION),
+        KnockOut.__name__: (KnockOut, SUBPOPULATION_SHIFT),
+        ReplaceWord.__name__: (ReplaceWord, FEATURE_PERTURBATION),
+        WordDeletion.__name__: (WordDeletion, FEATURE_PERTURBATION),
+        Typos.__name__: (Typos, FEATURE_PERTURBATION)
     }
 
-    FEATURE_PERTURBATIONS = [MissingValues, Scaling, Adversarial, ReplaceWord, Typos, WordDeletion]
-    SAMPLING_PERTURBATIONS = [KnockOut]
-
+    PREDICTION = 'prediction'
     CONFIDENCE = 'confidence'
     UNCERTAINTY = 'uncertainty'
     ACCURACY_DROP = 'accuracy_drop'

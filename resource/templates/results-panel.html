@@ -20,7 +20,7 @@
 </div>
 
 <div ng-if="results && !loading.results">
-    <div class="webapp__subsection" ng-if="results.SUBPOPULATION_PERTURBATION">
+    <div class="webapp__subsection" ng-if="results.SUBPOPULATION_SHIFT">
         <div class="grand-title-b results-subsection__header">
             Subpopulation shift perturbations
         </div>
@@ -37,7 +37,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="(testName, metrics) in results.SUBPOPULATION_PERTURBATION.metrics">
+                    <tr ng-repeat="(testName, metrics) in results.SUBPOPULATION_SHIFT.metrics">
                         <td class="cell text-highlight">{{ tests.perturbations[testName].displayName }}</td>
                         <td class="cell text-sb">{{ metrics['performance_variation'] * 100 | toFixedIfNeeded: 3 }}%</td>
                         <td class="cell text-sb">{{ metrics['robustness'] * 100 | toFixedIfNeeded: 3 }}%</td>
@@ -47,7 +47,7 @@
         </div>
     </div>
 
-    <div class="webapp__subsection" ng-if="results.SAMPLE_PERTURBATION">
+    <div class="webapp__subsection" ng-if="results.FEATURE_PERTURBATION">
         <div class="grand-title-b results-subsection__header">
             Sample perturbations
         </div>
@@ -64,7 +64,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="(testName, metrics) in results.SAMPLE_PERTURBATION.metrics">
+                    <tr ng-repeat="(testName, metrics) in results.FEATURE_PERTURBATION.metrics">
                         <td class="cell text-highlight">{{ tests.perturbations[testName].displayName }}</td>
                         <td class="cell text-sb">{{ metrics['performance_variation'] * 100 | toFixedIfNeeded: 3 }}%</td>
                         <td class="cell text-sb">{{ metrics['robustness'] * 100 | toFixedIfNeeded: 3 }}%</td>
@@ -80,13 +80,13 @@
                 The critical samples are the most sensitive to perturbations. They highlight where the model predictions are highly uncertain (presenting large confidence fluctuations).
             </p>
             <div class="flex dku-grid">
-                <div ng-repeat="sample in results.SAMPLE_PERTURBATION.critical_samples.samples">
+                <div ng-repeat="sample in results.FEATURE_PERTURBATION.critical_samples.samples">
                     <table class="table-sample table-striped">
                         <thead>
                             <tr>
                                 <th class="top-cell--blue small-title-b">
                                     <div class="flex top-cell__row">
-                                        <div>{{ results.SAMPLE_PERTURBATION.critical_samples.uncertainties[$index] }}</div>
+                                        <div>{{ results.FEATURE_PERTURBATION.critical_samples.uncertainties[$index] }}</div>
                                         <div>0.63</div>
                                     </div>
                                     <div class="flex top-cell__row">

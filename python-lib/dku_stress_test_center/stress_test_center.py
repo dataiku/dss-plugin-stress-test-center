@@ -1,58 +1,86 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import pandas as pd
+from collections import defaultdict
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
 from dku_stress_test_center.metrics import worst_group_performance, performance_variation, stress_resilience
 from drift_dac.perturbation_shared_utils import Shift
-from dku_webapp import DkuWebappConstants
 
 class StressTest(object):
-    def __init__(self, shift: Shift, list_of_features: list = None):
+    def __init__(self, shift: Shift):
         self.shift = shift
-        self.features = list_of_features
         self.df_with_pred = None
-        self.sample_perturbation = shift.__class__ in DkuStressTestCenterConstants.FEATURE_PERTURBATIONS
         # TODO: check valid configurations
 
     @staticmethod
-    def create(shift_type, shift_params, shift_features):
-        shift = DkuStressTestCenterConstants.TESTS[shift_type](**shift_params)
-        return StressTest(shift, shift_features)
+    def create(test_name, test_config):
+        test_class, test_type = DkuStressTestCenterConstants.TESTS[test_name]
+        params = test_config["params"]
+        if test_type == DkuStressTestCenterConstants.FEATURE_PERTURBATION:
+            feature_perturbation = test_class(**params)
+            features = test_config["selected_features"]
+            return FeaturePerturbationTest(feature_perturbation, features)
+        if test_type == DkuStressTestCenterConstants.SUBPOPULATION_SHIFT:
+            subpopulation_shift = test_class(**params)
+            return SubpopulationShiftTest(subpopulation_shift)
+        raise ValueError("Unknown stress test %s" % test_name)
 
-    def perturb(self, df: pd.DataFrame, target: str):
-        if self.sample_perturbation:
-            perturbed_columns = self.features
-        else:
-            perturbed_columns = df.columns != target
+    def perturb_df(self, df: pd.DataFrame, target: str):
+        raise NotImplementedError()
 
-        xt = df.loc[:, perturbed_columns].values
-        yt = df[target].values
-        xt, yt = self.shift.transform(xt, yt)
+    def compute_metrics(self, perf_metric: str, clean_y_true: np.array, clean_y_pred: np.array,
+                        perturbed_y_true: np.array, perturbed_y_pred: np.array):
+        raise NotImplementedError()
 
-        df.loc[:, perturbed_columns] = xt
-        df.loc[:, target] = yt
+
+class FeaturePerturbationTest(StressTest):
+    TEST_TYPE = DkuStressTestCenterConstants.FEATURE_PERTURBATION
+
+    def __init__(self, shift: Shift, features: list):
+        super(FeaturePerturbationTest, self).__init__(shift)
+        self.features = features
+
+    def perturb_df(self, df: pd.DataFrame, target: str):
+        X = df.loc[:, self.features].values
+        y = df.loc[:, target].values
+
+        X, y = self.shift.transform(X, y)
+        df.loc[:, self.features] = X
+        df.loc[:, target] = y
 
         return df
 
-    def compute_metrics(self, clean_df: pd.DataFrame, target: str, perf_metric: str):
-        clean_y_true = clean_df[target]
-        clean_y_pred = clean_df[DkuWebappConstants.PREDICTION]
-        perturbed_y_true = self.df_with_pred[target]
-        perturbed_y_pred = self.df_with_pred[DkuWebappConstants.PREDICTION]
+    def compute_metrics(self, perf_metric: str, clean_y_true: np.array, clean_y_pred: np.array,
+                        perturbed_y_true: np.array, perturbed_y_pred: np.array):
         return {
-            "robustness": self.compute_robustness(
-                perf_metric, clean_y_true, clean_y_pred, perturbed_y_true, perturbed_y_pred
-            ),
+            "robustness": stress_resilience(clean_y_pred, perturbed_y_pred),
             "performance_variation": performance_variation(
                 perf_metric, clean_y_true, clean_y_pred, perturbed_y_true, perturbed_y_pred
             )
         }
 
-    def compute_robustness(self, perf_metric: str, clean_y_true: np.array, clean_y_pred: np.array,
-                           perturbed_y_true: np.array, perturbed_y_pred: np.array):
-        if self.sample_perturbation:
-            return stress_resilience(clean_y_pred, perturbed_y_pred)
-        return worst_group_performance(perf_metric, perturbed_y_true, perturbed_y_pred)
+
+class SubpopulationShiftTest(StressTest):
+    TEST_TYPE = DkuStressTestCenterConstants.SUBPOPULATION_SHIFT
+
+    def perturb_df(self, df: pd.DataFrame, target: str):
+        X = df.loc[:, df.columns != target].values
+        y = df.loc[:, target].values
+
+        X, y = self.shift.transform(X, y)
+        df.loc[:, df.columns != target] = X
+        df.loc[:, target] = y
+
+        return df
+
+    def compute_metrics(self, perf_metric: str, clean_y_true: np.array, clean_y_pred: np.array,
+                        perturbed_y_true: np.array, perturbed_y_pred: np.array):
+        return {
+            "robustness": worst_group_performance(perf_metric, perturbed_y_true, perturbed_y_pred),
+            "performance_variation": performance_variation(
+                perf_metric, clean_y_true, clean_y_pred, perturbed_y_true, perturbed_y_pred
+            )
+        }
 
 
 class StressTestGenerator(object):
@@ -67,39 +95,43 @@ class StressTestGenerator(object):
     def set_config(self, config: dict):
         self._sampling_proportion = config["samples"]
         tests_config = config["perturbations"]
-        self.tests = []
-        for shift_type, shift_config in tests_config.items():
-            params, features = shift_config["params"], shift_config.get("selected_features")
-            self.tests.append(StressTest.create(shift_type, params, features))
+        self.tests = defaultdict(list)
+        for test_name, test_config in tests_config.items():
+            test = StressTest.create(test_name, test_config)
+            self.tests[test.TEST_TYPE].append(test)
 
     def compute_test_metrics(self, test: StressTest):
         target = self.model_accessor.get_target_variable()
         df = self.model_accessor.get_original_test_df(sample_fraction=self._sampling_proportion,
                                                       random_state=self._random_state)
-        perturbed_df = test.perturb(df, target)
-        test.df_with_pred = self.model_accessor.predict_and_concatenate(perturbed_df).dropna()
+        perturbed_df = test.perturb_df(df, target)
+        test.df_with_pred = self.model_accessor.predict_and_concatenate(perturbed_df)
         clean_df_with_pred = self._clean_df.loc[test.df_with_pred.index, :]
 
+        clean_y_true = clean_df_with_pred[target]
+        clean_y_pred = clean_df_with_pred[DkuStressTestCenterConstants.PREDICTION]
+        perturbed_y_true = test.df_with_pred[target]
+        perturbed_y_pred = test.df_with_pred[DkuStressTestCenterConstants.PREDICTION]
+
         return {
-            test.shift.__class__.__name__: test.compute_metrics(clean_df_with_pred, target, "auc") # TODO: use get_evaluation_metric
+            test.shift.__class__.__name__: test.compute_metrics(
+                "auc", clean_y_true, clean_y_pred, perturbed_y_true, perturbed_y_pred
+            ) # TODO: use get_evaluation_metric instead of hardcoded auc
         }
 
     def predict_clean_df(self):
         df = self.model_accessor.get_original_test_df(sample_fraction=self._sampling_proportion,
                                                       random_state=self._random_state)
-        self._clean_df = self.model_accessor.predict_and_concatenate(df).dropna()
+        self._clean_df = self.model_accessor.predict_and_concatenate(df)
 
     def build_stress_metrics(self):
-        metrics = {
-            DkuWebappConstants.SAMPLE_PERTURBATION: {"metrics": {}},
-            DkuWebappConstants.SUBPOPULATION_PERTURBATION: {"metrics": {}}
-        }
+        metrics = defaultdict(lambda: {"metrics": {}})
 
         self.predict_clean_df()
 
-        for test in self.tests:
-            test_type = DkuWebappConstants.SAMPLE_PERTURBATION if test.sample_perturbation else DkuWebappConstants.SUBPOPULATION_PERTURBATION
-            metrics[test_type]["metrics"] = self.compute_test_metrics(test)
+        for test_type, tests in self.tests.items():
+            for test in tests:
+                metrics[test_type]["metrics"].update(self.compute_test_metrics(test))
 
         return metrics
 
@@ -111,7 +143,7 @@ def get_critical_samples(y_true_class_confidence: np.array,  # n_rows x 1
         return pd.DataFrame(), []
     # sparse format for the pair (orig_x, pert_x)
     stress_test_indicator = perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE]
-    valid_stress_ids = set(stress_test_indicator) & set(DkuStressTestCenterConstants.FEATURE_PERTURBATIONS)
+    valid_stress_ids = set(stress_test_indicator) & set(DkuStressTestCenterConstants.FEATURE_PERTURBATION)
     valid_stress_ids |= set([DkuStressTestCenterConstants.CLEAN])
 
     true_class_confidence_df = pd.DataFrame({
