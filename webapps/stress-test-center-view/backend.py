@@ -59,11 +59,9 @@ def compute():
     try:
         # Get test data
         model_accessor = stressor.model_accessor
-        stressor.fit_transform()
 
         # Compute the performance drop metrics
-        target = model_accessor.get_target_variable()
-        results = stressor.build_stress_metric()
+        results = stressor.build_stress_metrics()
  
         # Compute the critical samples
         #y_true = perturbed_df[target]

@@ -31,6 +31,9 @@ class ModelAccessor(object):
             return []
         return list(self.model_handler.get_target_map().keys())
 
+    def get_evaluation_metric(self):
+        return self.model_handler.get_modeling_params["metrics"]["evaluationMetric"]
+
     def get_original_test_df(self, sample_fraction, random_state):
         np.random.seed(random_state)
         try:
@@ -48,5 +51,5 @@ class ModelAccessor(object):
     def get_predictor(self):
         return self.model_handler.get_predictor()
 
-    def predict(self, df):
-        return self.get_predictor().predict(df)
+    def predict_and_concatenate(self, df):
+        return self.model_handler.predict_and_concatenate(df)
