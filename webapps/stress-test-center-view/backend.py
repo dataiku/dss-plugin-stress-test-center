@@ -57,9 +57,6 @@ def set_stress_tests_config():
 @app.route('/compute', methods=["GET"])
 def compute():
     try:
-        # Get test data
-        model_accessor = stressor.model_accessor
-
         # Compute the performance drop metrics
         results = stressor.build_stress_metrics()
  
