@@ -4,8 +4,6 @@ from drift_dac.prior_shift import KnockOut
 
 
 class DkuStressTestCenterConstants(object):
-    CLEAN = 'CLEAN'
-
     FEATURE_PERTURBATION = "FEATURE_PERTURBATION"
     SUBPOPULATION_SHIFT = "SUBPOPULATION_SHIFT"
 
@@ -22,12 +20,6 @@ class DkuStressTestCenterConstants(object):
     NR_CRITICAL_SAMPLES = 5
 
     PREDICTION = 'prediction'
-    CONFIDENCE = 'confidence'
-    UNCERTAINTY = 'uncertainty'
-    ACCURACY_DROP = 'accuracy_drop'
-    ROBUSTNESS = 'robustness'
-    STRESS_TEST_TYPE = '_dku_stress_test_type'
-    DKU_ROW_ID = '_dku_row_identifier_'
 
     REGRESSION_TYPE = 'REGRESSION'
     CLASSIFICATION_TYPE = 'CLASSIFICATION'
