@@ -2,6 +2,7 @@ import numpy as np
 from math import ceil
 import copy
 from drift_dac.perturbation_shared_utils import Shift, PerturbationConstants
+from collections import Counter
 
 __all__ = ['OnlyOne', 'KnockOut', 'Rebalance']
 
@@ -66,19 +67,23 @@ class KnockOut(Shift):
 class Rebalance(Shift):
     """ Sample data to match a given distribution of classes.
     Args:
-        priors (array-like): desired classes frequencies
+        priors (dict): mapping of class -> desired frequency
     Attributes:
-        priors (array-like): desired classes frequencies
+        priors (dict): mapping of class -> desired frequency
         name (str): name of the perturbation
-        feature_type (int): identifier of the type of feature for which this perturbation is valid
+        feature_type (int): identifier of the feature types for which this perturbation is valid
             (see PerturbationConstants).
     """
     def __init__(self, priors):
         super(Rebalance, self).__init__()
+        if min(priors.values()) < 0:
+            raise ValueError("Class frequencies cannot be negative")
+        if sum(priors.values()) > 1:
+            raise ValueError("The sum of the desired class frequencies exceeds 1")
         self.priors = priors
         self.name = 'rebalance_shift'
-        for p in priors:
-            self.name += '_%.2f' % p
+        for target_class, proba in priors.items():
+            self.name += '_{}_{:.2f}'.format(target_class, proba)
         self.feature_type = PerturbationConstants.ANY
 
     def transform(self, X, y):
@@ -87,40 +92,60 @@ class Rebalance(Shift):
             X (numpy.ndarray): feature data.
             y (numpy.ndarray): target data.
         """
-        Xt = copy.deepcopy(X)
-        yt = copy.deepcopy(y)
-        Xt, yt = rebalance_shift(Xt, yt, self.priors)
+        Xt, yt = rebalance_shift(X, y, self.priors)
         return Xt, yt
-
 
 # Resample instances of all classes by given priors.
 def rebalance_shift(x, y, priors):
-    labels, counts = np.unique(y, return_counts=True)
-    n_labels = len(labels)
-    n_priors = len(priors)
-    assert (n_labels == n_priors)
-    assert (np.sum(priors) == 1.)
-    n_to_sample = y.shape[0]
-    for label_idx, prior in enumerate(priors):
-        if prior > 0:
-            n_samples_label = counts[label_idx]
-            max_n_to_sample = np.round(n_samples_label / prior)
-            if n_to_sample > max_n_to_sample:
-                n_to_sample = max_n_to_sample
+    actual_class_counts = Counter(y)
+    nr_samples = len(y)
 
-    resampled_counts = [int(np.round(prior * n_to_sample)) for prior in priors]
-    resampled_indices = []
-    for cl, res_count in zip(labels, resampled_counts):
-        if res_count:
-            cl_indices = np.where(y == cl)[0]
-            cl_res_indices = np.random.choice(cl_indices, res_count, replace=False)
-            resampled_indices.extend(cl_res_indices)
+    positive_priors = +Counter(priors)
+    # Check current target distribution has all the classes in desired distribution
+    if positive_priors.keys() > actual_class_counts.keys():
+        raise ValueError(
+            "One of the classes to resample is absent from the actual target distribution"
+        )
 
-    resampled_indices = np.random.choice(resampled_indices, x.shape[0], replace=True)
+    # If prior distribution is incomplete (sum < 1), we redistribute onto the unmapped classes
+    # (i.e. classes in the actual distribution that are not in the desired prior distribution)
+    nr_samples_to_redistribute = nr_samples * (1 - sum(positive_priors.values()))
 
-    x = x[resampled_indices, :]
-    y = y[resampled_indices]
-    return x, y
+    if nr_samples_to_redistribute == 0:
+        redistribution_coef = 0
+    else:
+        # Redistribution can only be done if current distribution has some unmapped classes left
+        unmapped_classes = actual_class_counts.keys() - priors.keys()
+        if not unmapped_classes:
+            raise ValueError("The desired prior distribution is incomplete")
+
+        nr_samples_from_unmapped_classes = sum(actual_class_counts[target_class]
+                                            for target_class in unmapped_classes)
+        redistribution_coef = nr_samples_to_redistribute / nr_samples_from_unmapped_classes
+
+    classes_to_resample = [
+        target_class for target_class in actual_class_counts if priors.get(target_class) != 0
+    ]
+    class_to_initialize = classes_to_resample.pop()
+    rebalanced_x_indices = np.random.choice(np.where(y==class_to_initialize)[0], y.shape)
+    rebalanced_y = np.full(y.shape, class_to_initialize, dtype=y.dtype)
+    offset = 0
+    for target_class in classes_to_resample:
+        desired_freq = priors.get(target_class)
+        if desired_freq is None:
+            desired_count = round(redistribution_coef * actual_class_counts[target_class])
+        else:
+            desired_count = round(desired_freq * nr_samples)
+        if desired_count == 0:
+            continue
+
+        class_samples_indices = np.where(y==target_class)[0]
+        rebalanced_x_indices[offset : offset+desired_count] = np.random.choice(class_samples_indices,
+                                                                               desired_count)
+        rebalanced_y[offset : offset+desired_count] = target_class
+        offset += desired_count
+
+    return x[rebalanced_x_indices], rebalanced_y
 
 
 # Remove instances of a single class.
