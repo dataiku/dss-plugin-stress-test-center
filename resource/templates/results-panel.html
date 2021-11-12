@@ -80,18 +80,18 @@
                 The critical samples are the most sensitive to perturbations. They highlight where the model predictions are highly uncertain (presenting large confidence fluctuations).
             </p>
             <div class="flex dku-grid">
-                <div ng-repeat="sample in results.FEATURE_PERTURBATION.critical_samples.samples">
+                <div ng-repeat="sample in results.FEATURE_PERTURBATION.critical_samples.features">
                     <table class="table-sample table-striped">
                         <thead>
                             <tr>
                                 <th class="top-cell--blue small-title-b">
                                     <div class="flex top-cell__row">
-                                        <div>{{ results.FEATURE_PERTURBATION.critical_samples.uncertainties[$index] }}</div>
-                                        <div>0.63</div>
+                                        <div>{{ results.FEATURE_PERTURBATION.critical_samples.uncertainties[$index] | toFixedIfNeeded: 3}}</div>
+                                        <div>{{ results.FEATURE_PERTURBATION.critical_samples.mean_true_proba[$index] | toFixedIfNeeded: 3}}</div>
                                     </div>
                                     <div class="flex top-cell__row">
-                                        <div class="text-lighter">Uncertainty score</div>
-                                        <div class="text-lighter">Probability</div>
+                                        <div class="text-lighter">Uncertainty</div>
+                                        <div class="text-lighter">True class probability</div>
                                     </div>
                                 </th>
                             </tr>

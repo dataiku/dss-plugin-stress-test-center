@@ -19,6 +19,8 @@ class DkuStressTestCenterConstants(object):
         Typos.__name__: (Typos, FEATURE_PERTURBATION)
     }
 
+    NR_CRITICAL_SAMPLES = 5
+
     PREDICTION = 'prediction'
     CONFIDENCE = 'confidence'
     UNCERTAINTY = 'uncertainty'

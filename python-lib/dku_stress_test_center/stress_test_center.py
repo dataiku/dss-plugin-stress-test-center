@@ -136,40 +136,42 @@ class StressTestGenerator(object):
         return metrics
 
 
-def get_critical_samples(y_true_class_confidence: np.array,  # n_rows x 1
-                         perturbed_df: pd.DataFrame,
-                         top_k_samples: int = 5):
-    if True: # Temporary
-        return pd.DataFrame(), []
-    # sparse format for the pair (orig_x, pert_x)
-    stress_test_indicator = perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE]
-    valid_stress_ids = set(stress_test_indicator) & set(DkuStressTestCenterConstants.FEATURE_PERTURBATION)
-    valid_stress_ids |= set([DkuStressTestCenterConstants.CLEAN])
+    def get_critical_samples(self, test_type: str,
+                             nr_samples: int = DkuStressTestCenterConstants.NR_CRITICAL_SAMPLES):
 
-    true_class_confidence_df = pd.DataFrame({
-        DkuStressTestCenterConstants.STRESS_TEST_TYPE: stress_test_indicator,
-        DkuStressTestCenterConstants.DKU_ROW_ID: perturbed_df[DkuStressTestCenterConstants.DKU_ROW_ID],
-        DkuStressTestCenterConstants.CONFIDENCE: y_true_class_confidence
-    })
+        target = self.model_accessor.get_target_variable()
+        true_probas_mask = pd.get_dummies(self._clean_df[target], prefix="proba", dtype=bool)
+        true_class_probas = pd.DataFrame({
+            0: self._clean_df[true_probas_mask.columns].values[true_probas_mask]
+        })
 
-    true_class_confidence_df = true_class_confidence_df[true_class_confidence_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE].isin(valid_stress_ids)]
+        for idx, test in enumerate(self.tests[test_type]):
+            perturbed_probas = test.df_with_pred[true_probas_mask.columns]
+            cropped_true_class_probas = true_probas_mask.loc[perturbed_probas.index, :]
+            true_class_probas[idx+1] = pd.Series(
+                perturbed_probas.values[cropped_true_class_probas],
+                index=perturbed_probas.index
+            )
+        true_class_probas.dropna(inplace=True, how='all')
+        uncertainties = true_class_probas.std(axis=1)
+        indexes_to_keep = uncertainties.nlargest(nr_samples).index
 
-    # critical samples evaluation sorted by std of uncertainty
+        if indexes_to_keep.empty:
+            return {
+                "uncertainties": [],
+                "mean_true_proba": [],
+                "features": []
+            }
 
-    std_confidence_df = true_class_confidence_df.groupby([DkuStressTestCenterConstants.DKU_ROW_ID]).std()
-    uncertainty = np.round(std_confidence_df[DkuStressTestCenterConstants.CONFIDENCE].dropna(), 3)
+        critical_uncertainties = uncertainties.loc[indexes_to_keep]
+        critical_true_proba_means = true_class_probas.loc[indexes_to_keep, :].mean(axis=1)
+        critical_samples = self.model_accessor.get_original_test_df(
+            sample_fraction=self._sampling_proportion,
+            random_state=self._random_state
+        ).loc[indexes_to_keep, :]
 
-    critical_samples_df = pd.DataFrame({DkuStressTestCenterConstants.UNCERTAINTY: uncertainty})
-
-    if critical_samples_df.empty:
-        return pd.DataFrame(), []
-
-    critical_samples_df = critical_samples_df.sort_values(by=DkuStressTestCenterConstants.UNCERTAINTY,
-                                                          ascending=False)
-
-    critical_samples_df.reset_index(level=0, inplace=True)
-
-    clean_df_with_id = perturbed_df.loc[perturbed_df[DkuStressTestCenterConstants.STRESS_TEST_TYPE] == DkuStressTestCenterConstants.CLEAN]
-    critical_samples_df = critical_samples_df.merge(clean_df_with_id, on=DkuStressTestCenterConstants.DKU_ROW_ID, how='left').head(top_k_samples)
-    return (critical_samples_df.drop([DkuStressTestCenterConstants.DKU_ROW_ID, DkuStressTestCenterConstants.STRESS_TEST_TYPE, DkuStressTestCenterConstants.UNCERTAINTY], axis=1),
-        critical_samples_df[DkuStressTestCenterConstants.UNCERTAINTY].tolist())
+        return {
+            "uncertainties": critical_uncertainties.tolist(),
+            "mean_true_proba": critical_true_proba_means.tolist(),
+            "features": critical_samples.to_dict(orient='records')
+        }

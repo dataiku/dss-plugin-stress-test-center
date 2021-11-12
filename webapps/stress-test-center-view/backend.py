@@ -7,12 +7,12 @@ from flask import request, jsonify
 import json
 
 from dataiku import Model
+from dku_stress_test_center.utils import DkuStressTestCenterConstants
 from dataiku.customwebapp import get_webapp_config
 from dataiku.doctor.posttraining.model_information_handler import PredictionModelInformationHandler
 
 from dku_stress_test_center.model_accessor import ModelAccessor
 from dku_stress_test_center.stress_test_center import StressTestGenerator
-from dku_stress_test_center.stress_test_center import get_critical_samples
 from model_metadata import get_model_handler
 from dku_webapp import convert_numpy_int64_to_int, pretty_floats
 
@@ -64,21 +64,12 @@ def compute():
         results = stressor.build_stress_metrics()
  
         # Compute the critical samples
-        #y_true = perturbed_df[target]
-
-        #original_target_value = list(model_accessor.model_handler.get_target_map().keys())
-        #y_true_class_confidence = perturbed_df_with_prediction[
-        #    ['proba_{}'.format(original_target_value[0]), 'proba_{}'.format(original_target_value[1])]
-        #].values
-        #y_true_idx = np.array([
-        #    [True, False] if y == reversed_target_mapping.get(1) else [False, True] for y in y_true
-        #])
-        #y_true_class_confidence = y_true_class_confidence[y_true_idx]
-
-        #critical_samples_df, uncertainties = get_critical_samples(
-        #    y_true_class_confidence=y_true_class_confidence,
-        #    perturbed_df=perturbed_df
-        #)
+        if DkuStressTestCenterConstants.FEATURE_PERTURBATION in results:
+            results[DkuStressTestCenterConstants.FEATURE_PERTURBATION].update(
+                critical_samples=stressor.get_critical_samples(
+                    DkuStressTestCenterConstants.FEATURE_PERTURBATION
+                )
+            )
 
         return simplejson.dumps(pretty_floats(results), ignore_nan=True, default=convert_numpy_int64_to_int)
     except:
