@@ -142,8 +142,8 @@ class StressTestGenerator(object):
         target = self.model_accessor.get_target_variable()
         true_probas_mask = pd.get_dummies(self._clean_df[target], prefix="proba", dtype=bool)
         true_class_probas = pd.DataFrame({
-            0: self._clean_df[true_probas_mask.columns].values[true_probas_mask]
-        })
+            0: self._clean_df[true_probas_mask.columns].values[true_probas_mask],
+        }, index=true_probas_mask.index)
 
         for idx, test in enumerate(self.tests[test_type]):
             perturbed_probas = test.df_with_pred[true_probas_mask.columns]
