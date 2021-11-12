@@ -8,7 +8,7 @@
             <label for="samples" class="label-text">Proportion of samples for all the stress tests</label>
             <input type="number" id="samples" ng-model="tests.samples" step="0.01" min="0.01" max="1" required>
             <div class="text-tiny">
-                Set the proportion of rows used to run the selected stress tests
+                Set the proportion of rows used to run the selected tests
             </div>
         </div>
         <div class="dku-btn-container--right-align settings-subsection__form_field">
@@ -48,7 +48,7 @@
              class="settings-subsection__form_field">
         </div>
         <div class="control-group settings-subsection__form_field">
-            <label for="priorShift" class="label-text">Desired proportion of samples with selected class</label>
+            <label for="priorShift" class="label-text">Desired proportion of selected class</label>
             <input type="number" id="priorShift"
                    ng-model="tests.perturbations.PRIOR_SHIFT.params.samples_fraction"
                    placeholder="0.5" step="0.01" min="0" max="1" required>
