@@ -4,7 +4,7 @@ import pandas as pd
 from dku_stress_test_center.utils import DkuStressTestCenterConstants, get_stress_test_name
 from drift_dac.perturbation_shared_utils import Shift, PerturbationConstants
 from sklearn.metrics import accuracy_score, balanced_accuracy_score
-from drift_dac.prior_shift import KnockOut
+from drift_dac.prior_shift import Rebalance
 from drift_dac.covariate_shift import MissingValues, Scaling, Adversarial, ReplaceWord, Typos
 
 
@@ -20,7 +20,8 @@ class StressTestConfiguration(object):
     def create_conf(shift_type, shift_params, shift_features):
         shift = {
             DkuStressTestCenterConstants.ADVERSARIAL: Adversarial,
-            DkuStressTestCenterConstants.PRIOR_SHIFT: KnockOut,
+            DkuStressTestCenterConstants.PRIOR_SHIFT: \
+                lambda **params: Rebalance({params["cl"]: params["samples_fraction"]}),
             DkuStressTestCenterConstants.MISSING_VALUES: MissingValues,
             DkuStressTestCenterConstants.SCALING: Scaling,
             DkuStressTestCenterConstants.TYPOS: Typos,
