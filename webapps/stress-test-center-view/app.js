@@ -17,7 +17,7 @@ const versionId = webAppConfig['versionId'];
         $scope.forms = {};
         $scope.tests = {
             perturbations: {
-                KnockOut: {
+                Rebalance: {
                     displayName: "Target distribution",
                     needsTargetClasses: true,
                     params: { samples_fraction: .5 }
