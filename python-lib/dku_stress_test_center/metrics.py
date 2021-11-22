@@ -14,7 +14,7 @@ def worst_group_performance(metric_name: str, y_true: np.array, y_pred: np.array
         class_mask = y_true == target_class
         performance = get_performance_metric(metric_name)(y_true[class_mask], y_pred[class_mask])
         performances.append(performance)
-    return min(performances)
+    return min(performances) if greater_perf_is_better(metric_name) else max(performances)
 
 def stress_resilience(clean_y_pred: np.array, perturbed_y_pred: np.array):
     # TODO: make it work for regression as well
