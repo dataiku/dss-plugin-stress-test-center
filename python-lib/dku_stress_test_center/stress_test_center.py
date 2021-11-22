@@ -41,6 +41,7 @@ class FeaturePerturbationTest(StressTest):
         self.features = features
 
     def perturb_df(self, df: pd.DataFrame, target: str):
+        df = df.copy()
         X = df.loc[:, self.features].values
         y = df.loc[:, target].values
 
@@ -64,6 +65,7 @@ class SubpopulationShiftTest(StressTest):
     TEST_TYPE = DkuStressTestCenterConstants.SUBPOPULATION_SHIFT
 
     def perturb_df(self, df: pd.DataFrame, target: str):
+        df = df.copy()
         X = df.loc[:, df.columns != target].values
         y = df.loc[:, target].values
 
@@ -100,12 +102,7 @@ class StressTestGenerator(object):
             test = StressTest.create(test_name, test_config)
             self.tests[test.TEST_TYPE].append(test)
 
-    def compute_test_metrics(self, test: StressTest):
-        target = self.model_accessor.get_target_variable()
-        df = self.model_accessor.get_original_test_df(sample_fraction=self._sampling_proportion,
-                                                      random_state=self._random_state)
-        perturbed_df = test.perturb_df(df, target)
-        test.df_with_pred = self.model_accessor.predict_and_concatenate(perturbed_df)
+    def compute_test_metrics(self, test: StressTest, target: str):
         clean_df_with_pred = self._clean_df.loc[test.df_with_pred.index, :]
 
         clean_y_true = clean_df_with_pred[target]
@@ -119,19 +116,22 @@ class StressTestGenerator(object):
             ) # TODO: use get_evaluation_metric instead of hardcoded auc
         }
 
-    def predict_clean_df(self):
-        df = self.model_accessor.get_original_test_df(sample_fraction=self._sampling_proportion,
-                                                      random_state=self._random_state)
-        self._clean_df = self.model_accessor.predict_and_concatenate(df)
+    def predict_clean_df(self, df: pd.DataFrame):
+        self._clean_df = self.model_accessor.predict_and_concatenate(df.copy())
 
     def build_stress_metrics(self):
         metrics = defaultdict(lambda: {"metrics": {}})
 
-        self.predict_clean_df()
+        df = self.model_accessor.get_original_test_df(sample_fraction=self._sampling_proportion,
+                                                      random_state=self._random_state)
+        self.predict_clean_df(df)
 
+        target = self.model_accessor.get_target_variable()
         for test_type, tests in self.tests.items():
             for test in tests:
-                metrics[test_type]["metrics"].update(self.compute_test_metrics(test))
+                perturbed_df = test.perturb_df(df, target)
+                test.df_with_pred = self.model_accessor.predict_and_concatenate(perturbed_df)
+                metrics[test_type]["metrics"].update(self.compute_test_metrics(test, target))
 
         return metrics
 
