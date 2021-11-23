@@ -35,8 +35,7 @@ const versionId = webAppConfig['versionId'];
                     selected_features: new Set()
                 }
             },
-            samples: 1,
-            randomSeed: 65537
+            samples: 1
         };
         $scope.modelInfo = {};
 
@@ -69,8 +68,7 @@ const versionId = webAppConfig['versionId'];
         $scope.runAnalysis = function () {
             const { canRun, config } = $scope.checkTestConfig();
             if (!canRun) return;
-            const requestParams = Object.assign({}, $scope.tests);
-            requestParams.perturbations = config.reduce(function(fullParams, currentEntry) {
+            const perturbationsConfig = config.reduce(function(fullParams, currentEntry) {
                 const [testName, testSettings] = currentEntry;
                 fullParams[testName] = {
                     params: testSettings.params
@@ -83,7 +81,9 @@ const versionId = webAppConfig['versionId'];
 
             $scope.loading.results = true;
             $http.post(
-                getWebAppBackendUrl("stress-tests-config"), requestParams).then(function() {
+                getWebAppBackendUrl("stress-tests-config"),
+                { perturbations: perturbationsConfig, samples: $scope.tests.samples}
+            ).then(function() {
                 $http.get(getWebAppBackendUrl("compute"))
                     .then(function(response) {
                         $scope.loading.results = false;
