@@ -7,12 +7,13 @@ def get_performance_metric(metric_name: str):
 def greater_perf_is_better(metric_name: str):
     return True # TODO
 
-def worst_group_performance(metric_name: str, y_true: np.array, y_pred: np.array):
+def worst_group_performance(metric_name: str, y_true: np.array, y_pred: np.array,
+                            subpopulation: np.array):
     performances = []
-    target_classes = np.unique(y_true)
-    for target_class in target_classes:
-        class_mask = y_true == target_class
-        performance = get_performance_metric(metric_name)(y_true[class_mask], y_pred[class_mask])
+    subpopulation_values = np.unique(subpopulation)
+    for subpop in subpopulation_values:
+        subpop_mask = subpopulation == subpop
+        performance = get_performance_metric(metric_name)(y_true[subpop_mask], y_pred[subpop_mask])
         performances.append(performance)
     return min(performances) if greater_perf_is_better(metric_name) else max(performances)
 
