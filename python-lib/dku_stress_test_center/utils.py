@@ -8,8 +8,18 @@ class DkuStressTestCenterConstants(object):
     SUBPOPULATION_SHIFT = "SUBPOPULATION_SHIFT"
 
     TESTS = {
-        MissingValues.__name__: (MissingValues, FEATURE_PERTURBATION),
-        Scaling.__name__: (Scaling, FEATURE_PERTURBATION),
+        MissingValues.__name__: (
+            lambda **params: MissingValues(samples_fraction=params["samples_fraction"],
+                                           features_fraction=1,
+                                           value_to_put_in=None),
+            FEATURE_PERTURBATION
+        ),
+        Scaling.__name__: (
+            lambda **params: Scaling(samples_fraction=params["samples_fraction"],
+                                     scaling_factor=params["scaling_factor"],
+                                     features_fraction=1),
+            FEATURE_PERTURBATION
+        ),
         Adversarial.__name__: (Adversarial, FEATURE_PERTURBATION),
         Rebalance.__name__: (
             lambda **params: Rebalance({params["cl"]: params["samples_fraction"]}),
