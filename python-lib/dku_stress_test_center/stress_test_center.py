@@ -99,6 +99,7 @@ class StressTestGenerator(object):
 
     def set_config(self, config: dict):
         self._sampling_proportion = config["samples"]
+        self.random_state = config["randomSeed"]
         tests_config = config["perturbations"]
         self.tests = defaultdict(list)
         for test_name, test_config in tests_config.items():
