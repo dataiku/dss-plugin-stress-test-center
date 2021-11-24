@@ -17,18 +17,18 @@ const versionId = webAppConfig['versionId'];
         $scope.forms = {};
         $scope.tests = {
             perturbations: {
-                PRIOR_SHIFT: {
+                Rebalance: {
                     displayName: "Target distribution",
                     needsTargetClasses: true,
                     params: { samples_fraction: .5 }
                 },
-                MISSING_VALUES: {
+                MissingValues: {
                     displayName: "Missing values",
                     allowedFeatureTypes: ["NUMERIC", "CATEGORY"],
                     params: { samples_fraction: .5 },
                     selected_features: new Set()
                 },
-                SCALING: {
+                Scaling: {
                     displayName: "Scaling",
                     allowedFeatureTypes: ["NUMERIC"],
                     params: { samples_fraction: .5 },

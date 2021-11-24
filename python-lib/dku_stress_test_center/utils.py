@@ -1,47 +1,28 @@
 # -*- coding: utf-8 -*-
 from drift_dac.covariate_shift import MissingValues, Scaling, Adversarial, ReplaceWord, Typos, WordDeletion
 from drift_dac.prior_shift import Rebalance
-from drift_dac.perturbation_shared_utils import Shift
-
-
-def get_stress_test_name(shift: Shift):
-    if isinstance(shift, MissingValues):
-        return DkuStressTestCenterConstants.MISSING_VALUES
-    elif isinstance(shift, Scaling):
-        return DkuStressTestCenterConstants.SCALING
-    elif isinstance(shift, Adversarial):
-        return DkuStressTestCenterConstants.ADVERSARIAL
-    elif isinstance(shift, Rebalance):
-        return DkuStressTestCenterConstants.PRIOR_SHIFT
-    elif isinstance(shift, ReplaceWord):
-        return DkuStressTestCenterConstants.REPLACE_WORD
-    elif isinstance(shift, Typos):
-        return DkuStressTestCenterConstants.TYPOS
-    elif isinstance(shift,WordDeletion):
-        return DkuStressTestCenterConstants.WORD_DELETION
-    else:
-        raise NotImplementedError()
 
 
 class DkuStressTestCenterConstants(object):
-    CLEAN = 'CLEAN'
-    MISSING_VALUES = 'MISSING_VALUES'
-    SCALING = 'SCALING'
-    ADVERSARIAL = 'ADVERSARIAL'
-    PRIOR_SHIFT = 'PRIOR_SHIFT'
-    REPLACE_WORD = 'REPLACE_WORD'
-    TYPOS = 'TYPOS'
-    WORD_DELETION = 'WORD_DELETION'
+    FEATURE_PERTURBATION = "FEATURE_PERTURBATION"
+    SUBPOPULATION_SHIFT = "SUBPOPULATION_SHIFT"
 
-    PERTURBATION_BASED_STRESS_TYPES = [MISSING_VALUES, SCALING, ADVERSARIAL, REPLACE_WORD, TYPOS, WORD_DELETION]
-    SUBPOP_SHIFT_BASED_STRESS_TYPES = [PRIOR_SHIFT]
+    TESTS = {
+        MissingValues.__name__: (MissingValues, FEATURE_PERTURBATION),
+        Scaling.__name__: (Scaling, FEATURE_PERTURBATION),
+        Adversarial.__name__: (Adversarial, FEATURE_PERTURBATION),
+        Rebalance.__name__: (
+            lambda **params: Rebalance({params["cl"]: params["samples_fraction"]}),
+            SUBPOPULATION_SHIFT
+        ),
+        ReplaceWord.__name__: (ReplaceWord, FEATURE_PERTURBATION),
+        WordDeletion.__name__: (WordDeletion, FEATURE_PERTURBATION),
+        Typos.__name__: (Typos, FEATURE_PERTURBATION)
+    }
 
-    CONFIDENCE = 'confidence'
-    UNCERTAINTY = 'uncertainty'
-    ACCURACY_DROP = 'accuracy_drop'
-    ROBUSTNESS = 'robustness'
-    STRESS_TEST_TYPE = '_dku_stress_test_type'
-    DKU_ROW_ID = '_dku_row_identifier_'
+    NR_CRITICAL_SAMPLES = 5
+
+    PREDICTION = 'prediction'
 
     REGRESSION_TYPE = 'REGRESSION'
     CLASSIFICATION_TYPE = 'CLASSIFICATION'
