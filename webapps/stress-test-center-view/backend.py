@@ -14,7 +14,7 @@ from dataiku.doctor.posttraining.model_information_handler import PredictionMode
 from dku_stress_test_center.model_accessor import ModelAccessor
 from dku_stress_test_center.stress_test_center import StressTestGenerator
 from model_metadata import get_model_handler
-from dku_webapp import convert_numpy_int64_to_int, pretty_floats
+from dku_webapp import convert_numpy_int64_to_int
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,7 @@ def compute():
                 )
             )
 
-        return simplejson.dumps(pretty_floats(results), ignore_nan=True, default=convert_numpy_int64_to_int)
+        return simplejson.dumps(results, ignore_nan=True, default=convert_numpy_int64_to_int)
     except:
         logger.error("When trying to call compute endpoint: {}.".format(traceback.format_exc()))
         return "{}. Check backend log for more details.".format(traceback.format_exc()), 500
