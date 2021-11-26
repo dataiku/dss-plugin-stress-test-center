@@ -46,9 +46,9 @@ form input[type="text"] {
     transition: color 0.1s ease, border-color 0.5s ease;
 }
 
-form input[type="number"].ng-invalid,
-form input[type="search"].ng-invalid,
-form input[type="text"].ng-invalid {
+form input[type="number"].ng-invalid:not(:disabled),
+form input[type="search"].ng-invalid:not(:disabled),
+form input[type="text"].ng-invalid:not(:disabled) {
     border-color: var(--error-red);
 }
 
@@ -221,6 +221,10 @@ transform: translate(-125%, -50%);
     justify-content: flex-end;
 }
 
+.dku-btn--txt {
+    color: var(--blue);
+}
+
 /** WEBAPP: GENERAL **/
 
 .report-box {
@@ -284,6 +288,45 @@ transform: translate(-125%, -50%);
 
 .webapp-section__settings .spinner-div {
     height: calc(100% - 210px);
+}
+
+/* Custom key value list */
+.key-value-list__labels {
+    justify-content: space-between;
+    margin-right: 16px;
+}
+
+.key-value-list__labels_key, .key-value-element__key {
+    flex: 1 0 auto;
+}
+
+.key-value-list__labels_value, .key-value-element__value {
+    flex: 0 1 75px;
+}
+
+.key-value-element {
+    align-items: center;
+}
+
+.key-value-element + .key-value-element {
+    margin-top: 8px;
+}
+
+.key-value-element > .icon-long-arrow-right {
+    margin: 0 8px;
+}
+
+.key-value-element > .icon-trash {
+    margin-left: 8px;
+}
+
+.icon-trash {
+    color: var(--error-red);
+}
+
+.icon-trash:hover {
+    opacity: .5;
+    cursor: pointer;
 }
 
 /* Custom dropdown */

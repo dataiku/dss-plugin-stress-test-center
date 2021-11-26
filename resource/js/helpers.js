@@ -107,14 +107,22 @@ app.directive("customDropdown", function() {
             itemName: '@',
             item: '=',
             items: '=',
-            possibleValues: '='
+            possibleValues: '=',
+            taboo: "=",
+            index: "="
         },
         restrict: 'A',
         templateUrl:'/plugins/stress-test-center/resource/templates/custom-dropdown.html',
         link: function(scope, elem, attrs) {
-            scope.form.$setValidity("dropdown-not-empty", false);
+            const isInList = !!attrs.index; // TODO: tight coupling
+            const isMulti = !!attrs.items;
+            const validity = isInList ? "key-value-list-valid" : "dropdown-not-empty";
+            scope.form.$setValidity(validity, false);
 
-            const isMulti = attrs.items;
+            scope.notInTaboo = function(item) {
+                if (!scope.taboo) return true;
+                return item === scope.item || !(item in scope.taboo);
+            }
 
             scope.isSelected = function(value) {
                 if (isMulti) {
@@ -132,9 +140,12 @@ app.directive("customDropdown", function() {
                     }
                     event.stopPropagation();
                 } else {
+                    if (isInList) {
+                        scope.$emit("dropdownChange", scope.item, value, scope.index);
+                    }
                     scope.item = value;
                 }
-                scope.form.$setValidity("dropdown-not-empty", !!scope.item || !!(scope.items || {}).size);
+                scope.form.$setValidity(validity, !!scope.item || !!(scope.items || {}).size);
             }
 
             scope.getPlaceholder = function() {
@@ -160,6 +171,47 @@ app.directive("customDropdown", function() {
         }
     }
 })
+
+app.directive("keyValueList", function() {
+    return {
+        scope: {
+            keyOptions: '=',
+            map: '=',
+            keyLabel: '@',
+            keyItemLabel: '@',
+            valueLabel: '@',
+            form: "="
+        },
+        restrict: 'A',
+        templateUrl:'/plugins/stress-test-center/resource/templates/key-value-list.html',
+        link: function(scope) {
+            scope.keys = [];
+            scope.form.$setValidity("key-value-list-valid", false);
+
+            scope.deleteListItem = function(index) {
+                const removedKey = scope.keys.splice(index, 1)[0];
+                delete scope.map[removedKey];
+                scope.form.$setValidity(
+                    "key-value-list-valid",
+                    !!scope.keys.length && scope.keys.every(key => !!key)
+                );
+            }
+
+            scope.addListItem = function() {
+                if (!scope.keys.length) {
+                    scope.form.$setValidity("key-value-list-valid", true);
+                }
+                scope.keys.push(null);
+            }
+
+            scope.$on("dropdownChange", function(e, oldVal, newVal, idx) {
+                scope.keys[idx] = newVal;
+                scope.map[newVal] = scope.map[oldVal];
+                delete scope.map[oldVal];
+            });
+        }
+    }
+});
 
 app.directive("helpIcon", function () {
     return {
