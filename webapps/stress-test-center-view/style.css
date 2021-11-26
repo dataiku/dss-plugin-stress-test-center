@@ -354,7 +354,9 @@ transform: translate(-125%, -50%);
     left: 0;
     background: var(--white);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    width: 265px;
+    width: auto;
+    width: -moz-available;
+    width: -webkit-fill-available;
     max-height: 200px;
     z-index: 10;
 }
