@@ -142,7 +142,7 @@ app.directive("customDropdown", function() {
                 } else {
                     if (scope.item === value) return;
                     if (isInList) {
-                        scope.$emit("dropdownChange", scope.item, value, scope.index);
+                        scope.$emit("dropdownChange", scope.item, value, scope.index, elem);
                     }
                     scope.item = value;
                 }
@@ -175,7 +175,7 @@ app.directive("customDropdown", function() {
 
 // For now, key can only be one of a preset of values (dropdown)
 // & the value field only accepts numbers
-app.directive("keyValueList", function() {
+app.directive("keyValueList", function($timeout) {
     return {
         scope: {
             keyOptions: '=',
@@ -210,10 +210,14 @@ app.directive("keyValueList", function() {
                 scope.keys.push(null);
             }
 
-            scope.$on("dropdownChange", function(e, oldVal, newVal, idx) {
+            scope.$on("dropdownChange", function(e, oldVal, newVal, idx, keyElem) {
                 scope.keys[idx] = newVal;
                 scope.map[newVal] = scope.map[oldVal];
                 delete scope.map[oldVal];
+                $timeout(function() {
+                    const valueElem = keyElem.parent().find(".key-value-element__value")[0];
+                    valueElem.focus();
+                });
             });
         }
     }
