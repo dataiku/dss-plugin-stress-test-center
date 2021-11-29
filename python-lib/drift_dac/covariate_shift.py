@@ -710,10 +710,13 @@ class Outliers(Shift):
 
 
 class Scaling(Shift):
-    """ Scale a portion of samples and features by a random value in [10, 100, 1000].
+    """ Scale a portion of samples and features by a value, that can be either randomly selected
+    or set.
     Args:
         samples_fraction (float): proportion of samples to perturb.
         features_fraction (float): proportion of features to perturb.
+        scaling_factor (float, default None): value to use for the scaling. If None, a random value is picked
+        amongst [10, 100, 1000].
     Attributes:
         samples_fraction (float): proportion of samples to perturb.
         features_fraction (float): proportion of features to perturb.
@@ -721,12 +724,19 @@ class Scaling(Shift):
         feature_type (int): identifier of the type of feature for which this perturbation is valid
             (see PerturbationConstants).
     """
-    def __init__(self, samples_fraction=1.0, features_fraction=1.0):
+    def __init__(self, samples_fraction=1.0, features_fraction=1.0, scaling_factor=None):
         super(Scaling, self).__init__()
         self.samples_fraction = samples_fraction
         self.features_fraction = features_fraction
+        self._scaling_factor = scaling_factor
         self.name = 'scaling_shift_%.2f_%.2f' % (samples_fraction, features_fraction)
         self.feature_type = PerturbationConstants.NUMERIC
+
+    @property
+    def scaling_factor(self):
+        if self._scaling_factor is None:
+            return np.random.choice([10, 100, 1000])
+        return self._scaling_factor
 
     def transform(self, X, y=None):
         """ Apply the perturbation to a dataset.
@@ -745,9 +755,7 @@ class Scaling(Shift):
         row_indices, col_indices = np.transpose(np.array(self.shifted_indices)[np.newaxis]), \
                                    np.array(self.shifted_features)[np.newaxis]
 
-        scale_factor = np.random.choice([10, 100, 1000])
-
-        Xt[row_indices, col_indices] *= scale_factor
+        Xt[row_indices, col_indices] *= self.scaling_factor
 
         return Xt, yt
 
