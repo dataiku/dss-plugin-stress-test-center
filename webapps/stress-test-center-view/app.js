@@ -31,7 +31,10 @@ const versionId = webAppConfig['versionId'];
                 Scaling: {
                     displayName: "Scaling",
                     allowedFeatureTypes: ["NUMERIC"],
-                    params: { samples_fraction: .5 },
+                    params: {
+                        samples_fraction: .5,
+                        scaling_factor: 10
+                    },
                     selected_features: new Set()
                 }
             },
