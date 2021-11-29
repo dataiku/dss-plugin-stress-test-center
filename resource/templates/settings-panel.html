@@ -38,12 +38,13 @@
         <help-icon help-text="Modifies the target distribution by resampling"></help-icon>
     </div>
     <form name="forms.Rebalance" class="settings-subsection__form"
-          ng-if="tests.perturbations.Rebalance.$activated" ng-submit="runAnalysis()">
+          ng-show="tests.perturbations.Rebalance.$activated" ng-submit="runAnalysis()">
         <div key-value-list map="tests.perturbations.Rebalance.params.priors"
              key-options="modelInfo.targetClasses"
              key-label="Target classes"
              key-item-label="class"
              value-label="Proportion"
+             value-range="[0,1]"
              form="forms.Rebalance"
              class="settings-subsection__form_field">
         </div>
@@ -62,7 +63,7 @@
         <help-icon help-text="Randomly inserts missing values"></help-icon>
     </div>
     <form name="forms.MissingValues" class="settings-subsection__form"
-          ng-if="tests.perturbations.MissingValues.$activated" ng-submit="runAnalysis()">
+          ng-show="tests.perturbations.MissingValues.$activated" ng-submit="runAnalysis()">
         <div custom-dropdown
              form="forms.MissingValues"
              possible-values="tests.perturbations.MissingValues.availableColumns"
@@ -93,7 +94,7 @@
         <help-icon help-text="Changes the order of magnitude of each feature by some random scaling"></help-icon>
     </div>
     <form name="forms.Scaling" class="settings-subsection__form"
-          ng-if="tests.perturbations.Scaling.$activated" ng-submit="runAnalysis()">
+          ng-show="tests.perturbations.Scaling.$activated" ng-submit="runAnalysis()">
         <div custom-dropdown
              form="forms.Scaling"
              possible-values="tests.perturbations.Scaling.availableColumns"

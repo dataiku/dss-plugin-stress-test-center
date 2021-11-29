@@ -173,6 +173,8 @@ app.directive("customDropdown", function() {
     }
 })
 
+// For now, key can only be one of a preset of values (dropdown)
+// & the value field only accepts numbers
 app.directive("keyValueList", function() {
     return {
         scope: {
@@ -181,12 +183,14 @@ app.directive("keyValueList", function() {
             keyLabel: '@',
             keyItemLabel: '@',
             valueLabel: '@',
+            valueRange: '@',
             form: "="
         },
         restrict: 'A',
         templateUrl:'/plugins/stress-test-center/resource/templates/key-value-list.html',
         link: function(scope) {
             scope.keys = [null];
+            [ scope.valueMin, scope.valueMax ] = scope.$eval(scope.valueRange) || [null, null];
             scope.form.$setValidity("key-value-list-valid", false);
 
             scope.deleteListItem = function(index) {

@@ -17,6 +17,8 @@
             <input type="number"
                    ng-model="map[keys[$index]]"
                    ng-disabled="!keys[$index]"
+                   min="{{ valueMin }}"
+                   max="{{ valueMax }}"
                    class="key-value-element__value" required>
             </input>
             <i class="icon-trash" ng-click="deleteListItem($index)" ng-class="{'icon--hidden': !$index}"></i>
