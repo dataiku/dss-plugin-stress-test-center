@@ -140,6 +140,7 @@ app.directive("customDropdown", function() {
                     }
                     event.stopPropagation();
                 } else {
+                    if (scope.item === value) return;
                     if (isInList) {
                         scope.$emit("dropdownChange", scope.item, value, scope.index);
                     }
@@ -185,10 +186,11 @@ app.directive("keyValueList", function() {
         restrict: 'A',
         templateUrl:'/plugins/stress-test-center/resource/templates/key-value-list.html',
         link: function(scope) {
-            scope.keys = [];
+            scope.keys = [null];
             scope.form.$setValidity("key-value-list-valid", false);
 
             scope.deleteListItem = function(index) {
+                if (!index) return;
                 const removedKey = scope.keys.splice(index, 1)[0];
                 delete scope.map[removedKey];
                 scope.form.$setValidity(

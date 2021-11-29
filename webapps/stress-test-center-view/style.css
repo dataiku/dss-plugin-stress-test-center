@@ -223,6 +223,12 @@ transform: translate(-125%, -50%);
 
 .dku-btn--txt {
     color: var(--blue);
+    background: none;
+    border: none;
+}
+
+.dku-btn--txt:hover {
+    color: var(--blue-lighten-3);
 }
 
 /** WEBAPP: GENERAL **/
