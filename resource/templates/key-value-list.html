@@ -19,6 +19,7 @@
                    ng-disabled="!keys[$index]"
                    min="{{ valueMin }}"
                    max="{{ valueMax }}"
+                   step="any"
                    class="key-value-element__value" required>
             </input>
             <i class="icon-trash" ng-click="deleteListItem($index)" ng-class="{'icon--hidden': !$index}"></i>
