@@ -22,8 +22,11 @@
 <div ng-if="results && !loading.results">
     <div class="webapp__subsection" ng-if="results.SUBPOPULATION_SHIFT">
         <div class="grand-title-b results-subsection__header">
-            Subpopulation shift perturbations
+            Subpopulation shifts
         </div>
+        <p class="text-lighter">
+            These stress tests resample the dataset to match a desired frequency for specific subpopulations from a categorical column of the dataset.
+        </p>
         <div class="results__subsection">
             <div class="small-title-b">
                 Metrics
@@ -32,7 +35,7 @@
                 <thead>
                     <tr>
                         <th scope="col" class="fake-cell"></th>
-                        <th scope="col" class="cell small-title-b top-cell--blue">Performance</th>
+                        <th scope="col" class="cell small-title-b top-cell--blue">Performance variation</th>
                         <th scope="col" class="cell small-title-b top-cell--orange">Robustness</th>
                     </tr>
                 </thead>
@@ -49,8 +52,11 @@
 
     <div class="webapp__subsection" ng-if="results.FEATURE_PERTURBATION">
         <div class="grand-title-b results-subsection__header">
-            Sample perturbations
+            Feature corruptions
         </div>
+        <p class="text-lighter">
+            These stress tests corrupt the value of one or several features across randomly sampled rows.
+        </p>
         <div class="results__subsection">
             <div class="small-title-b">
                 Metrics
@@ -59,7 +65,7 @@
                 <thead>
                     <tr>
                         <th scope="col" class="fake-cell"></th>
-                        <th scope="col" class="cell small-title-b top-cell--blue">Performance</th>
+                        <th scope="col" class="cell small-title-b top-cell--blue">Performance variation</th>
                         <th scope="col" class="cell small-title-b top-cell--orange">Robustness</th>
                     </tr>
                 </thead>
