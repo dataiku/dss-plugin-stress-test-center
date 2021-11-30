@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
-from dku_stress_test_center.metrics import worst_group_performance, performance_variation, stress_resilience
+from dku_stress_test_center.metrics import Metric, worst_group_performance, performance_variation, stress_resilience
 from drift_dac.perturbation_shared_utils import Shift
 
 class StressTest(object):
@@ -15,8 +15,9 @@ class StressTest(object):
     def perturb_df(self, df: pd.DataFrame):
         raise NotImplementedError()
 
-    def compute_metrics(self, perf_metric: str, clean_y_true: np.array, clean_y_pred: np.array,
-                        perturbed_y_true: np.array, perturbed_y_pred: np.array):
+    def compute_metrics(self, perf_metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
+                        clean_y_pred: np.array, perturbed_y_pred: np.array,
+                        clean_probas: np.array, perturbed_probas: np.array):
         raise NotImplementedError()
 
 
@@ -36,12 +37,14 @@ class FeaturePerturbationTest(StressTest):
 
         return df
 
-    def compute_metrics(self, perf_metric: str, clean_y_true: np.array, clean_y_pred: np.array,
-                        perturbed_y_true: np.array, perturbed_y_pred: np.array):
+    def compute_metrics(self, perf_metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
+                        clean_y_pred: np.array, perturbed_y_pred: np.array,
+                        clean_probas: np.array, perturbed_probas: np.array):
         return {
             "robustness": stress_resilience(clean_y_pred, perturbed_y_pred),
-            "performance_variation": performance_variation(perf_metric, clean_y_true, clean_y_pred,
-                                                           perturbed_y_true, perturbed_y_pred)
+            "performance_variation": performance_variation(perf_metric, clean_y_true, perturbed_y_true,
+                                                           clean_y_pred, perturbed_y_pred,
+                                                           clean_probas, perturbed_probas)
         }
 
 
@@ -63,13 +66,15 @@ class SubpopulationShiftTest(StressTest):
 
         return df
 
-    def compute_metrics(self, perf_metric: str, clean_y_true: np.array, clean_y_pred: np.array,
-                        perturbed_y_true: np.array, perturbed_y_pred: np.array):
+    def compute_metrics(self, perf_metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
+                        clean_y_pred: np.array, perturbed_y_pred: np.array,
+                        clean_probas: np.array, perturbed_probas: np.array):
         return {
-            "robustness": worst_group_performance(perf_metric, perturbed_y_true, perturbed_y_pred,
-                                                  perturbed_y_true),
-            "performance_variation": performance_variation(perf_metric, clean_y_true, clean_y_pred,
-                                                           perturbed_y_true, perturbed_y_pred)
+            "robustness": worst_group_performance(perf_metric, perturbed_y_true, perturbed_y_true,
+                                                  perturbed_y_pred, perturbed_probas),
+            "performance_variation": performance_variation(perf_metric, clean_y_true, perturbed_y_true,
+                                                           clean_y_pred, perturbed_y_pred,
+                                                           clean_probas, perturbed_probas)
         }
 
 
@@ -110,15 +115,21 @@ class StressTestGenerator(object):
         clean_df_with_pred = self._clean_df.loc[test.df_with_pred.index, :]
 
         target = self.model_accessor.get_target_variable()
-        clean_y_true = clean_df_with_pred[target]
-        clean_y_pred = clean_df_with_pred[DkuStressTestCenterConstants.PREDICTION]
-        perturbed_y_true = test.df_with_pred[target]
-        perturbed_y_pred = test.df_with_pred[DkuStressTestCenterConstants.PREDICTION]
+        target_map = self.model_accessor.get_target_map()
+        clean_y_true = clean_df_with_pred[target].replace(target_map)
+        perturbed_y_true = test.df_with_pred[target].replace(target_map)
+        clean_y_pred = clean_df_with_pred[DkuStressTestCenterConstants.PREDICTION].replace(target_map)
+        perturbed_y_pred = test.df_with_pred[DkuStressTestCenterConstants.PREDICTION].replace(target_map)
+
+        clean_probas = clean_df_with_pred.filter(regex=r'^proba_', axis=1).values
+        perturbed_probas = test.df_with_pred.filter(regex=r'^proba_', axis=1).values
+
 
         return {
             test.shift.__class__.__name__: test.compute_metrics(
-                "auc", clean_y_true, clean_y_pred, perturbed_y_true, perturbed_y_pred
-            ) # TODO: use get_evaluation_metric instead of hardcoded auc
+                self.model_accessor.get_metric(), clean_y_true.values, perturbed_y_true.values,
+                clean_y_pred.values, perturbed_y_pred.values, clean_probas, perturbed_probas
+            )
         }
 
     def predict_clean_df(self, df: pd.DataFrame):

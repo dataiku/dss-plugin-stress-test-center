@@ -2,6 +2,7 @@
 import logging
 import numpy as np
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
+from dku_stress_test_center.metrics import Metric
 
 logger = logging.getLogger(__name__)
 
@@ -14,11 +15,7 @@ class ModelAccessor(object):
         """
         Wrap the prediction type accessor of the model
         """
-        if self.model_handler.get_prediction_type() in DkuStressTestCenterConstants.DKU_CLASSIFICATION_TYPE:
-            return DkuStressTestCenterConstants.CLASSIFICATION_TYPE
-        if DkuStressTestCenterConstants.REGRESSION_TYPE in self.model_handler.get_prediction_type():
-            return DkuStressTestCenterConstants.REGRESSION_TYPE
-        return DkuStressTestCenterConstants.CLUSTERING_TYPE
+        return self.model_handler.get_prediction_type()
 
     def get_target_variable(self):
         """
@@ -27,12 +24,12 @@ class ModelAccessor(object):
         return self.model_handler.get_target_variable()
 
     def get_target_classes(self):
-        if self.get_prediction_type() == DkuStressTestCenterConstants.REGRESSION_TYPE:
+        if self.get_prediction_type() == DkuStressTestCenterConstants.REGRESSION:
             return []
-        return list(self.model_handler.get_target_map().keys())
+        return list(self.get_target_map().keys())
 
-    def get_evaluation_metric(self):
-        return self.model_handler.get_modeling_params["metrics"]["evaluationMetric"]
+    def get_target_map(self):
+        return self.model_handler.get_target_map()
 
     def get_original_test_df(self, sample_fraction, random_state):
         np.random.seed(random_state)
@@ -54,3 +51,7 @@ class ModelAccessor(object):
     def predict_and_concatenate(self, df):
         df_with_pred = self.model_handler.predict_and_concatenate(df)
         return df_with_pred.dropna(subset=[DkuStressTestCenterConstants.PREDICTION])
+
+    def get_metric(self):
+        return Metric(self.model_handler.get_modeling_params()["metrics"],
+                       self.get_prediction_type())
