@@ -63,14 +63,14 @@ class Metric(object):
                 make_lift_score(metrics)(y_true, probas),
             self.LOG_LOSS: lambda y_true, y_pred, probas: log_loss(y_true, probas),
             self.ROC_AUC: lambda y_true, y_pred, probas: mroc_auc_score(y_true, probas),
-            self.EVS: lambda y_true, y_pred, probas: explained_variance_score(y_true, probas),
+            self.EVS: lambda y_true, y_pred, probas: explained_variance_score(y_true, y_pred),
             self.MAPE: lambda y_true, y_pred, probas:\
-                mean_absolute_percentage_error(y_true, probas),
-            self.MAE: lambda y_true, y_pred, probas: mean_absolute_error(y_true, probas),
-            self.MSE: lambda y_true, y_pred, probas: mean_squared_error(y_true, probas),
-            self.RMSE: lambda y_true, y_pred, probas: sqrt(mean_squared_error(y_true, probas)),
-            self.RMSLE: lambda y_true, y_pred, probas: rmsle_score(y_true, probas),
-            self.R2: lambda y_true, y_pred, probas: r2_score(y_true, probas),
+                mean_absolute_percentage_error(y_true, y_pred),
+            self.MAE: lambda y_true, y_pred, probas: mean_absolute_error(y_true, y_pred),
+            self.MSE: lambda y_true, y_pred, probas: mean_squared_error(y_true, y_pred),
+            self.RMSE: lambda y_true, y_pred, probas: sqrt(mean_squared_error(y_true, y_pred)),
+            self.RMSLE: lambda y_true, y_pred, probas: rmsle_score(y_true, y_pred),
+            self.R2: lambda y_true, y_pred, probas: r2_score(y_true, y_pred),
         }.get(self.name)
 
         if perf_metric is None:
@@ -89,9 +89,15 @@ def worst_group_performance(metric: Metric, subpopulation: np.array, y_true: np.
     return min(performances) if metric.is_greater_better() else max(performances)
 
 
-def stress_resilience(clean_y_pred: np.array, perturbed_y_pred: np.array):
-    # TODO: make it work for regression as well
+def stress_resilience_classification(clean_y_pred: np.array, perturbed_y_pred: np.array):
     return (clean_y_pred == perturbed_y_pred).sum() / len(clean_y_pred)
+
+
+def stress_resilience_regression(clean_y_pred: np.array, perturbed_y_pred: np.array,
+                                 clean_y_true: np.array):
+    clean_abs_error = np.abs(clean_y_pred - clean_y_true)
+    perturbed_abs_error = np.abs(perturbed_y_pred - clean_y_true)
+    return np.count_nonzero(perturbed_abs_error <= clean_abs_error) / len(clean_y_true)
 
 
 def performance_variation(metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,

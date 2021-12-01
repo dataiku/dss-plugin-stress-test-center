@@ -107,6 +107,7 @@ const versionId = webAppConfig['versionId'];
             .then(function(response) {
                 $scope.loading.modelInfo = false;
                 $scope.modelInfo.targetClasses = response.data["target_classes"];
+                $scope.modelInfo.isRegression = !$scope.modelInfo.targetClasses.length;
 
                 features = response.data["features"];
 
@@ -123,7 +124,7 @@ const versionId = webAppConfig['versionId'];
                         }
                     }
                     if (testConfig.needsTargetClasses) {
-                        if (!$scope.modelInfo.targetClasses.length) { // model is a regression
+                        if ($scope.modelInfo.isRegression) {
                             delete $scope.tests.perturbations[testName];
                         }
                     }

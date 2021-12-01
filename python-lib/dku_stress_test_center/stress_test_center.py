@@ -3,7 +3,8 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
-from dku_stress_test_center.metrics import Metric, worst_group_performance, performance_variation, stress_resilience
+from dku_stress_test_center.metrics import Metric, worst_group_performance, performance_variation,\
+    stress_resilience_classification, stress_resilience_regression
 from drift_dac.perturbation_shared_utils import Shift
 
 class StressTest(object):
@@ -19,6 +20,10 @@ class StressTest(object):
                         clean_y_pred: np.array, perturbed_y_pred: np.array,
                         clean_probas: np.array, perturbed_probas: np.array):
         raise NotImplementedError()
+
+    @property
+    def name(self):
+        return self.shift.__class__.__name__
 
 
 class FeaturePerturbationTest(StressTest):
@@ -40,8 +45,12 @@ class FeaturePerturbationTest(StressTest):
     def compute_metrics(self, perf_metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
                         clean_y_pred: np.array, perturbed_y_pred: np.array,
                         clean_probas: np.array, perturbed_probas: np.array):
+        if perf_metric.pred_type == DkuStressTestCenterConstants.REGRESSION:
+            robustness = stress_resilience_regression(clean_y_pred, perturbed_y_pred, clean_y_true)
+        else:
+            robustness = stress_resilience_classification(clean_y_pred, perturbed_y_pred)
         return {
-            "robustness": stress_resilience(clean_y_pred, perturbed_y_pred),
+            "robustness": robustness,
             "performance_variation": performance_variation(perf_metric, clean_y_true, perturbed_y_true,
                                                            clean_y_pred, perturbed_y_pred,
                                                            clean_probas, perturbed_probas)
@@ -126,7 +135,7 @@ class StressTestGenerator(object):
 
 
         return {
-            test.shift.__class__.__name__: test.compute_metrics(
+            test.name: test.compute_metrics(
                 self.model_accessor.get_metric(), clean_y_true.values, perturbed_y_true.values,
                 clean_y_pred.values, perturbed_y_pred.values, clean_probas, perturbed_probas
             )
@@ -150,35 +159,52 @@ class StressTestGenerator(object):
 
         return metrics
 
-    def get_critical_samples(self, test_type: str,
-                             nr_samples: int = DkuStressTestCenterConstants.NR_CRITICAL_SAMPLES):
-
+    def _get_true_class_proba_columns(self, test_type: str):
         target = self.model_accessor.get_target_variable()
         true_probas_mask = pd.get_dummies(self._clean_df[target], prefix="proba", dtype=bool)
         true_class_probas = pd.DataFrame({
             0: self._clean_df[true_probas_mask.columns].values[true_probas_mask],
         }, index=true_probas_mask.index)
 
-        for idx, test in enumerate(self.tests[test_type]):
+        for test in self.tests[test_type]:
             perturbed_probas = test.df_with_pred[true_probas_mask.columns]
             cropped_true_class_probas = true_probas_mask.loc[perturbed_probas.index, :]
-            true_class_probas[idx+1] = pd.Series(
+            true_class_probas[test.name] = pd.Series(
                 perturbed_probas.values[cropped_true_class_probas],
                 index=perturbed_probas.index
             )
-        true_class_probas.dropna(inplace=True, how='all')
-        uncertainties = true_class_probas.std(axis=1)
-        indexes_to_keep = uncertainties.nlargest(nr_samples).index
 
-        if indexes_to_keep.empty:
+        return true_class_probas
+
+    def _get_prediction_columns(self, test_type: str):
+        predictions = pd.DataFrame({
+            0: self._clean_df[DkuStressTestCenterConstants.PREDICTION]
+        })
+
+
+        for test in self.tests[test_type]:
+            predictions[test.name] = test.df_with_pred[DkuStressTestCenterConstants.PREDICTION]
+        return predictions
+
+    def get_critical_samples(self, test_type: str,
+                             nr_samples: int = DkuStressTestCenterConstants.NR_CRITICAL_SAMPLES):
+        if self.model_accessor.get_prediction_type() == DkuStressTestCenterConstants.REGRESSION:
+            columns = self._get_prediction_columns(test_type)
+        else:
+            columns = self._get_true_class_proba_columns(test_type)
+        columns.dropna(inplace=True)
+        if columns.empty:
             return {
                 "uncertainties": [],
-                "mean_true_proba": [],
+                "means": [],
                 "features": []
             }
 
+        uncertainties = columns.std(axis=1)
+        indexes_to_keep = uncertainties.nlargest(nr_samples).index
+
         critical_uncertainties = uncertainties.loc[indexes_to_keep]
-        critical_true_proba_means = true_class_probas.loc[indexes_to_keep, :].mean(axis=1)
+        critical_means = columns.loc[indexes_to_keep, :].mean(axis=1)
         critical_samples = self.model_accessor.get_original_test_df(
             sample_fraction=self._sampling_proportion,
             random_state=self._random_state
@@ -186,6 +212,6 @@ class StressTestGenerator(object):
 
         return {
             "uncertainties": critical_uncertainties.tolist(),
-            "mean_true_proba": critical_true_proba_means.tolist(),
+            "means": critical_means.tolist(),
             "features": critical_samples.to_dict(orient='records')
         }
