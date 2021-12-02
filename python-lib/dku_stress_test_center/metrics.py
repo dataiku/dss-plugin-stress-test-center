@@ -1,7 +1,8 @@
 import numpy as np
-from sklearn.metrics import accuracy_score, recall_score, f1_score, precision_score, log_loss,\
+from math import sqrt
+from sklearn.metrics import accuracy_score, recall_score, f1_score, precision_score,\
     explained_variance_score, mean_absolute_error, mean_squared_error, r2_score
-from dataiku.doctor.utils.metrics import rmsle_score, mroc_auc_score, mean_absolute_percentage_error
+from dataiku.doctor.utils.metrics import rmsle_score, mroc_auc_score, mean_absolute_percentage_error, log_loss
 from dataiku.doctor.prediction.common import make_lift_score, make_cost_matrix_score
 
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
@@ -58,9 +59,9 @@ class Metric(object):
             self.PRECISION: lambda y_true, y_pred, probas:\
                 precision_score(y_true, y_pred, **extra_params),
             self.COST_MATRIX: lambda y_true, y_pred, probas:\
-                make_cost_matrix_score(metrics)(y_true, y_pred) / len(y_true),
+                make_cost_matrix_score(self.config)(y_true, y_pred) / len(y_true),
             self.CUMULATIVE_LIFT: lambda y_true, y_pred, probas:\
-                make_lift_score(metrics)(y_true, probas),
+                make_lift_score(self.config)(y_true, probas),
             self.LOG_LOSS: lambda y_true, y_pred, probas: log_loss(y_true, probas),
             self.ROC_AUC: lambda y_true, y_pred, probas: mroc_auc_score(y_true, probas),
             self.EVS: lambda y_true, y_pred, probas: explained_variance_score(y_true, y_pred),
@@ -84,7 +85,9 @@ def worst_group_performance(metric: Metric, subpopulation: np.array, y_true: np.
     subpopulation_values = np.unique(subpopulation)
     for subpop in subpopulation_values:
         subpop_mask = subpopulation == subpop
-        performance = metric.get_performance_metric(y_true[subpop_mask], y_pred[subpop_mask], probas)
+        performance = metric.get_performance_metric(
+            y_true[subpop_mask], y_pred[subpop_mask], probas[subpop_mask]
+        )
         performances.append(performance)
     return min(performances) if metric.is_greater_better() else max(performances)
 

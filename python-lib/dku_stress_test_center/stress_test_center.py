@@ -136,8 +136,8 @@ class StressTestGenerator(object):
 
         return {
             test.name: test.compute_metrics(
-                self.model_accessor.get_metric(), clean_y_true.values, perturbed_y_true.values,
-                clean_y_pred.values, perturbed_y_pred.values, clean_probas, perturbed_probas
+                self.model_accessor.get_metric(), clean_y_true, perturbed_y_true,
+                clean_y_pred, perturbed_y_pred, clean_probas, perturbed_probas
             )
         }
 
