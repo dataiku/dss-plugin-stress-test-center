@@ -162,8 +162,10 @@ class StressTestGenerator(object):
     def _get_true_class_proba_columns(self, test_type: str):
         target = self.model_accessor.get_target_variable()
         true_probas_mask = pd.get_dummies(self._clean_df[target], prefix="proba", dtype=bool)
+
+        uncorrupted_probas = self._clean_df[true_probas_mask.columns].values[true_probas_mask]
         true_class_probas = pd.DataFrame({
-            0: self._clean_df[true_probas_mask.columns].values[true_probas_mask],
+            DkuStressTestCenterConstants.UNCORRUPTED: uncorrupted_probas,
         }, index=true_probas_mask.index)
 
         for test in self.tests[test_type]:
@@ -177,8 +179,9 @@ class StressTestGenerator(object):
         return true_class_probas
 
     def _get_prediction_columns(self, test_type: str):
+        uncorrupted_predictions = self._clean_df[DkuStressTestCenterConstants.PREDICTION]
         predictions = pd.DataFrame({
-            0: self._clean_df[DkuStressTestCenterConstants.PREDICTION]
+            DkuStressTestCenterConstants.UNCORRUPTED: uncorrupted_predictions
         })
 
 

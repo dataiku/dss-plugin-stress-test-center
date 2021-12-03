@@ -32,7 +32,8 @@ class DkuStressTestCenterConstants(object):
 
     NR_CRITICAL_SAMPLES = 5
 
-    PREDICTION = 'prediction'
+    PREDICTION = "prediction"
+    UNCORRUPTED = "_dku_stress_test_uncorrupted"
 
     MULTICLASS = "MULTICLASS"
     REGRESSION = "REGRESSION"
