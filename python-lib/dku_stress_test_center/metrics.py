@@ -25,7 +25,7 @@ class Metric(object):
     R2="R2"
     CUSTOM="CUSTOM"
     GREATER_IS_BETTER={ACCURACY, PRECISION, RECALL, F1, COST_MATRIX, ROC_AUC, CUMULATIVE_LIFT, EVS, R2}
-    CANNOT_BE_USED={ROC_AUC, CUSTOM}
+    CANNOT_BE_USED={ROC_AUC, CUSTOM, CUMULATIVE_LIFT}
 
     def __init__(self, config: dict, pred_type: str):
         self.pred_type = pred_type
