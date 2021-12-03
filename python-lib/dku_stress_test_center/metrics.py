@@ -25,6 +25,7 @@ class Metric(object):
     R2="R2"
     CUSTOM="CUSTOM"
     GREATER_IS_BETTER={ACCURACY, PRECISION, RECALL, F1, COST_MATRIX, ROC_AUC, CUMULATIVE_LIFT, EVS, R2}
+    CANNOT_BE_USED={ROC_AUC, CUSTOM}
 
     def __init__(self, config: dict, pred_type: str):
         self.pred_type = pred_type
@@ -33,7 +34,7 @@ class Metric(object):
     @property
     def name(self):
         metric_name = self.config["evaluationMetric"]
-        if metric_name == self.CUSTOM:
+        if metric_name in self.CANNOT_BE_USED:
             if self.pred_type == DkuStressTestCenterConstants.REGRESSION:
                 return self.R2
             return self.ACCURACY
