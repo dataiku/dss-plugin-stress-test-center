@@ -565,7 +565,11 @@ class MissingValues(Shift):
             X (numpy.ndarray): feature data.
             y (numpy.ndarray): target data.
         """
-        Xt = copy.deepcopy(X)
+        if X.dtype <= np.int and self.value_to_put_in is None:
+            Xt = X.astype(float)
+        else:
+            Xt = copy.deepcopy(X)
+
         yt = y
 
         self.shifted_indices = sample_random_indices(Xt.shape[0], self.samples_fraction)
