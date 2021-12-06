@@ -207,13 +207,13 @@ transform: translate(-125%, -50%);
     color: var(--white);
 }
 
-.dku-btn-primary:disabled, .dku-btn-primary:active:hover {
+.dku-btn-primary:disabled, .dku-btn-primary:disabled:active {
     background: var(--blue-lighten-4);
     cursor: not-allowed;
 }
 
 .dku-btn-primary:active {
-    background: #3194fc;
+    background: var(--blue-darken-4);
 }
 
 .dku-btn-container--right-align {
@@ -228,7 +228,11 @@ transform: translate(-125%, -50%);
 }
 
 .dku-btn--txt:hover {
-    color: var(--blue-lighten-3);
+    background: var(--blue-lighten-5);
+}
+
+.dku-btn--txt:active {
+    background: var(--blue-lighten-4);
 }
 
 /** WEBAPP: GENERAL **/
@@ -308,6 +312,10 @@ transform: translate(-125%, -50%);
 
 .key-value-list__labels_value, .key-value-element__value {
     flex: 0 1 75px;
+}
+
+.key-value-list {
+    margin-bottom: 8px;
 }
 
 .key-value-element {

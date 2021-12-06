@@ -1,28 +1,30 @@
 <div class="control-group">
-    <div class="key-value-list__labels flex">
-        <div class="key-value-list__labels_key">{{ keyLabel }}</div>
-        <div class="key-value-list__labels_value">{{ valueLabel }}</div>
-    </div>
-    <div class="key-value-list__elements">
-        <div class="flex key-value-element" ng-repeat="key in keys track by $index">
-            <div custom-dropdown
-                 form="form"
-                 item="keys[$index]"
-                 possible-values="keyOptions"
-                 item-name="{{ keyItemLabel }}"
-                 taboo="map"
-                 index="$index"
-                 class="key-value-element__key"></div>
-            <i class="icon-long-arrow-right"></i>
-            <input type="number"
-                   ng-model="map[keys[$index]]"
-                   ng-disabled="!keys[$index]"
-                   min="{{ valueMin }}"
-                   max="{{ valueMax }}"
-                   step="any"
-                   class="key-value-element__value" required>
-            </input>
-            <i class="icon-trash" ng-click="deleteListItem($index)" ng-class="{'icon--hidden': !$index}"></i>
+    <div class="key-value-list">
+        <div class="key-value-list__labels flex">
+            <div class="key-value-list__labels_key">{{ keyLabel }}</div>
+            <div class="key-value-list__labels_value">{{ valueLabel }}</div>
+        </div>
+        <div class="key-value-list__elements">
+            <div class="flex key-value-element" ng-repeat="key in keys track by $index">
+                <div custom-dropdown
+                    form="form"
+                    item="keys[$index]"
+                    possible-values="keyOptions"
+                    item-name="{{ keyItemLabel }}"
+                    taboo="map"
+                    index="$index"
+                    class="key-value-element__key"></div>
+                <i class="icon-long-arrow-right"></i>
+                <input type="number"
+                    ng-model="map[keys[$index]]"
+                    ng-disabled="!keys[$index]"
+                    min="{{ valueMin }}"
+                    max="{{ valueMax }}"
+                    step="any"
+                    class="key-value-element__value" required>
+                </input>
+                <i class="icon-trash" ng-click="deleteListItem($index)" ng-class="{'icon--hidden': !$index}"></i>
+            </div>
         </div>
     </div>
     <button type="button" class="dku-btn dku-btn--txt" ng-click="addListItem()">
