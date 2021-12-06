@@ -306,11 +306,11 @@ transform: translate(-125%, -50%);
     margin-right: 16px;
 }
 
-.key-value-list__labels_key, .key-value-element__key {
+.key-value-label__key, .key-value-element__key {
     flex: 1 0 auto;
 }
 
-.key-value-list__labels_value, .key-value-element__value {
+.key-value-label__value, .key-value-element__value {
     flex: 0 1 75px;
 }
 
