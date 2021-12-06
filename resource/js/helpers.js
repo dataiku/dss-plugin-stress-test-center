@@ -191,29 +191,30 @@ app.directive("keyValueList", function($timeout) {
         link: function(scope) {
             scope.keys = [null];
             [ scope.valueMin, scope.valueMax ] = scope.$eval(scope.valueRange) || [null, null];
-            const validity = "key-value-list-valid";
-            scope.form.$setValidity(validity, false);
+            const VALIDITY = "key-value-list-valid";
+            const DEFAULT_VALUE = .5;
+            scope.form.$setValidity(VALIDITY, false);
 
             scope.deleteListItem = function(index) {
                 if (!index) return;
                 const removedKey = scope.keys.splice(index, 1)[0];
                 delete scope.map[removedKey];
                 scope.form.$setValidity(
-                    validity,
+                    VALIDITY,
                     !!scope.keys.length && scope.keys.every(key => !!key)
                 );
             }
 
             scope.addListItem = function() {
                 if (!scope.keys.length) {
-                    scope.form.$setValidity(validity, true);
+                    scope.form.$setValidity(VALIDITY, true);
                 }
                 scope.keys.push(null);
             }
 
             scope.$on("dropdownChange", function(e, oldVal, newVal, idx, keyElem) {
                 scope.keys[idx] = newVal;
-                scope.map[newVal] = scope.map[oldVal];
+                scope.map[newVal] = scope.map[oldVal] || DEFAULT_VALUE;
                 delete scope.map[oldVal];
                 $timeout(function() {
                     const valueElem = keyElem.parent().find(".key-value-element__value")[0];

@@ -8,7 +8,7 @@
             <div class="flex key-value-element" ng-repeat="key in keys track by $index">
                 <div custom-dropdown
                     form="form"
-                    item="keys[$index]"
+                    item="key"
                     possible-values="keyOptions"
                     item-name="{{ keyItemLabel }}"
                     taboo="map"
@@ -17,14 +17,14 @@
                     class="key-value-element__key"></div>
                 <i class="icon-long-arrow-right"></i>
                 <input type="number"
-                    ng-model="map[keys[$index]]"
-                    ng-disabled="!keys[$index]"
+                    ng-model="map[key]"
+                    ng-disabled="!key"
                     min="{{ valueMin }}"
                     max="{{ valueMax }}"
                     step="any"
                     class="key-value-element__value" required>
                 </input>
-                <i class="icon-trash" ng-click="deleteListItem($index)" ng-class="{'icon--hidden': !$index}"></i>
+                <i class="icon-trash" ng-click="deleteListItem($index)" ng-class="{'icon--hidden': $first}"></i>
             </div>
         </div>
     </div>
