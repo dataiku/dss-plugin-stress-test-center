@@ -3,7 +3,7 @@
 app.service("ModalService", function() {
     const remove = function(config) {
         return function(event) {
-            if (event && !event.target.className.includes("dku-modal-background")) return false;
+            if (event && !event.target.className.includes("modal-background")) return false;
             for (const key in config) {
                 delete config[key];
             }
@@ -254,4 +254,15 @@ app.filter("toFixedIfNeeded", function() {
         }
         return number;
     }
+});
+
+app.directive('focusHere', function ($timeout) {
+    return {
+        restrict: 'A',
+        link: function (scope, element) {
+            $timeout(function() {
+                element[0].focus();
+            });
+        }
+    };
 });

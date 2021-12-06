@@ -25,11 +25,7 @@ const versionId = webAppConfig['versionId'];
 
     app.controller('VizController', function($scope, $http, ModalService, MetricNames) {
         $scope.modal = {};
-        $scope.removeModal = function(event) {
-            if (ModalService.remove($scope.modal)(event)) {
-                angular.element(".template").focus();
-            }
-        };
+        $scope.removeModal = ModalService.remove($scope.modal);
         $scope.createModal = ModalService.create($scope.modal);
 
         $scope.loading = {};
