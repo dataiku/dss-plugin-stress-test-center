@@ -4,7 +4,26 @@ const versionId = webAppConfig['versionId'];
 
 (function() {
     'use strict';
-    app.controller('VizController', function($scope, $http, ModalService) {
+    app.constant('MetricNames', {
+        F1: "F1 Score",
+        ACCURACY: "Accuracy",
+        PRECISION: "Precision",
+        RECALL: "Recall",
+        COST_MATRIX: "Cost matrix",
+        ROC_AUC: "AUC",
+        LOG_LOSS: "Log Loss",
+        CUMULATIVE_LIFT: "Cumulative lift",
+        EVS: "Explained Variance Score",
+        MAPE: "Mean Absolute Percentage Error",
+        MAE: "Mean Absolute Error",
+        MSE: "Mean Squared Error",
+        RMSE: "Root Mean Square Error",
+        RMSLE: "Root Mean Square Logarithmic Error",
+        R2: "R2 Score",
+        CUSTOM: "A custom code metric"
+    });
+
+    app.controller('VizController', function($scope, $http, ModalService, MetricNames) {
         $scope.modal = {};
         $scope.removeModal = function(event) {
             if (ModalService.remove($scope.modal)(event)) {
@@ -108,6 +127,13 @@ const versionId = webAppConfig['versionId'];
                 $scope.loading.modelInfo = false;
                 $scope.modelInfo.targetClasses = response.data["target_classes"];
                 $scope.modelInfo.isRegression = !$scope.modelInfo.targetClasses.length;
+
+                $scope.modelInfo.metric = response.data["metric"];
+                if ($scope.modelInfo.metric.actual !== $scope.modelInfo.metric.initial) {
+                    const warning_msg = `The plugin uses the metric used during the model training (${MetricNames[$scope.modelInfo.metric.initial]}) to compute some of its own metrics. ` + 
+                        `However the metric used is not supported by the plugin. hence the computation will be done using ${MetricNames[$scope.modelInfo.metric.actual]} instead.`;
+                    $scope.createModal.alert(warning_msg, "Warning");
+                }
 
                 features = response.data["features"];
 
