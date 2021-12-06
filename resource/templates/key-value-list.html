@@ -8,11 +8,11 @@
             <div class="flex key-value-element" ng-repeat="key in keys track by $index">
                 <div custom-dropdown
                     form="form"
-                    item="key"
+                    item="keys[$index]"
                     possible-values="keyOptions"
                     item-name="{{ keyItemLabel }}"
                     taboo="map"
-                    index="$index"
+                    on-change="dropdownChange"
                     validity="key-value-list-valid"
                     class="key-value-element__key"></div>
                 <i class="icon-long-arrow-right"></i>

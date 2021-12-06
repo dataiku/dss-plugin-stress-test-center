@@ -110,12 +110,11 @@ app.directive("customDropdown", function() {
             possibleValues: '=',
             taboo: '=',
             validity: '@',
-            index: '='
+            onChange: '='
         },
         restrict: 'A',
         templateUrl:'/plugins/stress-test-center/resource/templates/custom-dropdown.html',
         link: function(scope, elem, attrs) {
-            const isInList = !!attrs.index; // TODO: tight coupling
             const isMulti = !!attrs.items;
             scope.form.$setValidity(scope.validity, false);
 
@@ -141,8 +140,8 @@ app.directive("customDropdown", function() {
                     event.stopPropagation();
                 } else {
                     if (scope.item === value) return;
-                    if (isInList) {
-                        scope.$emit("dropdownChange", scope.item, value, scope.index, elem);
+                    if (scope.onChange) {
+                        scope.onChange(scope.item, value, elem);
                     }
                     scope.item = value;
                 }
@@ -212,15 +211,14 @@ app.directive("keyValueList", function($timeout) {
                 scope.keys.push(null);
             }
 
-            scope.$on("dropdownChange", function(e, oldVal, newVal, idx, keyElem) {
-                scope.keys[idx] = newVal;
-                scope.map[newVal] = scope.map[oldVal] || DEFAULT_VALUE;
-                delete scope.map[oldVal];
+            scope.dropdownChange = function(oldValue, newValue, keyElem) {
+                scope.map[newValue] = scope.map[oldValue] || DEFAULT_VALUE;
+                delete scope.map[oldValue];
                 $timeout(function() {
                     const valueElem = keyElem.parent().find(".key-value-element__value")[0];
                     valueElem.focus();
                 });
-            });
+            };
         }
     }
 });
