@@ -108,18 +108,18 @@ app.directive("customDropdown", function() {
             item: '=',
             items: '=',
             possibleValues: '=',
-            taboo: "=",
-            index: "="
+            taboo: '=',
+            validity: '@',
+            index: '='
         },
         restrict: 'A',
         templateUrl:'/plugins/stress-test-center/resource/templates/custom-dropdown.html',
         link: function(scope, elem, attrs) {
             const isInList = !!attrs.index; // TODO: tight coupling
             const isMulti = !!attrs.items;
-            const validity = isInList ? "key-value-list-valid" : "dropdown-not-empty";
-            scope.form.$setValidity(validity, false);
+            scope.form.$setValidity(scope.validity, false);
 
-            scope.notInTaboo = function(item) {
+            scope.canBeSelected = function(item) {
                 if (!scope.taboo) return true;
                 return item === scope.item || !(item in scope.taboo);
             }
@@ -146,7 +146,7 @@ app.directive("customDropdown", function() {
                     }
                     scope.item = value;
                 }
-                scope.form.$setValidity(validity, !!scope.item || !!(scope.items || {}).size);
+                scope.form.$setValidity(scope.validity, !!scope.item || !!(scope.items || {}).size);
             }
 
             scope.getPlaceholder = function() {
@@ -191,21 +191,22 @@ app.directive("keyValueList", function($timeout) {
         link: function(scope) {
             scope.keys = [null];
             [ scope.valueMin, scope.valueMax ] = scope.$eval(scope.valueRange) || [null, null];
-            scope.form.$setValidity("key-value-list-valid", false);
+            const validity = "key-value-list-valid";
+            scope.form.$setValidity(validity, false);
 
             scope.deleteListItem = function(index) {
                 if (!index) return;
                 const removedKey = scope.keys.splice(index, 1)[0];
                 delete scope.map[removedKey];
                 scope.form.$setValidity(
-                    "key-value-list-valid",
+                    validity,
                     !!scope.keys.length && scope.keys.every(key => !!key)
                 );
             }
 
             scope.addListItem = function() {
                 if (!scope.keys.length) {
-                    scope.form.$setValidity("key-value-list-valid", true);
+                    scope.form.$setValidity(validity, true);
                 }
                 scope.keys.push(null);
             }
