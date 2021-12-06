@@ -28,7 +28,7 @@
             </div>
         </div>
     </div>
-    <button type="button" class="dku-btn dku-btn--txt" ng-click="addListItem()">
+    <button type="button" class="dku-btn dku-btn--txt" ng-disabled="!canAddListItem()" ng-click="addListItem()">
         <i class="icon-plus-sign"></i>
         &nbsp;<span>Add a {{ keyItemLabel }}</span>
     </button>

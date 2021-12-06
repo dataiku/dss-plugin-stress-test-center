@@ -204,6 +204,10 @@ app.directive("keyValueList", function($timeout) {
                 );
             }
 
+            scope.canAddListItem = function() {
+                return scope.keys.length < scope.keyOptions.length;
+            }
+
             scope.addListItem = function() {
                 if (!scope.keys.length) {
                     scope.form.$setValidity(VALIDITY, true);

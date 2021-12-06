@@ -235,6 +235,11 @@ transform: translate(-125%, -50%);
     background: var(--blue-lighten-4);
 }
 
+.dku-btn--txt:disabled {
+    color: var(--blue-lighten-4);
+    cursor: not-allowed;
+}
+
 /** WEBAPP: GENERAL **/
 
 .report-box {
