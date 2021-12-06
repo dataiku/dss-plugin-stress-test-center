@@ -108,7 +108,7 @@ app.directive("customDropdown", function() {
             item: '=',
             items: '=',
             possibleValues: '=',
-            taboo: '=',
+            notAvailableValues: '=',
             validity: '@',
             onChange: '='
         },
@@ -119,8 +119,8 @@ app.directive("customDropdown", function() {
             scope.form.$setValidity(scope.validity, false);
 
             scope.canBeSelected = function(item) {
-                if (!scope.taboo) return true;
-                return item === scope.item || !(item in scope.taboo);
+                if (!scope.notAvailableValues) return true;
+                return item === scope.item || !(item in scope.notAvailableValues);
             }
 
             scope.isSelected = function(value) {
