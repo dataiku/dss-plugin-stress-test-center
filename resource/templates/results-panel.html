@@ -20,12 +20,12 @@
 </div>
 
 <div ng-if="results && !loading.results">
-    <div class="webapp__subsection" ng-if="results.SUBPOPULATION_SHIFT">
+    <div class="webapp__subsection" ng-if="results.TARGET_SHIFT">
         <div class="grand-title-b results-subsection__header">
-            Subpopulation shifts
+            Target shift
         </div>
         <p class="text-lighter">
-            These stress tests resample the dataset to match a desired frequency for specific subpopulations from a categorical column of the dataset.
+            This stress test resamples the dataset to match a desired distribution for the target column.
         </p>
         <div class="results__subsection">
             <div class="small-title-b">
@@ -40,10 +40,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="(testName, metrics) in results.SUBPOPULATION_SHIFT.metrics">
+                    <tr ng-repeat="(testName, metrics) in results.TARGET_SHIFT.metrics">
                         <td class="cell text-highlight">{{ tests.perturbations[testName].displayName }}</td>
-                        <td class="cell text-sb">{{ metrics['performance_variation'] * 100 | toFixedIfNeeded: 3 }}%</td>
-                        <td class="cell text-sb">{{ metrics['robustness'] * 100 | toFixedIfNeeded: 3 }}%</td>
+                        <td class="cell text-sb">{{ metrics['performance_variation'] | toFixedIfNeeded: 3 }}</td>
+                        <td class="cell text-sb">{{ metrics['robustness'] | toFixedIfNeeded: 3 }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -72,8 +72,8 @@
                 <tbody>
                     <tr ng-repeat="(testName, metrics) in results.FEATURE_PERTURBATION.metrics">
                         <td class="cell text-highlight">{{ tests.perturbations[testName].displayName }}</td>
-                        <td class="cell text-sb">{{ metrics['performance_variation'] * 100 | toFixedIfNeeded: 3 }}%</td>
-                        <td class="cell text-sb">{{ metrics['robustness'] * 100 | toFixedIfNeeded: 3 }}%</td>
+                        <td class="cell text-sb">{{ metrics['performance_variation'] | toFixedIfNeeded: 3 }}</td>
+                        <td class="cell text-sb">{{ metrics['robustness'] | toFixedIfNeeded: 3 }}</td>
                     </tr>
                 </tbody>
             </table>

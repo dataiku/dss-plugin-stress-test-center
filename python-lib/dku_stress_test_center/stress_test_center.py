@@ -87,6 +87,19 @@ class SubpopulationShiftTest(StressTest):
         }
 
 
+class TargetShiftTest(SubpopulationShiftTest):
+    TEST_TYPE = DkuStressTestCenterConstants.TARGET_SHIFT
+
+    def compute_metrics(self, perf_metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
+                    clean_y_pred: np.array, perturbed_y_pred: np.array,
+                    clean_probas: np.array, perturbed_probas: np.array):
+        return {
+            "performance_variation": performance_variation(perf_metric, clean_y_true, perturbed_y_true,
+                                                            clean_y_pred, perturbed_y_pred,
+                                                            clean_probas, perturbed_probas)
+        }
+
+
 class StressTestGenerator(object):
     def __init__(self, random_state=65537):
         self._random_state = random_state
@@ -104,10 +117,10 @@ class StressTestGenerator(object):
             features = test_config["selected_features"]
             return FeaturePerturbationTest(test_class(**params), features)
 
-        if test_type == DkuStressTestCenterConstants.SUBPOPULATION_SHIFT:
+        if test_type == DkuStressTestCenterConstants.TARGET_SHIFT:
             target = self.model_accessor.get_target_variable()
             population = test_config.get("population", target)
-            return SubpopulationShiftTest(test_class(**params), population)
+            return TargetShiftTest(test_class(**params), population)
 
         raise ValueError("Unknown stress test %s" % test_name)
 
