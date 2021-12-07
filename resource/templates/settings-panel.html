@@ -45,12 +45,15 @@
     </div>
     <form name="forms.Rebalance" class="settings-subsection__form"
           ng-show="tests.perturbations.Rebalance.$activated" ng-submit="runAnalysis()">
-        <div key-value-list map="tests.perturbations.Rebalance.params.priors"
+        <div key-value-list
+             map="tests.perturbations.Rebalance.params.priors"
              key-options="modelInfo.targetClasses"
              key-label="Target classes"
              key-item-label="class"
              value-label="Proportion"
              value-range="[0,1]"
+             step=".01"
+             default-value=".5"
              form="forms.Rebalance"
              class="settings-subsection__form_field">
         </div>

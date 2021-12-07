@@ -184,15 +184,17 @@ app.directive("keyValueList", function($timeout) {
             keyItemLabel: '@',
             valueLabel: '@',
             valueRange: '@',
-            form: "="
+            step: '=',
+            defaultValue: '=',
+            form: '='
         },
         restrict: 'A',
         templateUrl:'/plugins/stress-test-center/resource/templates/key-value-list.html',
         link: function(scope) {
             scope.keys = [null];
+            scope.step = scope.step || "any";
             [ scope.valueMin, scope.valueMax ] = scope.$eval(scope.valueRange) || [null, null];
             const VALIDITY = "key-value-list-valid";
-            const DEFAULT_VALUE = .5;
             scope.form.$setValidity(VALIDITY, false);
 
             scope.deleteListItem = function(index) {
@@ -217,7 +219,7 @@ app.directive("keyValueList", function($timeout) {
             };
 
             scope.dropdownChange = function(oldValue, newValue, keyElem) {
-                scope.map[newValue] = scope.map[oldValue] || DEFAULT_VALUE;
+                scope.map[newValue] = scope.map[oldValue] || scope.defaultValue;
                 delete scope.map[oldValue];
                 $timeout(function() {
                     const valueElem = keyElem.parent().find(".key-value-element__value")[0];
