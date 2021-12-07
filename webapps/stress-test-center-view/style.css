@@ -306,16 +306,16 @@ transform: translate(-125%, -50%);
 }
 
 /* Custom key value list */
-.key-value-list__labels {
+.key-value-labels {
     justify-content: space-between;
     margin-right: 16px;
 }
 
-.key-value-label__key, .key-value-element__key {
+.key-value-labels__key, .key-value-element__key {
     flex: 1 0 auto;
 }
 
-.key-value-label__value, .key-value-element__value {
+.key-value-labels__value, .key-value-element__value {
     flex: 0 1 75px;
 }
 

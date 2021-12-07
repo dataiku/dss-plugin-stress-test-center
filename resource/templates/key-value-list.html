@@ -1,10 +1,10 @@
 <div class="control-group">
     <div class="key-value-list">
-        <div class="key-value-list__labels flex">
-            <div class="key-value-label__key">{{ keyLabel }}</div>
-            <div class="key-value-label__value">{{ valueLabel }}</div>
+        <div class="key-value-labels flex">
+            <div class="key-value-labels__key">{{ keyLabel }}</div>
+            <div class="key-value-labels__value">{{ valueLabel }}</div>
         </div>
-        <div class="key-value-list__elements">
+        <div>
             <div class="flex key-value-element" ng-repeat="key in keys track by $index">
                 <div custom-dropdown
                     form="form"
