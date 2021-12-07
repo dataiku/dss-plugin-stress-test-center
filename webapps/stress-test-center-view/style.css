@@ -235,7 +235,7 @@ transform: translate(-125%, -50%);
     background: var(--blue-lighten-4);
 }
 
-.dku-btn--txt:disabled {
+.dku-btn--txt:disabled, .dku-btn--txt:disabled:active, .dku-btn--txt:disabled:hover {
     color: var(--blue-lighten-4);
     cursor: not-allowed;
 }
