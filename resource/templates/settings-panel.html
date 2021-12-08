@@ -7,7 +7,7 @@
         <div class="control-group settings-subsection__form_field">
             <label for="samples" class="label-text">Proportion of samples for all the stress tests</label>
             <input type="number" id="samples" ng-model="tests.samples" step="0.01" min="0.01" max="1" required>
-            <div class="text-tiny">
+            <div class="text-tiny text-lighter">
                 Set the proportion of rows used to run the selected tests
             </div>
         </div>
@@ -34,7 +34,7 @@
 
 <div ng-if="!loading.modelInfo && tests.perturbations.Rebalance" class="webapp__subsection">
     <div class="flex small-title-b settings-subsection__header">
-        <label class="flex" ng-class="{'text-lighter': !tests.perturbations.Rebalance.$activated}">
+        <label class="flex" ng-class="{'text-disabled': !tests.perturbations.Rebalance.$activated}">
             <label class="switch">
                 <input type="checkbox" ng-model="tests.perturbations.Rebalance.$activated">
                 <div class="slider round"></div>
@@ -59,7 +59,7 @@
 
 <div ng-if="!loading.modelInfo && tests.perturbations.MissingValues" class="webapp__subsection">
     <div class="flex small-title-b settings-subsection__header">
-        <label class="flex" ng-class="{'text-lighter': !tests.perturbations.MissingValues.$activated}">
+        <label class="flex" ng-class="{'text-disabled': !tests.perturbations.MissingValues.$activated}">
             <label class="switch">
                 <input type="checkbox" ng-model="tests.perturbations.MissingValues.$activated">
                 <div class="slider round"></div>
@@ -90,7 +90,7 @@
 
 <div ng-if="!loading.modelInfo && tests.perturbations.Scaling" class="webapp__subsection">
     <div class="flex small-title-b settings-subsection__header">
-        <label class="flex" ng-class="{'text-lighter': !tests.perturbations.Scaling.$activated}">
+        <label class="flex" ng-class="{'text-disabled': !tests.perturbations.Scaling.$activated}">
             <label class="switch">
                 <input type="checkbox" ng-model="tests.perturbations.Scaling.$activated">
                 <div class="slider round"></div>

@@ -4,52 +4,69 @@ const versionId = webAppConfig['versionId'];
 
 (function() {
     'use strict';
-    app.constant("CorruptionUtils", {
-        metrics: {
-            FEATURE_PERTURBATION: [
-                {
-                    name: "performance_variation",
-                    displayName: "Performance variation"
+    app.service("CorruptionUtils", function() {
+        function metrics(metricName, isRegression) {
+            const perfVarDesc = "Performance variation measures the degradation of the " +
+                "performance metric used during training after corrupting the dataset. " +
+                `It is the difference between the ${metricName} after and before the corruption.`;
+            const resilienceDescClassif = "Corruption resilience is the ratio of rows where " +
+                "the prediction is not altered after the corruption.";
+            const resilienceDescReg = "Corruption resilience is the ratio of rows where the " +
+                "error between predicted and true values is not increased after the corruption.";
+
+            return {
+                FEATURE_PERTURBATION: [
+                    {
+                        name: "performance_variation",
+                        displayName: "Performance variation",
+                        description: perfVarDesc
+                    },
+                    {
+                        name: "corruption_resilience",
+                        displayName: "Corruption resilience",
+                        description: isRegression ? resilienceDescReg : resilienceDescClassif
+                    },
+                ],
+                TARGET_SHIFT: [
+                    {
+                        name: "performance_variation",
+                        displayName: "Performance variation",
+                        description: perfVarDesc
+                    }
+                ]
+            };
+        };
+
+        return {
+            metrics,
+            types: {
+                FEATURE_PERTURBATION: {
+                    displayName: "Feature perturbations",
+                    description: "These stress tests corrupt the value of one or several features across randomly sampled rows."
                 },
-                {
-                    name: "corruption_resilience",
-                    displayName: "Corruption resilience"
-                },
-            ],
-            TARGET_SHIFT: [
-                {
-                    name: "performance_variation",
-                    displayName: "Performance variation"
+                TARGET_SHIFT: {
+                    displayName: "Target distribution shift",
+                    description: "This stress test resamples the dataset to match a desired distribution for the target column."
                 }
-            ]
-        },
-        types: {
-            FEATURE_PERTURBATION: {
-                displayName: "Feature perturbations",
-                description: "These stress tests corrupt the value of one or several features across randomly sampled rows."
-            },
-            TARGET_SHIFT: {
-                displayName: "Target distribution shift",
-                description: "This stress test resamples the dataset to match a desired distribution for the target column."
             }
-        }
+        };
     });
 
     app.constant('MetricNames', {
         F1: "F1 score",
-        ACCURACY: "Accuracy",
-        PRECISION: "Precision",
-        RECALL: "Recall",
-        COST_MATRIX: "Cost matrix gain",
+        ACCURACY: "accuracy",
+        PRECISION: "precision",
+        RECALL: "recall",
+        COST_MATRIX: "cost matrix gain",
         ROC_AUC: "AUC",
-        LOG_LOSS: "Log loss",
-        CUMULATIVE_LIFT: "Cumulative lift",
-        EVS: "Explained Variance Score",
-        MAPE: "Mean Absolute Percentage Error",
-        MAE: "Mean Absolute Error",
-        MSE: "Mean Squared Error",
-        RMSE: "Root Mean Square Error",
-        RMSLE: "Root Mean Square Logarithmic Error",
+        LOG_LOSS: "log loss",
+        CUMULATIVE_LIFT: "cumulative lift",
+        EVS: "explained variance score",
+        MAPE: "mean absolute percentage error",
+        MAE: "mean absolute error",
+        MSE: "mean squared error",
+        RMSE: "root mean square error",
+        RMSLE: "root mean square logarithmic error",
         R2: "R2 score",
         CUSTOM: "A custom code metric"
     });
@@ -60,7 +77,7 @@ const versionId = webAppConfig['versionId'];
         $scope.createModal = ModalService.create($scope.modal);
 
         $scope.CORRUPTION_TYPES = CorruptionUtils.types;
-        $scope.CORRUPTION_METRICS = CorruptionUtils.metrics;
+
         $scope.loading = {};
         $scope.forms = {};
         $scope.tests = {
@@ -159,13 +176,14 @@ const versionId = webAppConfig['versionId'];
 
                 $scope.modelInfo.metric = MetricNames[response.data["metric"].actual];
                 if (response.data["metric"].initial === "CUSTOM") {
-                    const warning_msg = "The corruption metrics computed by this webapp use the " +
-                        "metric that was selected for model hyperparameter optimization. " +
-                        `However custom metrics are not supported. ${$scope.modelInfo.metric} ` +
-                        " will be leveraged instead.";
+                    const warning_msg = "The corruption metrics computed by this webapp " +
+                    "habitually use the metric that was selected for model hyperparameter "+
+                    "optimization. `However, since custom metrics are not supported, ${$scope.modelInfo.metric} ` +
+                    " will be leveraged instead.";
 
                     $scope.createModal.alert(warning_msg, "Warning");
                 }
+                $scope.CORRUPTION_METRICS = CorruptionUtils.metrics($scope.modelInfo.metric, $scope.modelInfo.isRegression);
 
                 features = response.data["features"];
 

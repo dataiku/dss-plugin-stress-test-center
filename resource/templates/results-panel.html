@@ -3,7 +3,7 @@
         Put your model through a battery of tests to see how it handles the unexpected
     </div>
     <div class="empty-state__subtitle">
-        Select the tests corresponding to corruptions you expect to have at deployment time, and assess the robustness of your model.
+        Select the corruptions you expect to have at deployment time, and assess the robustness of your model.
     </div>
     <div>
         <button class="dku-btn dku-btn-primary"
@@ -28,8 +28,13 @@
             {{ CORRUPTION_TYPES[corruptionType].description }}
         </p>
         <div class="results__subsection">
-            <div class="small-title-b">
-                Metrics
+            <div>
+                <div class="small-title-b">
+                    Metrics
+                </div>
+                <p class="text-lighter" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]">
+                    {{ metric.description }}
+                </p>
             </div>
             <table class="table-metric">
                 <thead>
@@ -71,7 +76,7 @@
                                         </div>
                                         <div>
                                             {{ results[corruptionType].critical_samples.means[$index] | toFixedIfNeeded: 3}}
-                                            ± {{ results[corruptionType].critical_samples.uncertainties[$index] | toFixedIfNeeded: 3}}
+                                            ± {{ results[corruptionType].critical_samples.uncertainties[$index] | toFixedIfNeeded: 6}}
                                         </div>
                                     </div>
                                 </th>

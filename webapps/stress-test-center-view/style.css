@@ -165,6 +165,10 @@ transform: translate(-125%, -50%);
 }
 
 .text-lighter {
+    color: var(--grey-lighten-3);
+}
+
+.text-disabled {
     color: var(--grey-lighten-4);
 }
 
@@ -239,11 +243,11 @@ transform: translate(-125%, -50%);
 
 /** WEBAPP: GENERAL **/
 
-.report-box {
+.webapp {
     font-family: var(--font-family);
     font-size: 13px;
     line-height: 18px;
-    color: var(--grey-lighten-3);
+    color: var(--grey);
     background: var(--grey-lighten-7);
 }
 
@@ -260,10 +264,12 @@ transform: translate(-125%, -50%);
 
 .webapp__subsection {
     padding: 16px;
+    border-bottom: 1px solid var(--grey-lighten-6);
 }
 
-.webapp__subsection {
-    border-bottom: 1px solid var(--grey-lighten-6);
+.webapp__subsection p {
+    padding: unset;
+    text-align: justify;
 }
 
 .flex {
