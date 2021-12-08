@@ -46,9 +46,9 @@ form input[type="text"] {
     transition: color 0.1s ease, border-color 0.5s ease;
 }
 
-form input[type="number"].ng-invalid,
-form input[type="search"].ng-invalid,
-form input[type="text"].ng-invalid {
+form input[type="number"].ng-invalid:not(:disabled),
+form input[type="search"].ng-invalid:not(:disabled),
+form input[type="text"].ng-invalid:not(:disabled) {
     border-color: var(--error-red);
 }
 
@@ -207,18 +207,38 @@ transform: translate(-125%, -50%);
     color: var(--white);
 }
 
-.dku-btn-primary:disabled, .dku-btn-primary:active:hover {
+.dku-btn-primary:disabled, .dku-btn-primary:disabled:active {
     background: var(--blue-lighten-4);
     cursor: not-allowed;
 }
 
 .dku-btn-primary:active {
-    background: #3194fc;
+    background: var(--blue-darken-4);
 }
 
 .dku-btn-container--right-align {
     display: flex;
     justify-content: flex-end;
+}
+
+.dku-btn--txt {
+    color: var(--blue);
+    background: none;
+    border: none;
+}
+
+.dku-btn--txt:hover {
+    background: var(--blue-lighten-5);
+}
+
+.dku-btn--txt:active {
+    background: var(--blue-lighten-4);
+}
+
+.dku-btn--txt:disabled, .dku-btn--txt:disabled:active, .dku-btn--txt:disabled:hover {
+    color: var(--blue-lighten-4);
+    cursor: not-allowed;
+    background: none;
 }
 
 /** WEBAPP: GENERAL **/
@@ -286,6 +306,49 @@ transform: translate(-125%, -50%);
     height: calc(100% - 210px);
 }
 
+/* Custom key value list */
+.key-value-labels {
+    justify-content: space-between;
+    margin-right: 16px;
+}
+
+.key-value-labels__key, .key-value-element__key {
+    flex: 1 0 auto;
+}
+
+.key-value-labels__value, .key-value-element__value {
+    flex: 0 1 75px;
+}
+
+.key-value-list {
+    margin-bottom: 8px;
+}
+
+.key-value-element {
+    align-items: center;
+}
+
+.key-value-element + .key-value-element {
+    margin-top: 8px;
+}
+
+.key-value-element > .icon-long-arrow-right {
+    margin: 0 8px;
+}
+
+.key-value-element > .icon-trash {
+    margin-left: 8px;
+}
+
+.icon-trash {
+    color: var(--error-red);
+}
+
+.icon-trash:hover {
+    opacity: .5;
+    cursor: pointer;
+}
+
 /* Custom dropdown */
 .custom-dropdown {
     border: 1px solid var(--grey-lighten-6);
@@ -311,7 +374,9 @@ transform: translate(-125%, -50%);
     left: 0;
     background: var(--white);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    width: 265px;
+    width: auto;
+    width: -moz-available;
+    width: -webkit-fill-available;
     max-height: 200px;
     z-index: 10;
 }

@@ -10,7 +10,7 @@
         <div class="custom-dropdown__body" ng-if="isOpen">
             <div class="custom-dropdown-row"
                 ng-click="updateSelection(item, $event)"
-                ng-repeat="item in possibleValues">
+                ng-repeat="item in possibleValues | filter: canBeSelected">
                 <i class="icon-ok" ng-class="{'icon--hidden': !isSelected(item)}"></i>
                 <i class="{{ itemImage(item) }}" ng-if="itemImage"></i>
                 <div>{{ item }}</div>

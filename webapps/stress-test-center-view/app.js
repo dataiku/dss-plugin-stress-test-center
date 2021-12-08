@@ -20,7 +20,7 @@ const versionId = webAppConfig['versionId'];
                 Rebalance: {
                     displayName: "Target distribution",
                     needsTargetClasses: true,
-                    params: { samples_fraction: .5 }
+                    params: { priors: {} }
                 },
                 MissingValues: {
                     displayName: "Missing values",
@@ -53,7 +53,7 @@ const versionId = webAppConfig['versionId'];
         }
 
         $scope.checkTestConfig = function() {
-            if ($scope.forms.SAMPLES.$invalid) return { canRun: false };
+            if (!$scope.forms.SAMPLES || $scope.forms.SAMPLES.$invalid) return { canRun: false };
             const testEntries = Object.entries($scope.tests.perturbations);
             const validActivatedTests = testEntries.filter(function(entry) {
                 const [testName, testSettings] = entry;

@@ -22,7 +22,7 @@ class DkuStressTestCenterConstants(object):
         ),
         Adversarial.__name__: (Adversarial, FEATURE_PERTURBATION),
         Rebalance.__name__: (
-            lambda **params: Rebalance({params["cl"]: params["samples_fraction"]}),
+            lambda **params: Rebalance(**params),
             SUBPOPULATION_SHIFT
         ),
         ReplaceWord.__name__: (ReplaceWord, FEATURE_PERTURBATION),

@@ -1,0 +1,35 @@
+<div class="control-group">
+    <div class="key-value-list">
+        <div class="key-value-labels flex">
+            <div class="key-value-labels__key">{{ keyLabel }}</div>
+            <div class="key-value-labels__value">{{ valueLabel }}</div>
+        </div>
+        <div>
+            <div class="flex key-value-element" ng-repeat="key in keys track by $index">
+                <div custom-dropdown
+                    form="form"
+                    item="keys[$index]"
+                    possible-values="keyOptions"
+                    item-name="{{ keyItemLabel }}"
+                    not-available-values="map"
+                    on-change="dropdownChange"
+                    validity="key-value-list-valid"
+                    class="key-value-element__key"></div>
+                <i class="icon-long-arrow-right"></i>
+                <input type="number"
+                    ng-model="map[key]"
+                    ng-disabled="!key"
+                    min="{{ valueMin }}"
+                    max="{{ valueMax }}"
+                    step="{{ step }}"
+                    class="key-value-element__value" required>
+                </input>
+                <i class="icon-trash" ng-click="deleteListItem($index)" ng-class="{'icon--hidden': $first}"></i>
+            </div>
+        </div>
+    </div>
+    <button type="button" class="dku-btn dku-btn--txt" ng-disabled="!canAddListItem()" ng-click="addListItem()">
+        <i class="icon-plus-sign"></i>
+        &nbsp;<span>Add a {{ keyItemLabel }}</span>
+    </button>
+</div>
