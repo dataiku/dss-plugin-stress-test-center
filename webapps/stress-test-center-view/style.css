@@ -501,7 +501,7 @@ table {
 
 .table-metric {
     text-align: center;
-    width: 100%;
+    max-width: 100%;
  }
 
  .table-sample {
@@ -513,7 +513,8 @@ table {
  }
 
  .table-metric td {
-    padding: 4px 8px;
+    padding: 8px;
+    min-width: 150px;
  }
 
  .table-sample td {
