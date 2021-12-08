@@ -66,7 +66,7 @@
             </label>
             {{ tests.perturbations.MissingValues.displayName }}
         </label>
-        <help-icon help-text="Randomly inserts missing values"></help-icon>
+        <help-icon help-text="Randomly inserts missing values in one or several feature columns"></help-icon>
     </div>
     <form name="forms.MissingValues" class="settings-subsection__form"
           ng-show="tests.perturbations.MissingValues.$activated" ng-submit="runAnalysis()">
@@ -97,7 +97,7 @@
             </label>
             {{ tests.perturbations.Scaling.displayName }}
         </label>
-        <help-icon help-text="Changes the order of magnitude of each feature by some random scaling"></help-icon>
+        <help-icon help-text="Multiplies one or several feature columns by a specified scaling factor"></help-icon>
     </div>
     <form name="forms.Scaling" class="settings-subsection__form"
           ng-show="tests.perturbations.Scaling.$activated" ng-submit="runAnalysis()">
