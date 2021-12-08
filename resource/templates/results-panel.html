@@ -66,13 +66,12 @@
                             <tr>
                                 <th class="top-cell--blue small-title-b">
                                     <div class="flex top-cell__row">
-                                        <div>{{ results[corruptionType].critical_samples.uncertainties[$index] | toFixedIfNeeded: 3}}</div>
-                                        <div>{{ results[corruptionType].critical_samples.means[$index] | toFixedIfNeeded: 3}}</div>
-                                    </div>
-                                    <div class="flex top-cell__row">
-                                        <div class="text-lighter">Uncertainty</div>
-                                        <div class="text-lighter">
-                                            {{ modelInfo.isRegression ? 'Prediction' : 'True class probability' }}
+                                        <div>
+                                            {{ modelInfo.isRegression ? 'Predicted value' : 'True class probability' }}
+                                        </div>
+                                        <div>
+                                            {{ results[corruptionType].critical_samples.means[$index] | toFixedIfNeeded: 3}}
+                                            ± {{ results[corruptionType].critical_samples.uncertainties[$index] | toFixedIfNeeded: 3}}
                                         </div>
                                     </div>
                                 </th>
