@@ -72,7 +72,7 @@
                                 <th class="top-cell--blue small-title-b">
                                     <div class="flex top-cell__row">
                                         <div>
-                                            {{ modelInfo.isRegression ? 'Predicted value' : 'True class probability' }}
+                                            Average {{ modelInfo.isRegression ? 'predicted value' : 'true class probability' }}
                                         </div>
                                         <div>
                                             {{ results[corruptionType].critical_samples.means[$index] | toFixedIfNeeded: 3}}

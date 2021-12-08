@@ -34,12 +34,12 @@
 
 <div ng-if="!loading.modelInfo && tests.perturbations.Rebalance" class="webapp__subsection">
     <div class="flex small-title-b settings-subsection__header">
-        <label class="flex" ng-class="{'text-disabled': !tests.perturbations.Rebalance.$activated}">
+        <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.Rebalance.$activated}">
             <label class="switch">
                 <input type="checkbox" ng-model="tests.perturbations.Rebalance.$activated">
                 <div class="slider round"></div>
             </label>
-            {{ tests.perturbations.Rebalance.displayName }}
+            <div>{{ tests.perturbations.Rebalance.displayName }}</div>
         </label>
         <help-icon help-text="Modifies the target distribution by resampling"></help-icon>
     </div>
@@ -59,12 +59,12 @@
 
 <div ng-if="!loading.modelInfo && tests.perturbations.MissingValues" class="webapp__subsection">
     <div class="flex small-title-b settings-subsection__header">
-        <label class="flex" ng-class="{'text-disabled': !tests.perturbations.MissingValues.$activated}">
+        <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.MissingValues.$activated}">
             <label class="switch">
                 <input type="checkbox" ng-model="tests.perturbations.MissingValues.$activated">
                 <div class="slider round"></div>
             </label>
-            {{ tests.perturbations.MissingValues.displayName }}
+            <div>{{ tests.perturbations.MissingValues.displayName }}</div>
         </label>
         <help-icon help-text="Randomly inserts missing values in one or several feature columns"></help-icon>
     </div>
@@ -90,12 +90,12 @@
 
 <div ng-if="!loading.modelInfo && tests.perturbations.Scaling" class="webapp__subsection">
     <div class="flex small-title-b settings-subsection__header">
-        <label class="flex" ng-class="{'text-disabled': !tests.perturbations.Scaling.$activated}">
+        <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.Scaling.$activated}">
             <label class="switch">
                 <input type="checkbox" ng-model="tests.perturbations.Scaling.$activated">
                 <div class="slider round"></div>
             </label>
-            {{ tests.perturbations.Scaling.displayName }}
+            <div>{{ tests.perturbations.Scaling.displayName }}</div>
         </label>
         <help-icon help-text="Multiplies one or several feature columns by a specified scaling factor"></help-icon>
     </div>

@@ -178,8 +178,8 @@ const versionId = webAppConfig['versionId'];
                 if (response.data["metric"].initial === "CUSTOM") {
                     const warning_msg = "The corruption metrics computed by this webapp " +
                     "habitually use the metric that was selected for model hyperparameter "+
-                    "optimization. `However, since custom metrics are not supported, ${$scope.modelInfo.metric} ` +
-                    " will be leveraged instead.";
+                    "optimization. However, since custom metrics are not supported, "+
+                    `${$scope.modelInfo.metric} will be leveraged instead.`;
 
                     $scope.createModal.alert(warning_msg, "Warning");
                 }
