@@ -46,7 +46,7 @@
                     <tr ng-repeat="(testName, metrics) in results[corruptionType].metrics">
                         <td class="cell text-highlight">{{ tests.perturbations[testName].displayName }}</td>
                         <td class="cell text-sb" ng-repeat="metric in CorruptionMetrics[corruptionType]">
-                            {{ metrics[metric.name] | toFixedIfNeeded: 3 }}
+                            {{ metrics[metric.name] | toFixedIfNeeded: 6 }}
                         </td>
                     </tr>
                 </tbody>
