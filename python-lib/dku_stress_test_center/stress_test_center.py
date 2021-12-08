@@ -4,7 +4,7 @@ import pandas as pd
 from collections import defaultdict
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
 from dku_stress_test_center.metrics import Metric, worst_group_performance, performance_variation,\
-    stress_resilience_classification, stress_resilience_regression
+    corruption_resilience_classification, corruption_resilience_regression
 from drift_dac.perturbation_shared_utils import Shift
 
 class StressTest(object):
@@ -46,14 +46,15 @@ class FeaturePerturbationTest(StressTest):
                         clean_y_pred: np.array, perturbed_y_pred: np.array,
                         clean_probas: np.array, perturbed_probas: np.array):
         if perf_metric.pred_type == DkuStressTestCenterConstants.REGRESSION:
-            robustness = stress_resilience_regression(clean_y_pred, perturbed_y_pred, clean_y_true)
+            corruption_resilience = corruption_resilience_regression(clean_y_pred, perturbed_y_pred, clean_y_true)
         else:
-            robustness = stress_resilience_classification(clean_y_pred, perturbed_y_pred)
+            corruption_resilience = corruption_resilience_classification(clean_y_pred, perturbed_y_pred)
         return {
-            "robustness": robustness,
-            "performance_variation": performance_variation(perf_metric, clean_y_true, perturbed_y_true,
-                                                           clean_y_pred, perturbed_y_pred,
-                                                           clean_probas, perturbed_probas)
+            "corruption_resilience": corruption_resilience,
+            "performance_variation": performance_variation(
+                perf_metric, clean_y_true, perturbed_y_true, clean_y_pred, perturbed_y_pred,
+                clean_probas, perturbed_probas
+            )
         }
 
 
@@ -79,11 +80,13 @@ class SubpopulationShiftTest(StressTest):
                         clean_y_pred: np.array, perturbed_y_pred: np.array,
                         clean_probas: np.array, perturbed_probas: np.array):
         return {
-            "robustness": worst_group_performance(perf_metric, perturbed_y_true, perturbed_y_true,
-                                                  perturbed_y_pred, perturbed_probas),
-            "performance_variation": performance_variation(perf_metric, clean_y_true, perturbed_y_true,
-                                                           clean_y_pred, perturbed_y_pred,
-                                                           clean_probas, perturbed_probas)
+            "worst_group_subpop": worst_group_performance(
+                perf_metric, perturbed_y_true, perturbed_y_true, perturbed_y_pred, perturbed_probas
+            ),
+            "performance_variation": performance_variation(
+                perf_metric, clean_y_true, perturbed_y_true, clean_y_pred, perturbed_y_pred,
+                clean_probas, perturbed_probas
+            )
         }
 
 
@@ -94,9 +97,10 @@ class TargetShiftTest(SubpopulationShiftTest):
                     clean_y_pred: np.array, perturbed_y_pred: np.array,
                     clean_probas: np.array, perturbed_probas: np.array):
         return {
-            "performance_variation": performance_variation(perf_metric, clean_y_true, perturbed_y_true,
-                                                            clean_y_pred, perturbed_y_pred,
-                                                            clean_probas, perturbed_probas)
+            "performance_variation": performance_variation(
+                perf_metric, clean_y_true, perturbed_y_true, clean_y_pred, perturbed_y_pred,
+                clean_probas, perturbed_probas
+            )
         }
 
 
@@ -213,7 +217,7 @@ class StressTestGenerator(object):
             return {
                 "uncertainties": [],
                 "means": [],
-                "features": []
+                "samples": []
             }
 
         uncertainties = columns.std(axis=1)
@@ -229,5 +233,5 @@ class StressTestGenerator(object):
         return {
             "uncertainties": critical_uncertainties.tolist(),
             "means": critical_means.tolist(),
-            "features": critical_samples.to_dict(orient='records')
+            "samples": critical_samples.to_dict(orient='records')
         }

@@ -25,7 +25,6 @@ class Metric(object):
     R2="R2"
     CUSTOM="CUSTOM"
     GREATER_IS_BETTER={ACCURACY, PRECISION, RECALL, F1, COST_MATRIX, ROC_AUC, CUMULATIVE_LIFT, EVS, R2}
-    CANNOT_BE_USED={ROC_AUC, CUSTOM, CUMULATIVE_LIFT}
 
     def __init__(self, config: dict, pred_type: str):
         self.pred_type = pred_type
@@ -34,7 +33,7 @@ class Metric(object):
     @property
     def name(self):
         metric_name = self.config["evaluationMetric"]
-        if metric_name in self.CANNOT_BE_USED:
+        if metric_name == self.CUSTOM:
             if self.pred_type == DkuStressTestCenterConstants.REGRESSION:
                 return self.R2
             return self.ACCURACY
@@ -93,11 +92,11 @@ def worst_group_performance(metric: Metric, subpopulation: np.array, y_true: np.
     return min(performances) if metric.is_greater_better() else max(performances)
 
 
-def stress_resilience_classification(clean_y_pred: np.array, perturbed_y_pred: np.array):
+def corruption_resilience_classification(clean_y_pred: np.array, perturbed_y_pred: np.array):
     return (clean_y_pred == perturbed_y_pred).sum() / len(clean_y_pred)
 
 
-def stress_resilience_regression(clean_y_pred: np.array, perturbed_y_pred: np.array,
+def corruption_resilience_regression(clean_y_pred: np.array, perturbed_y_pred: np.array,
                                  clean_y_true: np.array):
     clean_abs_error = np.abs(clean_y_pred - clean_y_true)
     perturbed_abs_error = np.abs(perturbed_y_pred - clean_y_true)

@@ -20,12 +20,12 @@
 </div>
 
 <div ng-if="results && !loading.results">
-    <div class="webapp__subsection" ng-if="results.TARGET_SHIFT">
+    <div class="webapp__subsection" ng-repeat="(corruptionType, corruptionTypeResults) in results">
         <div class="grand-title-b results-subsection__header">
-            Target shift
+            {{ CorruptionTypes[corruptionType].displayName }}
         </div>
         <p class="text-lighter">
-            This stress test resamples the dataset to match a desired distribution for the target column.
+            {{ CorruptionTypes[corruptionType].description }}
         </p>
         <div class="results__subsection">
             <div class="small-title-b">
@@ -35,50 +35,24 @@
                 <thead>
                     <tr>
                         <th scope="col" class="fake-cell"></th>
-                        <th scope="col" class="cell small-title-b top-cell--blue">Performance variation</th>
-                        <th scope="col" class="cell small-title-b top-cell--orange">Robustness</th>
+                        <th scope="col" ng-repeat="metric in CorruptionMetrics[corruptionType]"
+                            ng-class="{'top-cell--blue': $even, 'top-cell--orange': $odd}"
+                            class="cell small-title-b">
+                            {{ metric.displayName }}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="(testName, metrics) in results.TARGET_SHIFT.metrics">
+                    <tr ng-repeat="(testName, metrics) in results[corruptionType].metrics">
                         <td class="cell text-highlight">{{ tests.perturbations[testName].displayName }}</td>
-                        <td class="cell text-sb">{{ metrics['performance_variation'] | toFixedIfNeeded: 3 }}</td>
-                        <td class="cell text-sb">{{ metrics['robustness'] | toFixedIfNeeded: 3 }}</td>
+                        <td class="cell text-sb" ng-repeat="metric in CorruptionMetrics[corruptionType]">
+                            {{ metrics[metric.name] | toFixedIfNeeded: 3 }}
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-    </div>
-
-    <div class="webapp__subsection" ng-if="results.FEATURE_PERTURBATION">
-        <div class="grand-title-b results-subsection__header">
-            Feature corruptions
-        </div>
-        <p class="text-lighter">
-            These stress tests corrupt the value of one or several features across randomly sampled rows.
-        </p>
-        <div class="results__subsection">
-            <div class="small-title-b">
-                Metrics
-            </div>
-            <table class="table-metric">
-                <thead>
-                    <tr>
-                        <th scope="col" class="fake-cell"></th>
-                        <th scope="col" class="cell small-title-b top-cell--blue">Performance variation</th>
-                        <th scope="col" class="cell small-title-b top-cell--orange">Robustness</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="(testName, metrics) in results.FEATURE_PERTURBATION.metrics">
-                        <td class="cell text-highlight">{{ tests.perturbations[testName].displayName }}</td>
-                        <td class="cell text-sb">{{ metrics['performance_variation'] | toFixedIfNeeded: 3 }}</td>
-                        <td class="cell text-sb">{{ metrics['robustness'] | toFixedIfNeeded: 3 }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="results__subsection">
+        <div class="results__subsection" ng-if="results[corruptionType].critical_samples">
             <div class="small-title-b">
                 Critical samples
             </div>
@@ -86,14 +60,14 @@
                 The critical samples are the most sensitive to perturbations. They highlight where the model predictions are highly uncertain (presenting large confidence fluctuations).
             </p>
             <div class="flex dku-grid">
-                <div ng-repeat="sample in results.FEATURE_PERTURBATION.critical_samples.features">
+                <div ng-repeat="sample in results[corruptionType].critical_samples.samples">
                     <table class="table-sample table-striped">
                         <thead>
                             <tr>
                                 <th class="top-cell--blue small-title-b">
                                     <div class="flex top-cell__row">
-                                        <div>{{ results.FEATURE_PERTURBATION.critical_samples.uncertainties[$index] | toFixedIfNeeded: 3}}</div>
-                                        <div>{{ results.FEATURE_PERTURBATION.critical_samples.means[$index] | toFixedIfNeeded: 3}}</div>
+                                        <div>{{ results[corruptionType].critical_samples.uncertainties[$index] | toFixedIfNeeded: 3}}</div>
+                                        <div>{{ results[corruptionType].critical_samples.means[$index] | toFixedIfNeeded: 3}}</div>
                                     </div>
                                     <div class="flex top-cell__row">
                                         <div class="text-lighter">Uncertainty</div>

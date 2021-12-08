@@ -4,7 +4,37 @@ const versionId = webAppConfig['versionId'];
 
 (function() {
     'use strict';
-    app.controller('VizController', function($scope, $http, ModalService) {
+    app.constant("CorruptionMetrics", {
+        FEATURE_PERTURBATION: [
+            {
+                name: "performance_variation",
+                displayName: "Performance variation"
+            },
+            {
+                name: "corruption_resilience",
+                displayName: "Corruption resilience"
+            },
+        ],
+        TARGET_SHIFT: [
+            {
+                name: "performance_variation",
+                displayName: "Performance variation"
+            }
+        ]
+    });
+
+    app.constant("CorruptionTypes", {
+        FEATURE_PERTURBATION: {
+            displayName: "Feature perturbations",
+            description: "These stress tests corrupt the value of one or several features across randomly sampled rows."
+        },
+        TARGET_SHIFT: {
+            displayName: "Target distribution shift",
+            description: "This stress test resamples the dataset to match a desired distribution for the target column."
+        }
+    });
+
+    app.controller('VizController', function($scope, $http, ModalService, CorruptionMetrics, CorruptionTypes) {
         $scope.modal = {};
         $scope.removeModal = function(event) {
             if (ModalService.remove($scope.modal)(event)) {
@@ -13,6 +43,8 @@ const versionId = webAppConfig['versionId'];
         };
         $scope.createModal = ModalService.create($scope.modal);
 
+        $scope.CorruptionTypes = CorruptionTypes;
+        $scope.CorruptionMetrics = CorruptionMetrics;
         $scope.loading = {};
         $scope.forms = {};
         $scope.tests = {
