@@ -176,6 +176,12 @@ transform: translate(-125%, -50%);
     font-weight: 500;
 }
 
+.ellipsed-text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
 /** BUTTONS **/
 
 .dku-btn {
@@ -516,11 +522,21 @@ table {
     padding: 4px 8px;
  }
 
- .table-sample td {
-    padding: 8px 16px;
-    border-top: 1px solid var(--grey-lighten-6);
+ .table-sample th {
     border-bottom: 1px solid var(--grey-lighten-6);
  }
+
+ .table-sample td {
+    padding: 8px 16px;
+ }
+
+ .table-sample-feature {
+    border-bottom: 1px solid var(--grey-lighten-6);
+ }
+
+.table-sample-feature__name, .table-sample-feature__value {
+    max-width: 50%;
+}
 
  .table-striped tbody tr:nth-of-type(2n+1) {
     background: var(--grey-lighten-7);
