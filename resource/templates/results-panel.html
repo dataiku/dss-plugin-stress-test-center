@@ -22,10 +22,10 @@
 <div ng-if="results && !loading.results">
     <div class="webapp__subsection" ng-repeat="(corruptionType, corruptionTypeResults) in results">
         <div class="grand-title-b results-subsection__header">
-            {{ CorruptionTypes[corruptionType].displayName }}
+            {{ CORRUPTION_TYPES[corruptionType].displayName }}
         </div>
         <p class="text-lighter">
-            {{ CorruptionTypes[corruptionType].description }}
+            {{ CORRUPTION_TYPES[corruptionType].description }}
         </p>
         <div class="results__subsection">
             <div class="small-title-b">
@@ -35,7 +35,7 @@
                 <thead>
                     <tr>
                         <th scope="col" class="fake-cell"></th>
-                        <th scope="col" ng-repeat="metric in CorruptionMetrics[corruptionType]"
+                        <th scope="col" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]"
                             ng-class="{'top-cell--blue': $even, 'top-cell--orange': $odd}"
                             class="cell small-title-b">
                             {{ metric.displayName }}
@@ -45,7 +45,7 @@
                 <tbody>
                     <tr ng-repeat="(testName, metrics) in results[corruptionType].metrics">
                         <td class="cell text-highlight">{{ tests.perturbations[testName].displayName }}</td>
-                        <td class="cell text-sb" ng-repeat="metric in CorruptionMetrics[corruptionType]">
+                        <td class="cell text-sb" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]">
                             {{ metrics[metric.name] | toFixedIfNeeded: 6 }}
                         </td>
                     </tr>
