@@ -95,6 +95,7 @@ class Rebalance(Shift):
         Xt, yt = rebalance_shift(X, y, self.priors)
         return Xt, yt
 
+
 # Resample instances of all classes by given priors.
 def rebalance_shift(x, y, priors):
     actual_class_counts = Counter(y)
@@ -140,11 +141,15 @@ def rebalance_shift(x, y, priors):
             continue
 
         class_samples_indices = np.where(y==target_class)[0]
-        rebalanced_x_indices[offset : offset+desired_count] = np.random.choice(class_samples_indices,
-                                                                               desired_count)
+        desired_count = min(len(rebalanced_x_indices) - offset, desired_count)
+        rebalanced_x_indices[offset : offset + desired_count] = np.random.choice(
+            class_samples_indices, desired_count
+        )
         rebalanced_y[offset : offset+desired_count] = target_class
-        offset += desired_count
 
+        offset += desired_count
+        if offset == len(rebalanced_x_indices):
+            break
     return x[rebalanced_x_indices], rebalanced_y
 
 
