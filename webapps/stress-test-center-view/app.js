@@ -35,7 +35,26 @@ const versionId = webAppConfig['versionId'];
         }
     });
 
-    app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils) {
+    app.constant('MetricNames', {
+        F1: "F1 score",
+        ACCURACY: "Accuracy",
+        PRECISION: "Precision",
+        RECALL: "Recall",
+        COST_MATRIX: "Cost matrix gain",
+        ROC_AUC: "AUC",
+        LOG_LOSS: "Log loss",
+        CUMULATIVE_LIFT: "Cumulative lift",
+        EVS: "Explained Variance Score",
+        MAPE: "Mean Absolute Percentage Error",
+        MAE: "Mean Absolute Error",
+        MSE: "Mean Squared Error",
+        RMSE: "Root Mean Square Error",
+        RMSLE: "Root Mean Square Logarithmic Error",
+        R2: "R2 score",
+        CUSTOM: "A custom code metric"
+    });
+
+    app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils, MetricNames) {
         $scope.modal = {};
         $scope.removeModal = ModalService.remove($scope.modal);
         $scope.createModal = ModalService.create($scope.modal);
@@ -137,6 +156,16 @@ const versionId = webAppConfig['versionId'];
                 $scope.loading.modelInfo = false;
                 $scope.modelInfo.targetClasses = response.data["target_classes"];
                 $scope.modelInfo.isRegression = !$scope.modelInfo.targetClasses.length;
+
+                $scope.modelInfo.metric = MetricNames[response.data["metric"].actual];
+                if (response.data["metric"].initial === "CUSTOM") {
+                    const warning_msg = "The corruption metrics computed by this webapp use the " +
+                        "metric that was selected for model hyperparameter optimization. " +
+                        `However custom metrics are not supported. ${$scope.modelInfo.metric} ` +
+                        " will be leveraged instead.";
+
+                    $scope.createModal.alert(warning_msg, "Warning");
+                }
 
                 features = response.data["features"];
 

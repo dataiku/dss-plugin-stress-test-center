@@ -31,16 +31,19 @@ class Metric(object):
         self.config = config
 
     @property
-    def name(self):
-        metric_name = self.config["evaluationMetric"]
-        if metric_name == self.CUSTOM:
+    def initial(self):
+        return self.config["evaluationMetric"]
+
+    @property
+    def actual(self):
+        if self.initial == self.CUSTOM:
             if self.pred_type == DkuStressTestCenterConstants.REGRESSION:
                 return self.R2
             return self.ACCURACY
-        return metric_name
+        return self.initial
 
     def is_greater_better(self):
-        return self.name in self.GREATER_IS_BETTER
+        return self.actual in self.GREATER_IS_BETTER
 
     def get_performance_metric(self, y_true: np.array, y_pred: np.array, probas: np.array):
         if self.pred_type == DkuStressTestCenterConstants.MULTICLASS:
@@ -72,10 +75,10 @@ class Metric(object):
             self.RMSE: lambda y_true, y_pred, probas: sqrt(mean_squared_error(y_true, y_pred)),
             self.RMSLE: lambda y_true, y_pred, probas: rmsle_score(y_true, y_pred),
             self.R2: lambda y_true, y_pred, probas: r2_score(y_true, y_pred),
-        }.get(self.name)
+        }.get(self.actual)
 
         if perf_metric is None:
-            raise ValueError("Unknown training metric: {}".format(self.name))
+            raise ValueError("Unknown training metric: {}".format(self.actual))
         return perf_metric(y_true, y_pred, probas)
 
 
