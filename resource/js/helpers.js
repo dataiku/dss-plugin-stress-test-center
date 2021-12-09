@@ -108,28 +108,28 @@ app.directive("customDropdown", function() {
             item: '=',
             items: '=',
             possibleValues: '=',
-            taboo: "=",
-            index: "="
+            notAvailableValues: '=',
+            validity: '@',
+            onChange: '='
         },
         restrict: 'A',
         templateUrl:'/plugins/stress-test-center/resource/templates/custom-dropdown.html',
         link: function(scope, elem, attrs) {
-            const isInList = !!attrs.index; // TODO: tight coupling
             const isMulti = !!attrs.items;
-            const validity = isInList ? "key-value-list-valid" : "dropdown-not-empty";
-            scope.form.$setValidity(validity, false);
+            scope.validity = scope.validity || "dropdown-not-empty";
+            scope.form.$setValidity(scope.validity, false);
 
-            scope.notInTaboo = function(item) {
-                if (!scope.taboo) return true;
-                return item === scope.item || !(item in scope.taboo);
-            }
+            scope.canBeSelected = function(item) {
+                if (!scope.notAvailableValues) return true;
+                return item === scope.item || !(item in scope.notAvailableValues);
+            };
 
             scope.isSelected = function(value) {
                 if (isMulti) {
                     return scope.items.has(value);
                 }
                 return scope.item === value;
-            }
+            };
 
             scope.updateSelection = function(value, event) {
                 if (isMulti) {
@@ -141,13 +141,13 @@ app.directive("customDropdown", function() {
                     event.stopPropagation();
                 } else {
                     if (scope.item === value) return;
-                    if (isInList) {
-                        scope.$emit("dropdownChange", scope.item, value, scope.index, elem);
+                    if (scope.onChange) {
+                        scope.onChange(scope.item, value, elem);
                     }
                     scope.item = value;
                 }
-                scope.form.$setValidity(validity, !!scope.item || !!(scope.items || {}).size);
-            }
+                scope.form.$setValidity(scope.validity, !!scope.item || !!(scope.items || {}).size);
+            };
 
             scope.getPlaceholder = function() {
                 if (isMulti) {
@@ -156,11 +156,11 @@ app.directive("customDropdown", function() {
                 }
                 if (!scope.item) return "Select a " + scope.itemName;
                 return scope.item;
-            }
+            };
 
             scope.toggleDropdown = function() {
                 scope.isOpen = !scope.isOpen;
-            }
+            };
 
             const dropdownElem = elem.find(".custom-dropdown");
             const labelElem = elem.find(".label-text");
@@ -168,7 +168,7 @@ app.directive("customDropdown", function() {
                 if ((target) && ( angular.element(target).closest(dropdownElem)[0]
                     || angular.element(target).closest(labelElem)[0] )) { return; }
                 scope.isOpen = false;
-            })
+            });
         }
     }
 })
@@ -184,41 +184,48 @@ app.directive("keyValueList", function($timeout) {
             keyItemLabel: '@',
             valueLabel: '@',
             valueRange: '@',
-            form: "="
+            step: '=',
+            defaultValue: '=',
+            form: '='
         },
         restrict: 'A',
         templateUrl:'/plugins/stress-test-center/resource/templates/key-value-list.html',
         link: function(scope) {
             scope.keys = [null];
+            scope.step = scope.step || "any";
             [ scope.valueMin, scope.valueMax ] = scope.$eval(scope.valueRange) || [null, null];
-            scope.form.$setValidity("key-value-list-valid", false);
+            const VALIDITY = "key-value-list-valid";
+            scope.form.$setValidity(VALIDITY, false);
 
             scope.deleteListItem = function(index) {
                 if (!index) return;
                 const removedKey = scope.keys.splice(index, 1)[0];
                 delete scope.map[removedKey];
                 scope.form.$setValidity(
-                    "key-value-list-valid",
+                    VALIDITY,
                     !!scope.keys.length && scope.keys.every(key => !!key)
                 );
-            }
+            };
+
+            scope.canAddListItem = function() {
+                return scope.keys.length < scope.keyOptions.length;
+            };
 
             scope.addListItem = function() {
                 if (!scope.keys.length) {
-                    scope.form.$setValidity("key-value-list-valid", true);
+                    scope.form.$setValidity(VALIDITY, true);
                 }
                 scope.keys.push(null);
-            }
+            };
 
-            scope.$on("dropdownChange", function(e, oldVal, newVal, idx, keyElem) {
-                scope.keys[idx] = newVal;
-                scope.map[newVal] = scope.map[oldVal];
-                delete scope.map[oldVal];
+            scope.dropdownChange = function(oldValue, newValue, keyElem) {
+                scope.map[newValue] = scope.map[oldValue] || scope.defaultValue;
+                delete scope.map[oldValue];
                 $timeout(function() {
                     const valueElem = keyElem.parent().find(".key-value-element__value")[0];
                     valueElem.focus();
                 });
-            });
+            };
         }
     }
 });
@@ -242,7 +249,7 @@ app.directive("helpIcon", function () {
                 const tooltip = elem.find(".help-text__tooltip");
                 tooltip.css("top", (top - 8) + "px");
                 tooltip.toggleClass("tooltip--hidden");
-            }
+            };
         }
     }
 });

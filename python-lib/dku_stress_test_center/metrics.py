@@ -39,7 +39,7 @@ class Metric(object):
         if self.initial == self.CUSTOM:
             if self.pred_type == DkuStressTestCenterConstants.REGRESSION:
                 return self.R2
-            return self.ACCURACY
+            return self.ROC_AUC
         return self.initial
 
     def is_greater_better(self):
