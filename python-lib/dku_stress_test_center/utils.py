@@ -6,6 +6,7 @@ from drift_dac.prior_shift import Rebalance
 class DkuStressTestCenterConstants(object):
     FEATURE_PERTURBATION = "FEATURE_PERTURBATION"
     SUBPOPULATION_SHIFT = "SUBPOPULATION_SHIFT"
+    TARGET_SHIFT = "TARGET_SHIFT"
 
     TESTS = {
         MissingValues.__name__: (
@@ -23,7 +24,7 @@ class DkuStressTestCenterConstants(object):
         Adversarial.__name__: (Adversarial, FEATURE_PERTURBATION),
         Rebalance.__name__: (
             lambda **params: Rebalance(**params),
-            SUBPOPULATION_SHIFT
+            TARGET_SHIFT
         ),
         ReplaceWord.__name__: (ReplaceWord, FEATURE_PERTURBATION),
         WordDeletion.__name__: (WordDeletion, FEATURE_PERTURBATION),
@@ -32,9 +33,9 @@ class DkuStressTestCenterConstants(object):
 
     NR_CRITICAL_SAMPLES = 5
 
-    PREDICTION = 'prediction'
+    PREDICTION = "prediction"
+    UNCORRUPTED = "_dku_stress_test_uncorrupted"
 
-    REGRESSION_TYPE = 'REGRESSION'
-    CLASSIFICATION_TYPE = 'CLASSIFICATION'
-    CLUSTERING_TYPE = 'CLUSTERING'
-    DKU_CLASSIFICATION_TYPE = ['BINARY_CLASSIFICATION', 'MULTICLASS']
+    MULTICLASS = "MULTICLASS"
+    REGRESSION = "REGRESSION"
+    BINARY_CLASSIFICATION = "BINARY_CLASSIFICATION"

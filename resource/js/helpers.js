@@ -256,6 +256,11 @@ app.directive("helpIcon", function () {
 
 app.filter("toFixedIfNeeded", function() {
     return function(number, decimals) {
+        const lowerBound = 5 * Math.pow(10, -(decimals + 1));
+        if (number && Math.abs(number) < lowerBound) {
+            return "< " + lowerBound*Math.sign(number);
+        }
+
         if(Math.round(number) !== number) {
             return parseFloat(number.toFixed(decimals));
         }
