@@ -4,13 +4,25 @@ const versionId = webAppConfig['versionId'];
 
 (function() {
     'use strict';
-    app.service("CorruptionUtils", function() {
-        function metrics(metricName, isRegression) {
-            const perfVarDesc = "Performance variation measures the degradation of the " +
-                "performance metric used during training after corrupting the dataset. " +
-                `It is the difference between the ${metricName} after and before the corruption.`;
+    app.service("CorruptionUtils", function(MetricNames) {
+        function metrics(metric, isRegression) {
+            let metricUsedDesc;
+            if (metric.initial === "CUSTOM") {
+                metricUsedDesc = `(the default metric for ${isRegression ? "regression" : "classification"} ` +
+                "tasks, as the model used a custom metric for hyperparameter optimization which "+
+                "is not supported by the plugin)";
+            } else {
+                metricUsedDesc = "(the metric selected for hyperparameter optimization)";
+            }
+
+            const perfVarDesc = "Performance variation is the difference, " +
+            `${metric.greaterIsBetter ? "after and before" : "before and after"} the corruption, `+
+            `of the model's ${MetricNames[metric.actual]} ${metricUsedDesc}. The lower the ` +
+            "performance variation is, the more the corruption degrades the model's performance.";
+
             const resilienceDescClassif = "Corruption resilience is the ratio of rows where " +
                 "the prediction is not altered after the corruption.";
+
             const resilienceDescReg = "Corruption resilience is the ratio of rows where the " +
                 "error between predicted and true values is not increased after the corruption.";
 
@@ -67,8 +79,7 @@ const versionId = webAppConfig['versionId'];
         MSE: "mean squared error",
         RMSE: "root mean square error",
         RMSLE: "root mean square logarithmic error",
-        R2: "R2 score",
-        CUSTOM: "A custom code metric"
+        R2: "R2 score"
     });
 
     app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils, MetricNames) {
@@ -174,16 +185,7 @@ const versionId = webAppConfig['versionId'];
                 $scope.modelInfo.targetClasses = response.data["target_classes"];
                 $scope.modelInfo.isRegression = !$scope.modelInfo.targetClasses.length;
 
-                $scope.modelInfo.metric = MetricNames[response.data["metric"].actual];
-                if (response.data["metric"].initial === "CUSTOM") {
-                    const warning_msg = "The corruption metrics computed by this webapp " +
-                    "habitually use the metric that was selected for model hyperparameter "+
-                    "optimization. However, since custom metrics are not supported, "+
-                    `${$scope.modelInfo.metric} will be leveraged instead.`;
-
-                    $scope.createModal.alert(warning_msg, "Warning");
-                }
-                $scope.CORRUPTION_METRICS = CorruptionUtils.metrics($scope.modelInfo.metric, $scope.modelInfo.isRegression);
+                $scope.CORRUPTION_METRICS = CorruptionUtils.metrics(response.data["metric"],  $scope.modelInfo.isRegression);
 
                 features = response.data["features"];
 

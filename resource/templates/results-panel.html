@@ -62,7 +62,7 @@
                 Critical samples
             </div>
             <p class="text-lighter">
-                The critical samples are the most sensitive to perturbations. They highlight where the model predictions are highly uncertain (presenting large confidence fluctuations).
+                The critical samples are the least robust to corruptions. They highlight where the model predictions are highly uncertain.
             </p>
             <div class="flex dku-grid">
                 <div ng-repeat="sample in results[corruptionType].critical_samples.samples">
