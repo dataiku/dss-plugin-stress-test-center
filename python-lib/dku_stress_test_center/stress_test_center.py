@@ -5,13 +5,12 @@ from collections import defaultdict
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
 from dku_stress_test_center.metrics import Metric, worst_group_performance, performance_variation,\
     corruption_resilience_classification, corruption_resilience_regression
-from drift_dac.perturbation_shared_utils import Shift
+from drift_dac.perturbation_shared_utils import Shift, PerturbationConstants
 
 class StressTest(object):
     def __init__(self, shift: Shift):
         self.shift = shift
         self.df_with_pred = None
-        # TODO: check valid configurations
 
     def perturb_df(self, df: pd.DataFrame):
         raise NotImplementedError()
@@ -33,11 +32,20 @@ class FeaturePerturbationTest(StressTest):
         super(FeaturePerturbationTest, self).__init__(shift)
         self.features = features
 
+    def check(self, X):
+        if self.shift.feature_type == PerturbationConstants.NUMERIC:
+            if not pd.api.types.is_numeric_dtype(X):
+                raise ValueError("Some selected features are not of a numeric type")
+        if self.shift.feature_type in {PerturbationConstants.TEXT, PerturbationConstants.CATEGORICAL}:
+            if not pd.api.types.is_string_dtype(X):
+                raise ValueError("Some selected features are not of a string type")
+
     def perturb_df(self, df: pd.DataFrame):
         df = df.copy()
-        X = df.loc[:, self.features].values
+        X = df.loc[:, self.features]
+        self.check(X)
 
-        X, _ = self.shift.transform(X)
+        X, _ = self.shift.transform(X.values)
         df.loc[:, self.features] = X
 
         return df
