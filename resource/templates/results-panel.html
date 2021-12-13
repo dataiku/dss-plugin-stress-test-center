@@ -21,7 +21,7 @@
 
 <div ng-if="results && !loading.results">
     <div class="webapp__subsection" ng-repeat="(corruptionType, corruptionTypeResults) in results">
-        <div class="grand-title-b results-subsection__header">
+        <div class="grand-title results-subsection__header">
             {{ CORRUPTION_TYPES[corruptionType].displayName }}
         </div>
         <p class="text-lighter">
@@ -29,7 +29,7 @@
         </p>
         <div class="results__subsection">
             <div>
-                <div class="small-title-b">
+                <div class="small-title text-sb">
                     Metrics
                 </div>
                 <p class="text-lighter" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]">
@@ -42,42 +42,44 @@
                         <th scope="col" class="fake-cell"></th>
                         <th scope="col" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]"
                             ng-class="{'top-cell--blue': $even, 'top-cell--orange': $odd}"
-                            class="cell small-title-b">
+                            class="cell small-title text-sb">
                             {{ metric.displayName }}
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="(testName, metrics) in results[corruptionType].metrics">
-                        <td class="cell text-highlight">{{ tests.perturbations[testName].displayName }}</td>
+                        <td class="cell">{{ tests.perturbations[testName].displayName }}</td>
                         <td class="cell text-sb" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]">
-                            {{ metrics[metric.name] | toFixedIfNeeded: 6 }}
+                            {{ metrics[metric.name] | toFixedIfNeeded: 3 }}
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
         <div class="results__subsection" ng-if="results[corruptionType].critical_samples">
-            <div class="small-title-b">
+            <div class="small-title text-sb">
                 Critical samples
             </div>
             <p class="text-lighter">
-                The critical samples are the least robust to corruptions. They highlight where the model predictions are highly uncertain.
+                The critical samples are the most prone to corruptions. They highlight where the model predictions are highly uncertain.
             </p>
             <div class="flex dku-grid">
                 <div ng-repeat="sample in results[corruptionType].critical_samples.samples">
                     <table class="table-sample table-striped">
                         <thead>
                             <tr>
-                                <th class="top-cell--blue small-title-b">
-                                    <div class="flex top-cell__row">
-                                        <div>
-                                            Average {{ modelInfo.isRegression ? 'predicted value' : 'true class probability' }}
-                                        </div>
-                                        <div>
+                                <th class="top-cell--blue small-title flex text-sb top-cell__row">
+                                    <div>
+                                        Average {{ modelInfo.isRegression ? 'predicted value' : 'true class probability' }}
+                                    </div>
+                                    <div>
+                                        <span>
                                             {{ results[corruptionType].critical_samples.means[$index] | toFixedIfNeeded: 3}}
-                                            ± {{ results[corruptionType].critical_samples.uncertainties[$index] | toFixedIfNeeded: 6}}
-                                        </div>
+                                        </span>
+                                        <span class="text-regular">
+                                            ± {{ results[corruptionType].critical_samples.uncertainties[$index] | toFixedIfNeeded: 3}}
+                                        </span>
                                     </div>
                                 </th>
                             </tr>

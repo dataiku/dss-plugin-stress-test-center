@@ -1,7 +1,7 @@
 <div class="webapp__subsection">
-    <div class="grand-title-b flex settings-section__header">
+    <div class="grand-title flex settings-section__header">
         Stress tests
-        <help-icon class="small-title-b" help-text="Select the tests corresponding to corruptions you expect to have at deployment time, and assess the robustness of your model"></help-icon>
+        <help-icon class="small-title text-sb" help-text="Select the tests corresponding to corruptions you expect to have at deployment time, and assess the robustness of your model"></help-icon>
     </div>
     <form name="forms.SAMPLES" class="settings-subsection__form" ng-submit="runAnalysis()">
         <div class="control-group settings-subsection__form_field">
@@ -33,7 +33,7 @@
 </div>
 
 <div ng-if="!loading.modelInfo && tests.perturbations.Rebalance" class="webapp__subsection">
-    <div class="flex small-title-b settings-subsection__header">
+    <div class="flex small-title text-sb settings-subsection__header">
         <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.Rebalance.$activated}">
             <label class="switch">
                 <input type="checkbox" ng-model="tests.perturbations.Rebalance.$activated">
@@ -61,7 +61,7 @@
 </div>
 
 <div ng-if="!loading.modelInfo && tests.perturbations.MissingValues" class="webapp__subsection">
-    <div class="flex small-title-b settings-subsection__header">
+    <div class="flex small-title text-sb settings-subsection__header">
         <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.MissingValues.$activated}">
             <label class="switch">
                 <input type="checkbox" ng-model="tests.perturbations.MissingValues.$activated">
@@ -92,7 +92,7 @@
 </div>
 
 <div ng-if="!loading.modelInfo && tests.perturbations.Scaling" class="webapp__subsection">
-    <div class="flex small-title-b settings-subsection__header">
+    <div class="flex small-title text-sb settings-subsection__header">
         <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.Scaling.$activated}">
             <label class="switch">
                 <input type="checkbox" ng-model="tests.perturbations.Scaling.$activated">

@@ -146,18 +146,15 @@ transform: translate(-125%, -50%);
 
 /** TEXT**/
 
-.small-title-b {
+.small-title {
     font-weight: 500;
     font-size: 15px;
     line-height: 20px;
-    color: var(--grey);
 }
 
-.grand-title-b {
-    font-weight: 400;
+.grand-title {
     font-size: 22px;
     line-height: 22px;
-    color: var(--grey);
 }
 
 .text-tiny {
@@ -172,12 +169,12 @@ transform: translate(-125%, -50%);
     color: var(--grey-lighten-4);
 }
 
-.text-highlight {
-    color: var(--grey);
-}
-
 .text-sb {
     font-weight: 500;
+}
+
+.text-regular {
+    font-weight: 400;
 }
 
 .ellipsed-text {
