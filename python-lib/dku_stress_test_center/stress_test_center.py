@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
-from dku_stress_test_center.metrics import Metric, worst_group_performance, performance_variation,\
+from dku_stress_test_center.metrics import Metric, worst_group_performance,\
     corruption_resilience_classification, corruption_resilience_regression
 from drift_dac.perturbation_shared_utils import Shift
 
@@ -16,7 +16,7 @@ class StressTest(object):
     def perturb_df(self, df: pd.DataFrame):
         raise NotImplementedError()
 
-    def compute_metrics(self, perf_metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
+    def compute_metrics(self, metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
                         clean_y_pred: np.array, perturbed_y_pred: np.array,
                         clean_probas: np.array, perturbed_probas: np.array):
         raise NotImplementedError()
@@ -42,19 +42,26 @@ class FeaturePerturbationTest(StressTest):
 
         return df
 
-    def compute_metrics(self, perf_metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
+    def compute_metrics(self, metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
                         clean_y_pred: np.array, perturbed_y_pred: np.array,
                         clean_probas: np.array, perturbed_probas: np.array):
-        if perf_metric.pred_type == DkuStressTestCenterConstants.REGRESSION:
-            corruption_resilience = corruption_resilience_regression(clean_y_pred, perturbed_y_pred, clean_y_true)
+        perf_before = metric.compute(clean_y_true, clean_y_pred, clean_probas)
+        perf_after = metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
+        delta = perf_before - perf_after
+
+        if metric.pred_type == DkuStressTestCenterConstants.REGRESSION:
+            corruption_resilience = corruption_resilience_regression(
+                clean_y_pred,perturbed_y_pred, clean_y_true
+            )
         else:
-            corruption_resilience = corruption_resilience_classification(clean_y_pred, perturbed_y_pred)
+            corruption_resilience = corruption_resilience_classification(
+                clean_y_pred, perturbed_y_pred
+            )
         return {
             "corruption_resilience": corruption_resilience,
-            "performance_variation": performance_variation(
-                perf_metric, clean_y_true, perturbed_y_true, clean_y_pred, perturbed_y_pred,
-                clean_probas, perturbed_probas
-            )
+            "performance_variation": delta * (-1 if metric.is_greater_better() else 1),
+            "perf_before": perf_before,
+            "perf_after": perf_after
         }
 
 
@@ -76,31 +83,37 @@ class SubpopulationShiftTest(StressTest):
 
         return df
 
-    def compute_metrics(self, perf_metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
+    def compute_metrics(self, metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
                         clean_y_pred: np.array, perturbed_y_pred: np.array,
                         clean_probas: np.array, perturbed_probas: np.array):
+        perf_before = metric.compute(clean_y_true, clean_y_pred, clean_probas)
+        perf_after = metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
+        delta = perf_before - perf_after
+
         return {
             "worst_group_subpop": worst_group_performance(
-                perf_metric, perturbed_y_true, perturbed_y_true, perturbed_y_pred, perturbed_probas
+                metric, perturbed_y_true, perturbed_y_true, perturbed_y_pred, perturbed_probas
             ),
-            "performance_variation": performance_variation(
-                perf_metric, clean_y_true, perturbed_y_true, clean_y_pred, perturbed_y_pred,
-                clean_probas, perturbed_probas
-            )
+            "performance_variation": delta * (-1 if metric.is_greater_better() else 1),
+            "perf_before": perf_before,
+            "perf_after": perf_after
         }
 
 
 class TargetShiftTest(SubpopulationShiftTest):
     TEST_TYPE = DkuStressTestCenterConstants.TARGET_SHIFT
 
-    def compute_metrics(self, perf_metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
+    def compute_metrics(self, metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
                     clean_y_pred: np.array, perturbed_y_pred: np.array,
                     clean_probas: np.array, perturbed_probas: np.array):
+        perf_before = metric.compute(clean_y_true, clean_y_pred, clean_probas)
+        perf_after = metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
+        delta = perf_before - perf_after
+
         return {
-            "performance_variation": performance_variation(
-                perf_metric, clean_y_true, perturbed_y_true, clean_y_pred, perturbed_y_pred,
-                clean_probas, perturbed_probas
-            )
+            "performance_variation": delta * (-1 if metric.is_greater_better() else 1),
+            "perf_before": perf_before,
+            "perf_after": perf_after
         }
 
 

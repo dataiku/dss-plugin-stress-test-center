@@ -32,7 +32,7 @@
                 <div class="small-title text-sb">
                     Metrics
                 </div>
-                <p class="text-lighter" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]">
+                <p class="text-lighter" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]" ng-if="metric.description">
                     {{ metric.description }}
                 </p>
             </div>
@@ -41,8 +41,8 @@
                     <tr>
                         <th scope="col" class="fake-cell"></th>
                         <th scope="col" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]"
-                            ng-class="{'top-cell--blue': $even, 'top-cell--orange': $odd}"
-                            class="cell small-title text-sb">
+                            ng-class="{'top-cell--blue': $even, 'top-cell--orange': $odd, 'text-regular': metric.contextual}"
+                            class="cell small-title">
                             {{ metric.displayName }}
                         </th>
                     </tr>
@@ -50,7 +50,7 @@
                 <tbody>
                     <tr ng-repeat="(testName, metrics) in results[corruptionType].metrics">
                         <td class="cell">{{ tests.perturbations[testName].displayName }}</td>
-                        <td class="cell text-sb" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]">
+                        <td class="cell" ng-class="{'text-sb': !metric.contextual}" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]">
                             {{ metrics[metric.name] | toFixedIfNeeded: 3 }}
                         </td>
                     </tr>
@@ -62,7 +62,7 @@
                 Critical samples
             </div>
             <p class="text-lighter">
-                The critical samples are the most prone to corruptions. They highlight where the model predictions are highly uncertain.
+                The critical samples are the most prone to corruptions. They highlight where the predictions are highly uncertain.
             </p>
             <div class="flex dku-grid">
                 <div ng-repeat="sample in results[corruptionType].critical_samples.samples">

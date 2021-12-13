@@ -29,8 +29,18 @@ const versionId = webAppConfig['versionId'];
             return {
                 FEATURE_PERTURBATION: [
                     {
+                        name: "perf_before",
+                        displayName: "Perf. before",
+                        contextual: true
+                    },
+                    {
+                        name: "perf_after",
+                        displayName: "Perf. after",
+                        contextual: true
+                    },
+                    {
                         name: "performance_variation",
-                        displayName: "Performance variation",
+                        displayName: "Perf. variation",
                         description: perfVarDesc
                     },
                     {
@@ -41,10 +51,20 @@ const versionId = webAppConfig['versionId'];
                 ],
                 TARGET_SHIFT: [
                     {
+                        name: "perf_before",
+                        displayName: "Perf. before",
+                        contextual: true
+                    },
+                    {
+                        name: "perf_after",
+                        displayName: "Perf. after",
+                        contextual: true
+                    },
+                    {
                         name: "performance_variation",
-                        displayName: "Performance variation",
+                        displayName: "Perf. variation",
                         description: perfVarDesc
-                    }
+                    },
                 ]
             };
         };

@@ -45,7 +45,7 @@ class Metric(object):
     def is_greater_better(self):
         return self.actual in self.GREATER_IS_BETTER
 
-    def get_performance_metric(self, y_true: np.array, y_pred: np.array, probas: np.array):
+    def compute(self, y_true: np.array, y_pred: np.array, probas: np.array):
         if self.pred_type == DkuStressTestCenterConstants.MULTICLASS:
             extra_params = {
                 "average": 'macro',
@@ -88,7 +88,7 @@ def worst_group_performance(metric: Metric, subpopulation: np.array, y_true: np.
     subpopulation_values = np.unique(subpopulation)
     for subpop in subpopulation_values:
         subpop_mask = subpopulation == subpop
-        performance = metric.get_performance_metric(
+        performance = metric.compute(
             y_true[subpop_mask], y_pred[subpop_mask], probas[subpop_mask]
         )
         performances.append(performance)
@@ -104,17 +104,3 @@ def corruption_resilience_regression(clean_y_pred: np.array, perturbed_y_pred: n
     clean_abs_error = np.abs(clean_y_pred - clean_y_true)
     perturbed_abs_error = np.abs(perturbed_y_pred - clean_y_true)
     return np.count_nonzero(perturbed_abs_error <= clean_abs_error) / len(clean_y_true)
-
-
-def performance_variation(metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
-                          clean_y_pred: np.array, perturbed_y_pred: np.array,
-                          clean_probas: np.array, perturbed_probas: np.array):
-    clean_performance_metric = metric.get_performance_metric(
-        clean_y_true, clean_y_pred, clean_probas
-    )
-    stressed_performance_metric = metric.get_performance_metric(
-        perturbed_y_true, perturbed_y_pred, perturbed_probas
-    )
-
-    delta = stressed_performance_metric - clean_performance_metric
-    return delta if metric.is_greater_better() else - delta
