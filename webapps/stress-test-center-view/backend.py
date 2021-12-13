@@ -11,6 +11,7 @@ from dku_stress_test_center.utils import DkuStressTestCenterConstants
 from dataiku.customwebapp import get_webapp_config
 from dataiku.doctor.posttraining.model_information_handler import PredictionModelInformationHandler
 
+from dku_stress_test_center.metrics import Metric
 from dku_stress_test_center.model_accessor import ModelAccessor
 from dku_stress_test_center.stress_test_center import StressTestGenerator
 from model_metadata import get_model_handler
@@ -32,12 +33,18 @@ def get_model_info():
         else:
             original_model_handler = PredictionModelInformationHandler.from_full_model_id(fmi)
         stressor.model_accessor = ModelAccessor(original_model_handler)
+
         return jsonify(
             target_classes=stressor.model_accessor.get_target_classes(),
             features={
                 feature: preprocessing["type"]
                 for (feature, preprocessing) in stressor.model_accessor.get_per_feature().items()
                     if preprocessing["role"] == "INPUT"
+            },
+            metric={
+                "initial": stressor.model_accessor.get_metric().initial,
+                "actual": stressor.model_accessor.get_metric().actual,
+                "greaterIsBetter": stressor.model_accessor.get_metric().is_greater_better()
             }
         )
     except:

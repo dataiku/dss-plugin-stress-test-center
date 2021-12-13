@@ -146,18 +146,15 @@ transform: translate(-125%, -50%);
 
 /** TEXT**/
 
-.small-title-b {
+.small-title {
     font-weight: 500;
     font-size: 15px;
     line-height: 20px;
-    color: var(--grey);
 }
 
-.grand-title-b {
-    font-weight: 400;
+.grand-title {
     font-size: 22px;
     line-height: 22px;
-    color: var(--grey);
 }
 
 .text-tiny {
@@ -165,15 +162,25 @@ transform: translate(-125%, -50%);
 }
 
 .text-lighter {
-    color: var(--grey-lighten-4);
+    color: var(--grey-lighten-3);
 }
 
-.text-highlight {
-    color: var(--grey);
+.text-disabled {
+    color: var(--grey-lighten-4);
 }
 
 .text-sb {
     font-weight: 500;
+}
+
+.text-regular {
+    font-weight: 400;
+}
+
+.ellipsed-text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 /** BUTTONS **/
@@ -243,11 +250,11 @@ transform: translate(-125%, -50%);
 
 /** WEBAPP: GENERAL **/
 
-.report-box {
+.webapp {
     font-family: var(--font-family);
     font-size: 13px;
     line-height: 18px;
-    color: var(--grey-lighten-3);
+    color: var(--grey);
     background: var(--grey-lighten-7);
 }
 
@@ -264,10 +271,12 @@ transform: translate(-125%, -50%);
 
 .webapp__subsection {
     padding: 16px;
+    border-bottom: 1px solid var(--grey-lighten-6);
 }
 
-.webapp__subsection {
-    border-bottom: 1px solid var(--grey-lighten-6);
+.webapp__subsection p {
+    padding: unset;
+    text-align: justify;
 }
 
 .flex {
@@ -291,6 +300,14 @@ transform: translate(-125%, -50%);
 .settings-subsection__header {
     align-items: center;
     justify-content: space-between;
+}
+
+.settings-subsection-header__title {
+    flex: 1 0 auto;
+}
+
+.settings-subsection-header__title:hover > div {
+    color: var(--grey);
 }
 
 .settings-subsection__form {
@@ -498,7 +515,6 @@ transform: translate(-125%, -50%);
 .dku-grid {
     flex-wrap: wrap;
     justify-content: space-between;
-    padding: 0 5%;
 }
 
 .dku-grid > div {
@@ -527,15 +543,25 @@ table {
  }
 
  .table-metric td {
-    padding: 8px;
+    padding: 4px;
     min-width: 150px;
+ }
+
+ .table-sample th {
+    border-bottom: 1px solid var(--grey-lighten-6);
  }
 
  .table-sample td {
     padding: 8px 16px;
-    border-top: 1px solid var(--grey-lighten-6);
+ }
+
+ .table-sample-feature {
     border-bottom: 1px solid var(--grey-lighten-6);
  }
+
+.table-sample-feature__name, .table-sample-feature__value {
+    max-width: 50%;
+}
 
  .table-striped tbody tr:nth-of-type(2n+1) {
     background: var(--grey-lighten-7);

@@ -4,48 +4,110 @@ const versionId = webAppConfig['versionId'];
 
 (function() {
     'use strict';
-    app.constant("CorruptionUtils", {
-        metrics: {
-            FEATURE_PERTURBATION: [
-                {
-                    name: "performance_variation",
-                    displayName: "Performance variation"
-                },
-                {
-                    name: "corruption_resilience",
-                    displayName: "Corruption resilience"
-                },
-            ],
-            TARGET_SHIFT: [
-                {
-                    name: "performance_variation",
-                    displayName: "Performance variation"
-                }
-            ]
-        },
-        types: {
-            FEATURE_PERTURBATION: {
-                displayName: "Feature perturbations",
-                description: "These stress tests corrupt the value of one or several features across randomly sampled rows."
-            },
-            TARGET_SHIFT: {
-                displayName: "Target distribution shift",
-                description: "This stress test resamples the dataset to match a desired distribution for the target column."
+    app.service("CorruptionUtils", function(MetricNames) {
+        function metrics(metric, isRegression) {
+            let metricUsedDesc;
+            if (metric.initial === "CUSTOM") {
+                metricUsedDesc = `(the default metric for ${isRegression ? "regression" : "classification"} ` +
+                "tasks, as the model used a custom metric for hyperparameter optimization which "+
+                "is not supported by the plugin)";
+            } else {
+                metricUsedDesc = "(the metric selected for hyperparameter optimization)";
             }
-        }
-    });
 
-    app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils) {
-        $scope.modal = {};
-        $scope.removeModal = function(event) {
-            if (ModalService.remove($scope.modal)(event)) {
-                angular.element(".template").focus();
+            const perfVarDesc = "Performance variation is the difference, " +
+            `${metric.greaterIsBetter ? "after and before" : "before and after"} the corruption, `+
+            `of the model's ${MetricNames[metric.actual]} ${metricUsedDesc}.`;
+
+            const resilienceDescClassif = "Corruption resilience is the ratio of rows where " +
+                "the prediction is not altered after the corruption.";
+
+            const resilienceDescReg = "Corruption resilience is the ratio of rows where the " +
+                "error between predicted and true values is not increased after the corruption.";
+
+            return {
+                FEATURE_PERTURBATION: [
+                    {
+                        name: "perf_before",
+                        displayName: "Perf. before",
+                        contextual: true
+                    },
+                    {
+                        name: "perf_after",
+                        displayName: "Perf. after",
+                        contextual: true
+                    },
+                    {
+                        name: "performance_variation",
+                        displayName: "Perf. variation",
+                        description: perfVarDesc
+                    },
+                    {
+                        name: "corruption_resilience",
+                        displayName: "Corruption resilience",
+                        description: isRegression ? resilienceDescReg : resilienceDescClassif
+                    },
+                ],
+                TARGET_SHIFT: [
+                    {
+                        name: "perf_before",
+                        displayName: "Perf. before",
+                        contextual: true
+                    },
+                    {
+                        name: "perf_after",
+                        displayName: "Perf. after",
+                        contextual: true
+                    },
+                    {
+                        name: "performance_variation",
+                        displayName: "Perf. variation",
+                        description: perfVarDesc
+                    },
+                ]
+            };
+        };
+
+        return {
+            metrics,
+            types: {
+                FEATURE_PERTURBATION: {
+                    displayName: "Feature perturbations",
+                    description: "These stress tests corrupt the value of one or several features across randomly sampled rows."
+                },
+                TARGET_SHIFT: {
+                    displayName: "Target distribution shift",
+                    description: "This stress test resamples the dataset to match a desired distribution for the target column."
+                }
             }
         };
+    });
+
+    app.constant('MetricNames', {
+        F1: "F1 score",
+        ACCURACY: "accuracy",
+        PRECISION: "precision",
+        RECALL: "recall",
+        COST_MATRIX: "cost matrix gain",
+        ROC_AUC: "AUC",
+        LOG_LOSS: "log loss",
+        CUMULATIVE_LIFT: "cumulative lift",
+        EVS: "explained variance score",
+        MAPE: "mean absolute percentage error",
+        MAE: "mean absolute error",
+        MSE: "mean squared error",
+        RMSE: "root mean square error",
+        RMSLE: "root mean square logarithmic error",
+        R2: "R2 score"
+    });
+
+    app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils, MetricNames) {
+        $scope.modal = {};
+        $scope.removeModal = ModalService.remove($scope.modal);
         $scope.createModal = ModalService.create($scope.modal);
 
         $scope.CORRUPTION_TYPES = CorruptionUtils.types;
-        $scope.CORRUPTION_METRICS = CorruptionUtils.metrics;
+
         $scope.loading = {};
         $scope.forms = {};
         $scope.tests = {
@@ -141,6 +203,8 @@ const versionId = webAppConfig['versionId'];
                 $scope.loading.modelInfo = false;
                 $scope.modelInfo.targetClasses = response.data["target_classes"];
                 $scope.modelInfo.isRegression = !$scope.modelInfo.targetClasses.length;
+
+                $scope.CORRUPTION_METRICS = CorruptionUtils.metrics(response.data["metric"],  $scope.modelInfo.isRegression);
 
                 features = response.data["features"];
 

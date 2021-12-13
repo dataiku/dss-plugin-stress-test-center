@@ -1,13 +1,13 @@
 <div class="webapp__subsection">
-    <div class="grand-title-b flex settings-section__header">
+    <div class="grand-title flex settings-section__header">
         Stress tests
-        <help-icon class="small-title-b" help-text="Select the tests corresponding to corruptions you expect to have at deployment time, and assess the robustness of your model"></help-icon>
+        <help-icon class="small-title text-sb" help-text="Select the tests corresponding to corruptions you expect to have at deployment time, and assess the robustness of your model"></help-icon>
     </div>
     <form name="forms.SAMPLES" class="settings-subsection__form" ng-submit="runAnalysis()">
         <div class="control-group settings-subsection__form_field">
             <label for="samples" class="label-text">Proportion of samples for all the stress tests</label>
             <input type="number" id="samples" ng-model="tests.samples" step="0.01" min="0.01" max="1" required>
-            <div class="text-tiny">
+            <div class="text-tiny text-lighter">
                 Set the proportion of rows used to run the selected tests
             </div>
         </div>
@@ -33,13 +33,13 @@
 </div>
 
 <div ng-if="!loading.modelInfo && tests.perturbations.Rebalance" class="webapp__subsection">
-    <div class="flex small-title-b settings-subsection__header">
-        <label class="flex" ng-class="{'text-lighter': !tests.perturbations.Rebalance.$activated}">
+    <div class="flex small-title text-sb settings-subsection__header">
+        <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.Rebalance.$activated}">
             <label class="switch">
                 <input type="checkbox" ng-model="tests.perturbations.Rebalance.$activated">
                 <div class="slider round"></div>
             </label>
-            {{ tests.perturbations.Rebalance.displayName }}
+            <div>{{ tests.perturbations.Rebalance.displayName }}</div>
         </label>
         <help-icon help-text="Modifies the target distribution by resampling"></help-icon>
     </div>
@@ -61,15 +61,15 @@
 </div>
 
 <div ng-if="!loading.modelInfo && tests.perturbations.MissingValues" class="webapp__subsection">
-    <div class="flex small-title-b settings-subsection__header">
-        <label class="flex" ng-class="{'text-lighter': !tests.perturbations.MissingValues.$activated}">
+    <div class="flex small-title text-sb settings-subsection__header">
+        <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.MissingValues.$activated}">
             <label class="switch">
                 <input type="checkbox" ng-model="tests.perturbations.MissingValues.$activated">
                 <div class="slider round"></div>
             </label>
-            {{ tests.perturbations.MissingValues.displayName }}
+            <div>{{ tests.perturbations.MissingValues.displayName }}</div>
         </label>
-        <help-icon help-text="Randomly inserts missing values"></help-icon>
+        <help-icon help-text="Randomly inserts missing values in one or several feature columns"></help-icon>
     </div>
     <form name="forms.MissingValues" class="settings-subsection__form"
           ng-show="tests.perturbations.MissingValues.$activated" ng-submit="runAnalysis()">
@@ -92,15 +92,15 @@
 </div>
 
 <div ng-if="!loading.modelInfo && tests.perturbations.Scaling" class="webapp__subsection">
-    <div class="flex small-title-b settings-subsection__header">
-        <label class="flex" ng-class="{'text-lighter': !tests.perturbations.Scaling.$activated}">
+    <div class="flex small-title text-sb settings-subsection__header">
+        <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.Scaling.$activated}">
             <label class="switch">
                 <input type="checkbox" ng-model="tests.perturbations.Scaling.$activated">
                 <div class="slider round"></div>
             </label>
-            {{ tests.perturbations.Scaling.displayName }}
+            <div>{{ tests.perturbations.Scaling.displayName }}</div>
         </label>
-        <help-icon help-text="Changes the order of magnitude of each feature by some random scaling"></help-icon>
+        <help-icon help-text="Multiplies one or several feature columns by a specified scaling factor"></help-icon>
     </div>
     <form name="forms.Scaling" class="settings-subsection__form"
           ng-show="tests.perturbations.Scaling.$activated" ng-submit="runAnalysis()">
@@ -122,7 +122,7 @@
             <label for="scalingSamples" class="label-text">Proportion of corrupted samples</label>
             <input type="number" id="scalingSamples"
                    ng-model="tests.perturbations.Scaling.params.samples_fraction"
-                   placeholder="0.5" step="0.01" min="0" max="1" required>
+                   placeholder="0.5" step="0.01" min="0.01" max="1" required>
         </div>
     </form>
 </div>
