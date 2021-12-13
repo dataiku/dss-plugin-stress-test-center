@@ -17,8 +17,7 @@ const versionId = webAppConfig['versionId'];
 
             const perfVarDesc = "Performance variation is the difference, " +
             `${metric.greaterIsBetter ? "after and before" : "before and after"} the corruption, `+
-            `of the model's ${MetricNames[metric.actual]} ${metricUsedDesc}. The lower the ` +
-            "performance variation is, the more the corruption degrades the model's performance.";
+            `of the model's ${MetricNames[metric.actual]} ${metricUsedDesc}.`;
 
             const resilienceDescClassif = "Corruption resilience is the ratio of rows where " +
                 "the prediction is not altered after the corruption.";
