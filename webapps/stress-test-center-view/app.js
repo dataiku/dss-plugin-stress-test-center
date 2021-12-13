@@ -15,9 +15,13 @@ const versionId = webAppConfig['versionId'];
                 metricUsedDesc = "(the metric selected for hyperparameter optimization)";
             }
 
+            const [shortName, longName] = [
+                MetricNames[metric.actual].shortName || metric.actual,
+                MetricNames[metric.actual].longName
+            ];
             const perfVarDesc = "Performance variation is the difference, " +
             `${metric.greaterIsBetter ? "after and before" : "before and after"} the corruption, `+
-            `of the model's ${MetricNames[metric.actual]} ${metricUsedDesc}.`;
+            `of the model's ${longName} ${metricUsedDesc}.`;
 
             const resilienceDescClassif = "Corruption resilience is the ratio of rows where " +
                 "the prediction is not altered after the corruption.";
@@ -29,17 +33,17 @@ const versionId = webAppConfig['versionId'];
                 FEATURE_PERTURBATION: [
                     {
                         name: "perf_before",
-                        displayName: "Perf. before",
+                        displayName: `${shortName} before`,
                         contextual: true
                     },
                     {
                         name: "perf_after",
-                        displayName: "Perf. after",
+                        displayName: `${shortName} after`,
                         contextual: true
                     },
                     {
                         name: "performance_variation",
-                        displayName: "Perf. variation",
+                        displayName: `${shortName} variation`,
                         description: perfVarDesc
                     },
                     {
@@ -51,17 +55,17 @@ const versionId = webAppConfig['versionId'];
                 TARGET_SHIFT: [
                     {
                         name: "perf_before",
-                        displayName: "Perf. before",
+                        displayName: `${shortName} before`,
                         contextual: true
                     },
                     {
                         name: "perf_after",
-                        displayName: "Perf. after",
+                        displayName: `${shortName} after`,
                         contextual: true
                     },
                     {
                         name: "performance_variation",
-                        displayName: "Perf. variation",
+                        displayName: `${shortName} variation`,
                         description: perfVarDesc
                     },
                 ]
@@ -84,21 +88,58 @@ const versionId = webAppConfig['versionId'];
     });
 
     app.constant('MetricNames', {
-        F1: "F1 score",
-        ACCURACY: "accuracy",
-        PRECISION: "precision",
-        RECALL: "recall",
-        COST_MATRIX: "cost matrix gain",
-        ROC_AUC: "AUC",
-        LOG_LOSS: "log loss",
-        CUMULATIVE_LIFT: "cumulative lift",
-        EVS: "explained variance score",
-        MAPE: "mean absolute percentage error",
-        MAE: "mean absolute error",
-        MSE: "mean squared error",
-        RMSE: "root mean square error",
-        RMSLE: "root mean square logarithmic error",
-        R2: "R2 score"
+        F1: {
+            longName: "F1 score",
+        },
+        ACCURACY: {
+            longName: "accuracy",
+            shortName: "Accuracy"
+        },
+        PRECISION: {
+            longName: "precision",
+            shortName: "Precision"
+        },
+        RECALL: {
+            longName: "recall",
+            shortName: "Recall"
+        },
+        COST_MATRIX: {
+            longName: "cost matrix gain",
+            shortName: "Cost matrix gain"
+        },
+        ROC_AUC: {
+            longName: "AUC",
+            shortName: "AUC"
+        },
+        LOG_LOSS: {
+            longName: "log loss",
+            shortName: "Log loss"
+        },
+        CUMULATIVE_LIFT: {
+            longName: "cumulative lift",
+            shortName: "Lift"
+        },
+        EVS: {
+            longName: "explained variance score",
+        },
+        MAPE: {
+            longName: "mean absolute percentage error"
+        },
+        MAE: {
+            longName: "mean absolute error"
+        },
+        MSE: {
+            longName: "mean squared error"
+        },
+        RMSE: {
+            longName: "root mean square error"
+        },
+        RMSLE: {
+            longName: "root mean square logarithmic error"
+        },
+        R2: {
+            longName: "R2 score"
+        }
     });
 
     app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils, MetricNames) {
