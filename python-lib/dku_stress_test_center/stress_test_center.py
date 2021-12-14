@@ -5,7 +5,10 @@ from collections import defaultdict
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
 from dku_stress_test_center.metrics import Metric, worst_group_performance,\
     corruption_resilience_classification, corruption_resilience_regression
+
 from drift_dac.perturbation_shared_utils import Shift, PerturbationConstants
+from drift_dac.covariate_shift import MissingValues, Scaling
+from drift_dac.prior_shift import Rebalance
 
 class StressTest(object):
     def __init__(self, shift: Shift):
@@ -27,6 +30,7 @@ class StressTest(object):
 
 class FeaturePerturbationTest(StressTest):
     TEST_TYPE = DkuStressTestCenterConstants.FEATURE_PERTURBATION
+    TESTS = {MissingValues, Scaling}
 
     def __init__(self, shift: Shift, features: list):
         super(FeaturePerturbationTest, self).__init__(shift)
@@ -76,6 +80,7 @@ class FeaturePerturbationTest(StressTest):
 
 class SubpopulationShiftTest(StressTest):
     TEST_TYPE = DkuStressTestCenterConstants.SUBPOPULATION_SHIFT
+    TESTS = {Rebalance}
 
     def __init__(self, shift: Shift, population: str):
         super(SubpopulationShiftTest, self).__init__(shift)
@@ -136,17 +141,16 @@ class StressTestGenerator(object):
         self._clean_df = None
 
     def generate_test(self, test_name, test_config):
-        test_class, test_type = DkuStressTestCenterConstants.TESTS[test_name]
-        params = test_config["params"]
+        test = DkuStressTestCenterConstants.TESTS[test_name](**test_config["params"])
+        feature_preprocessing = self.model_accessor.get_per_feature()
 
-        if test_type == DkuStressTestCenterConstants.FEATURE_PERTURBATION:
+        if test.__class__ in FeaturePerturbationTest.TESTS:
             features = test_config["selected_features"]
-            return FeaturePerturbationTest(test_class(**params), features)
+            return FeaturePerturbationTest(test, features)
 
-        if test_type == DkuStressTestCenterConstants.TARGET_SHIFT:
+        if test.__class__ in TargetShiftTest.TESTS:
             target = self.model_accessor.get_target_variable()
-            population = test_config.get("population", target)
-            return TargetShiftTest(test_class(**params), population)
+            return TargetShiftTest(test, target)
 
         raise ValueError("Unknown stress test %s" % test_name)
 
@@ -164,6 +168,7 @@ class StressTestGenerator(object):
 
         target = self.model_accessor.get_target_variable()
         target_map = self.model_accessor.get_target_map()
+
         clean_y_true = clean_df_with_pred[target].replace(target_map)
         perturbed_y_true = test.df_with_pred[target].replace(target_map)
         clean_y_pred = clean_df_with_pred[DkuStressTestCenterConstants.PREDICTION].replace(target_map)
@@ -181,7 +186,7 @@ class StressTestGenerator(object):
         }
 
     def predict_clean_df(self, df: pd.DataFrame):
-        self._clean_df = self.model_accessor.predict_and_concatenate(df.copy())
+        self._clean_df = self.model_accessor.predict_and_concatenate(df)
 
     def build_stress_metrics(self):
         metrics = defaultdict(lambda: {"metrics": {}})

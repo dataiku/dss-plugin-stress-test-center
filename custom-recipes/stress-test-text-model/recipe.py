@@ -4,7 +4,7 @@ from dku_stress_test_center.stress_test_center import FeaturePerturbationTest
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
 
 recipe_config = get_recipe_config()
-test_class, _ = DkuStressTestCenterConstants.TESTS[recipe_config["stress_test"]]
+test_class = DkuStressTestCenterConstants.TESTS[recipe_config["stress_test"]]
 feature_perturbation = test_class(**recipe_config)
 stress_test = FeaturePerturbationTest(feature_perturbation, recipe_config["selected_features"])
 
@@ -15,4 +15,4 @@ corrupted_dataset.write_schema(input_dataset.read_schema())
 with corrupted_dataset.get_writer() as writer:
     for df_chunk in input_dataset.iter_dataframes():
         corrupted_dataframe = stress_test.perturb_df(df_chunk)
-        writer.write_dataframe(corrupted_dataframe) # TODO: by batches?
+        writer.write_dataframe(corrupted_dataframe)
