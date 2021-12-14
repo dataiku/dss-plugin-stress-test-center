@@ -32,13 +32,14 @@ class FeaturePerturbationTest(StressTest):
         super(FeaturePerturbationTest, self).__init__(shift)
         self.features = features
 
-    def check(self, X):
-        if self.shift.feature_type == PerturbationConstants.NUMERIC:
-            if not pd.api.types.is_numeric_dtype(X):
-                raise ValueError("Some selected features are not of a numeric type")
-        if self.shift.feature_type in {PerturbationConstants.TEXT, PerturbationConstants.CATEGORICAL}:
-            if not pd.api.types.is_string_dtype(X):
-                raise ValueError("Some selected features are not of a string type")
+    def check(self, df: pd.DataFrame):
+        for feature in df:
+            if self.shift.feature_type == PerturbationConstants.NUMERIC:
+                if not pd.api.types.is_numeric_dtype(df[feature]):
+                    raise ValueError("{} is not of a numeric type".format(feature))
+            if self.shift.feature_type in {PerturbationConstants.TEXT, PerturbationConstants.CATEGORICAL}:
+                if not pd.api.types.is_string_dtype(df[feature]):
+                    raise ValueError("{} is not of a string type".format(feature))
 
     def perturb_df(self, df: pd.DataFrame):
         df = df.copy()
