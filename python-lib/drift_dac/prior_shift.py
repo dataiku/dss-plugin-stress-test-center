@@ -4,65 +4,7 @@ import copy
 from drift_dac.perturbation_shared_utils import Shift, PerturbationConstants
 from collections import Counter
 
-__all__ = ['OnlyOne', 'KnockOut', 'Rebalance']
-
-
-class OnlyOne(Shift):
-    """ Sample data to keep only one class.
-    Args:
-        keep_cl (int or str): class to keep
-    Attributes:
-        keep_cl (int or str): class to keep
-        name (str): name of the perturbation
-        feature_type (int): identifier of the type of feature for which this perturbation is valid
-            (see PerturbationConstants).
-    """
-    def __init__(self, keep_cl=0):
-        super(OnlyOne, self).__init__()
-        self.keep_cl = keep_cl
-        self.name = 'oo_shift_%s' % keep_cl
-        self.feature_type = PerturbationConstants.ANY
-
-    def transform(self, X, y):
-        """ Apply the perturbation to a dataset.
-        Args:
-            X (numpy.ndarray): feature data.
-            y (numpy.ndarray): target data.
-        """
-        Xt = copy.deepcopy(X)
-        yt = copy.deepcopy(y)
-        Xt, yt = only_one_shift(Xt, yt, self.keep_cl)
-        return Xt, yt
-
-
-class KnockOut(Shift):
-    """ Sample data to remove a portion of a given class.
-    Args:
-        cl (int or str): class to subsample
-    Attributes:
-        cl (int or str): class to subsample
-        name (str): name of the perturbation
-        feature_type (int): identifier of the type of feature for which this perturbation is valid
-            (see PerturbationConstants).
-    """
-    def __init__(self, cl=0, samples_fraction=1.0):
-        super(KnockOut, self).__init__()
-        self.cl = cl
-        self.samples_fraction = samples_fraction
-        self.name = 'ko_shift_%s_%.2f' % (cl, samples_fraction)
-        self.feature_type = PerturbationConstants.ANY
-
-    def transform(self, X, y):
-        """ Apply the perturbation to a dataset.
-        Args:
-            X (numpy.ndarray): feature data.
-            y (numpy.ndarray): target data.
-        """
-        Xt = copy.deepcopy(X)
-        yt = copy.deepcopy(y)
-        Xt, yt = knockout_shift(Xt, yt, self.cl, self.samples_fraction)
-        return Xt, yt
-
+__all__ = ['Rebalance']
 
 class Rebalance(Shift):
     """ Sample data to match a given distribution of classes.
@@ -151,41 +93,3 @@ def rebalance_shift(x, y, priors):
         if offset == len(rebalanced_x_indices):
             break
     return x[rebalanced_x_indices], rebalanced_y
-
-
-# Remove instances of a single class.
-def knockout_shift(x, y, cl, delta):
-    n_rows = x.shape[0]
-    del_indices = np.where(y == cl)[0]
-    until_index = ceil(delta * len(del_indices))
-    if until_index % 2 != 0:
-        until_index = until_index + 1
-    del_indices = del_indices[:until_index]
-    x = np.delete(x, del_indices, axis=0)
-    y = np.delete(y, del_indices, axis=0)
-
-    indices_cl = np.where(y == cl)[0]
-    indices_not_cl = np.where(y != cl)[0]
-    repeat_indices = np.random.choice(indices_not_cl, n_rows-len(indices_cl), replace=True)
-    x_not_cl = x[repeat_indices, :]
-    y_not_cl = y[repeat_indices]
-
-    x = np.concatenate((x_not_cl, x[indices_cl, :]))
-    y = np.concatenate((y_not_cl, y[indices_cl]))
-
-    permuted_indices = np.random.permutation(n_rows)
-
-    x = x[permuted_indices, :]
-    y = y[permuted_indices]
-
-    return x, y
-
-
-# Remove all classes except for one via multiple knock-out.
-def only_one_shift(x, y, keep_cl):
-    labels = np.unique(y)
-    for cl in labels:
-        if cl != keep_cl:
-            x, y = knockout_shift(x, y, cl, 1.0)
-
-    return x, y
