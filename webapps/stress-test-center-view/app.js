@@ -142,7 +142,7 @@ const versionId = webAppConfig['versionId'];
         }
     });
 
-    app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils, MetricNames) {
+    app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils) {
         $scope.modal = {};
         $scope.removeModal = ModalService.remove($scope.modal);
         $scope.createModal = ModalService.create($scope.modal);
@@ -160,7 +160,7 @@ const versionId = webAppConfig['versionId'];
                 },
                 MissingValues: {
                     displayName: "Missing values",
-                    allowedFeatureTypes: ["NUMERIC", "CATEGORY"],
+                    allowedFeatureTypes: ["NUMERIC", "CATEGORY", "VECTOR", "TEXT"],
                     params: { samples_fraction: .5 },
                     selected_features: new Set()
                 },
