@@ -3,7 +3,12 @@ import copy
 
 from drift_dac.perturbation_shared_utils import Shift, sample_random_indices, PerturbationConstants
 
-__all__ = ['MissingValues', 'Scaling']
+__all__ = ['MissingValues', 'Scaling', 'sample_random_indices']
+
+def sample_random_indices(total_size, fraction, replace=False):
+    num_rows_to_pick = int(np.ceil(fraction * total_size))
+    affected_indexes = sorted(list(np.random.choice(total_size, size=num_rows_to_pick, replace=replace)))
+    return affected_indexes
 
 class MissingValues(Shift):
     """ Insert missing values into a portion of data.
@@ -44,8 +49,7 @@ class MissingValues(Shift):
         self.shifted_indices = sample_random_indices(Xt.shape[0], self.samples_fraction)
         self.shifted_features = sample_random_indices(Xt.shape[1], self.features_fraction)
 
-        Xt[np.transpose(np.array(self.shifted_indices)[np.newaxis]), np.array(self.shifted_features)[
-            np.newaxis]] = self.value_to_put_in
+        Xt[np.ix_(self.shifted_indices, self.shifted_features)] = self.value_to_put_in
 
         return Xt, yt
 
@@ -89,13 +93,8 @@ class Scaling(Shift):
         yt = y
 
         self.shifted_indices = sample_random_indices(Xt.shape[0], self.samples_fraction)
-        numerical_features = np.array(range(Xt.shape[1]))
-        n_feats = len(numerical_features)
-        self.shifted_features = list(
-            np.array(numerical_features)[sample_random_indices(n_feats, self.features_fraction)])
-        row_indices, col_indices = np.transpose(np.array(self.shifted_indices)[np.newaxis]), \
-                                   np.array(self.shifted_features)[np.newaxis]
+        self.shifted_features = sample_random_indices(Xt.shape[1], self.features_fraction)
 
-        Xt[row_indices, col_indices] *= self.scaling_factor
+        Xt[np.ix_(self.shifted_indices, self.shifted_features)] *= self.scaling_factor
 
         return Xt, yt
