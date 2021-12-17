@@ -5,10 +5,10 @@
     </div>
     <form name="forms.SAMPLES" class="settings-subsection__form" ng-submit="runAnalysis()">
         <div class="control-group settings-subsection__form_field">
-            <label for="samples" class="label-text">Proportion of samples for all the stress tests</label>
+            <label for="samples" class="label-text">Ratio of samples for the stress tests</label>
             <input type="number" id="samples" ng-model="tests.samples" step="0.01" min="0.01" max="1" required>
             <div class="text-tiny text-lighter">
-                Set the proportion of rows used to run the selected tests
+                Set the ratio of rows from the model's test dataset to run the selected tests
             </div>
         </div>
         <div class="control-group settings-subsection__form_field">

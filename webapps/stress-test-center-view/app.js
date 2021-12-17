@@ -76,7 +76,7 @@ const versionId = webAppConfig['versionId'];
             metrics,
             types: {
                 FEATURE_PERTURBATION: {
-                    displayName: "Feature perturbations",
+                    displayName: "Feature corruptions",
                     description: "These stress tests corrupt the value of one or several features across randomly sampled rows."
                 },
                 TARGET_SHIFT: {
@@ -174,7 +174,7 @@ const versionId = webAppConfig['versionId'];
                     selected_features: new Set()
                 }
             },
-            samples: 1,
+            samples: .8,
             randomSeed: 65537
         };
         $scope.modelInfo = {};
