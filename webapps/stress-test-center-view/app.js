@@ -154,18 +154,18 @@ const versionId = webAppConfig['versionId'];
         $scope.tests = {
             perturbations: {
                 Rebalance: {
-                    displayName: "Target distribution",
+                    displayName: "Shift target distribution",
                     needsTargetClasses: true,
                     params: { priors: {} }
                 },
                 MissingValues: {
-                    displayName: "Missing values",
+                    displayName: "Insert missing values",
                     allowedFeatureTypes: ["NUMERIC", "CATEGORY", "VECTOR", "TEXT"],
                     params: { samples_fraction: .5 },
                     selected_features: new Set()
                 },
                 Scaling: {
-                    displayName: "Scaling",
+                    displayName: "Multiply by a coefficient",
                     allowedFeatureTypes: ["NUMERIC"],
                     params: {
                         samples_fraction: .5,

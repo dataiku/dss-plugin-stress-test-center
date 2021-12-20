@@ -1,9 +1,14 @@
 <div class="empty-state" ng-if="!results && !loading.results">
     <div class="empty-state__title">
-        Put your model through a battery of tests to see how it handles the unexpected
+        Select and configure corruptions you expect your data to have after deploying your model.
     </div>
     <div class="empty-state__subtitle">
-        Select the corruptions you expect to have at deployment time, and assess the robustness of your model.
+        <p>
+            Each selected corruption generates an altered dataset from the model's test set, that is then preprocessed and scored with the current model.
+        </p>   
+        <p>
+            The webapp will display several metrics to assess how the model's performance changes between uncorrupted and corrupted data.
+        </p>
     </div>
     <div>
         <button class="dku-btn dku-btn-primary"

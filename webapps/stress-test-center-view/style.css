@@ -503,12 +503,11 @@ transform: translate(-125%, -50%);
 
 .empty-state__title, .empty-state__subtitle {
     width: 75%;
-    margin-bottom: 16px;
+    font-size: 18px;
 }
 
 .empty-state__title {
-    font-size: 16px;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 /* dku-grid (critical samples) */
