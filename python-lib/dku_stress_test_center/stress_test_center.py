@@ -260,5 +260,6 @@ class StressTestGenerator(object):
         return {
             "uncertainties": critical_uncertainties.tolist(),
             "means": critical_means.tolist(),
-            "samples": critical_samples.to_dict(orient='records')
+            "samples": critical_samples.to_dict(orient='records'),
+            "details": columns.loc[indexes_to_keep, :].to_dict(orient='records')
         }

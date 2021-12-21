@@ -455,7 +455,6 @@ transform: translate(-125%, -50%);
     position: absolute;
     left: 316px;
     padding: 8px;
-    font-weight: 400;
     font-size: 13px;
     color: #144C71;
     box-shadow: 0px 8px 10px rgba(0, 0, 0, 0.14), 0px 3px 14px rgba(0, 0, 0, 0.12), 0px 5px 5px rgba(0, 0, 0, 0.2);
@@ -468,6 +467,24 @@ transform: translate(-125%, -50%);
 
 .tooltip--hidden {
     display: none;
+}
+
+.top-cell__critical-sample {
+    position: relative;
+}
+
+.details__tooltip {
+    font-family: var(--font-family);
+    max-width: 400px;
+    position: absolute;
+    top: 32px;
+    right: 0px;
+    padding: 4px;
+    font-weight: 200;
+    font-size: 11px;
+    color: var(--grey-lighten-2);
+    box-shadow: 0px 8px 10px rgba(0, 0, 0, 0.14), 0px 3px 14px rgba(0, 0, 0, 0.12), 0px 5px 5px rgba(0, 0, 0, 0.2);
+    background: var(--white);
 }
 
 /** RESULTS **/
@@ -578,7 +595,7 @@ table {
     border-top: 4px solid #FF7E0E;
  }
 
- .top-cell__row {
+ .top-cell {
     justify-content: space-between;
  }
 

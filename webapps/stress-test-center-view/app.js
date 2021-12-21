@@ -83,6 +83,12 @@ const versionId = webAppConfig['versionId'];
                     displayName: "Target distribution shift",
                     description: "This stress test resamples the dataset to match a desired distribution for the target column."
                 }
+            },
+            TEST_NAMES: {
+                _dku_stress_test_uncorrupted: "No corruption",
+                Rebalance: "Shift target distribution",
+                MissingValues: "Insert missing values",
+                Scaling: "Multiply by a coefficient"
             }
         };
     });
@@ -142,7 +148,7 @@ const versionId = webAppConfig['versionId'];
         }
     });
 
-    app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils) {
+    app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils, $filter) {
         $scope.modal = {};
         $scope.removeModal = ModalService.remove($scope.modal);
         $scope.createModal = ModalService.create($scope.modal);
@@ -225,8 +231,18 @@ const versionId = webAppConfig['versionId'];
                 getWebAppBackendUrl("stress-tests-config"), requestParams).then(function() {
                 $http.get(getWebAppBackendUrl("compute"))
                     .then(function(response) {
-                        $scope.loading.results = false;
+                        angular.forEach(response.data, function(result) {
+                            if (result.critical_samples) {
+                                result.critical_samples.details = result.critical_samples.details.map(function(details) {
+                                    return Object.entries(details).map(function(_) {
+                                        const [testName, result] = _;
+                                        return [CorruptionUtils.TEST_NAMES[testName], $filter("toFixedIfNeeded")(result, 3)];
+                                    });
+                                });
+                            }
+                        });
                         $scope.results = response.data;
+                        $scope.loading.results = false;
                 }, function(e) {
                     $scope.loading.results = false;
                     $scope.createModal.error(e.data);
