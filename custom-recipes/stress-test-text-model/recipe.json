@@ -32,8 +32,8 @@
             "label": "Feature corruption",
             "type": "SELECT",
             "selectChoices": [
-                { "value": "MissingValues", "label": "Missing values"},
-                { "value": "Scaling", "label": "Scaling"}
+                { "value": "MissingValues", "label": "Insert missing values"},
+                { "value": "Scaling", "label": "Multiply by a coefficient"}
             ],
             "mandatory": true
         },
@@ -54,7 +54,7 @@
         },
         {
             "name": "scaling_factor",
-            "label": "Scaling factor",
+            "label": "Coefficient",
             "type": "DOUBLE",
             "defaultValue": 10,
             "mandatory": true,
