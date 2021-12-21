@@ -58,7 +58,7 @@ app.directive("modalBackground", function($compile) {
     return {
         scope: true,
         restrict: "C",
-        templateUrl: "/plugins/stress-test-center/resource/templates/modal.html",
+        templateUrl: "/plugins/model-stress-test/resource/templates/modal.html",
         link: function(scope, element) {
             if (scope.modal.conditions) {
                 const inputField = element.find("input");
@@ -113,7 +113,7 @@ app.directive("customDropdown", function() {
             onChange: '='
         },
         restrict: 'A',
-        templateUrl:'/plugins/stress-test-center/resource/templates/custom-dropdown.html',
+        templateUrl:'/plugins/model-stress-test/resource/templates/custom-dropdown.html',
         link: function(scope, elem, attrs) {
             const isMulti = !!attrs.items;
             scope.validity = scope.validity || "dropdown-not-empty";
@@ -189,7 +189,7 @@ app.directive("keyValueList", function($timeout) {
             form: '='
         },
         restrict: 'A',
-        templateUrl:'/plugins/stress-test-center/resource/templates/key-value-list.html',
+        templateUrl:'/plugins/model-stress-test/resource/templates/key-value-list.html',
         link: function(scope) {
             scope.keys = [null];
             scope.step = scope.step || "any";
@@ -250,6 +250,25 @@ app.directive("helpIcon", function () {
                 tooltip.css("top", (top - 8) + "px");
                 tooltip.toggleClass("tooltip--hidden");
             };
+        }
+    }
+});
+
+app.directive("detailsIcon", function () {
+    return {
+        restrict: 'E',
+        scope: {
+            details: '=',
+
+        },
+        template: `<i class="icon-info-sign icon--hoverable" ng-mouseleave="show = !show" ng-mouseover="show = !show">
+            <div class="details__tooltip" ng-if="show">
+                <div ng-repeat="detail in details">
+                    {{ detail[0] }}: {{ detail[1] }}
+                </div>
+            </div>
+        </i>`,
+        link: function(scope, elem) {
         }
     }
 });
