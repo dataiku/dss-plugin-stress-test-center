@@ -181,7 +181,7 @@ const versionId = webAppConfig['versionId'];
                 }
             },
             samples: .8,
-            randomSeed: 65537
+            randomSeed: 1337
         };
         $scope.modelInfo = {};
 
