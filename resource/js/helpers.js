@@ -208,7 +208,7 @@ app.directive("keyValueList", function($timeout) {
             };
 
             scope.canAddListItem = function() {
-                return scope.keys.length < scope.keyOptions.length;
+                return scope.keys.length < scope.keyOptions.length - 1;
             };
 
             scope.addListItem = function() {
