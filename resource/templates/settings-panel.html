@@ -1,7 +1,10 @@
 <div class="settings-section">
     <div class="webapp-subsection grand-title flex settings-section__header">
         Stress tests
-        <help-icon class="small-title text-sb" help-text="Select the tests corresponding to corruptions you expect to have at deployment time, and assess the robustness of your model"></help-icon>
+        <help-icon
+            class="small-title text-sb"
+            help-text="Select and configure the tests corresponding to data changes you expect to have at deployment time">
+        </help-icon>
     </div>
     <div class="webapp-subsection">
         <div class="webapp-subsection__delimiter_title">
@@ -58,14 +61,14 @@
                 </label>
                 <div>{{ tests.perturbations.Rebalance.displayName }}</div>
             </label>
-            <help-icon help-text="Modifies the target distribution by resampling"></help-icon>
+            <help-icon help-text="Resample data to match a given taget distribution"></help-icon>
         </div>
         <form name="forms.Rebalance" class="settings__form"
             ng-show="tests.perturbations.Rebalance.$activated" ng-submit="runAnalysis()">
             <div key-value-list
                 map="tests.perturbations.Rebalance.params.priors"
                 key-options="modelInfo.targetClasses"
-                key-label="Target classes"
+                key-label="Target class"
                 key-item-label="class"
                 value-label="Proportion"
                 value-range="[0,1]"

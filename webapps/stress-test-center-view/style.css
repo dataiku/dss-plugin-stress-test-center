@@ -405,6 +405,7 @@ transform: translate(-125%, -50%);
     cursor: pointer;
     overflow-y: auto;
     position: absolute;
+    font-size: 12px;
     top: 27px;
     left: 0;
     background: var(--white);
