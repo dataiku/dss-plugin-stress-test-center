@@ -77,7 +77,7 @@ const versionId = webAppConfig['versionId'];
             types: {
                 FEATURE_PERTURBATION: {
                     displayName: "Feature corruptions",
-                    description: "These stress tests corrupt the value of one or several features across randomly sampled rows."
+                    description: "Each one of these tests independently corrupts one or several features across randomly sampled rows."
                 },
                 TARGET_SHIFT: {
                     displayName: "Target distribution shift",

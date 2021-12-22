@@ -25,14 +25,16 @@
 </div>
 
 <div ng-if="results && !loading.results">
-    <div class="webapp__subsection" ng-repeat="(corruptionType, corruptionTypeResults) in results">
-        <div class="grand-title results-subsection__header">
-            {{ CORRUPTION_TYPES[corruptionType].displayName }}
+    <div class="results-section" ng-repeat="(corruptionType, corruptionTypeResults) in results">
+        <div class="webapp-subsection">
+            <div class="grand-title results-subsection__header">
+                {{ CORRUPTION_TYPES[corruptionType].displayName }}
+            </div>
+            <p class="text-lighter">
+                {{ CORRUPTION_TYPES[corruptionType].description }}
+            </p>
         </div>
-        <p class="text-lighter">
-            {{ CORRUPTION_TYPES[corruptionType].description }}
-        </p>
-        <div class="results__subsection">
+        <div class="webapp-subsection">
             <div>
                 <div class="small-title text-sb">
                     Metrics
@@ -62,7 +64,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="results__subsection" ng-if="results[corruptionType].critical_samples">
+        <div class="webapp-subsection" ng-if="results[corruptionType].critical_samples">
             <div class="small-title text-sb">
                 Critical samples
             </div>
