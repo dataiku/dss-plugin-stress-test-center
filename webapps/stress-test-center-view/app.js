@@ -6,28 +6,27 @@ const versionId = webAppConfig['versionId'];
     'use strict';
     app.service("CorruptionUtils", function(MetricNames) {
         function metrics(metric, isRegression) {
-            let metricUsedDesc;
-            if (metric.initial === "CUSTOM") {
-                metricUsedDesc = `(the default metric for ${isRegression ? "regression" : "classification"} ` +
-                "tasks, as the model used a custom metric for hyperparameter optimization which "+
-                "is not supported by the plugin)";
-            } else {
-                metricUsedDesc = "(the metric selected for hyperparameter optimization)";
-            }
-
             const [shortName, longName] = [
                 MetricNames[metric.actual].shortName || metric.actual,
                 MetricNames[metric.actual].longName
             ];
-            const perfVarDesc = "Performance variation is the difference, " +
-            `${metric.greaterIsBetter ? "after and before" : "before and after"} the corruption, `+
-            `of the model's ${longName} ${metricUsedDesc}.`;
+
+            let metricUsedDesc;
+            if (metric.initial === "CUSTOM") {
+                metricUsedDesc = "the default metric for "+
+                `${isRegression ? "regression tasks (R2 score)" : "classification tasks (ROC AUC)"}.`;
+            } else {
+                metricUsedDesc = `the model's hyperparameter optimization metric (here, ${longName}).`;
+            }
+
+            const perfVarDesc = "Performance variation is the difference in the model's performance " +
+            `between the altered and unaltered dataset. Performance is assessed via ${metricUsedDesc}`;
 
             const resilienceDescClassif = "Corruption resilience is the ratio of rows where " +
                 "the prediction is not altered after the corruption.";
 
             const resilienceDescReg = "Corruption resilience is the ratio of rows where the " +
-                "error between predicted and true values is not increased after the corruption.";
+                "error between predicted and true values is not greater after the corruption.";
 
             return {
                 FEATURE_PERTURBATION: [
@@ -77,11 +76,11 @@ const versionId = webAppConfig['versionId'];
             types: {
                 FEATURE_PERTURBATION: {
                     displayName: "Feature corruptions",
-                    description: "Each one of these tests independently corrupts one or several features across randomly sampled rows."
+                    description: "Each of these independent tests corrupts one or several features across randomly sampled rows."
                 },
                 TARGET_SHIFT: {
                     displayName: "Target distribution shift",
-                    description: "This stress test resamples the dataset to match a desired distribution for the target column."
+                    description: "This stress test resamples the test set to match the desired distribution for the target column."
                 }
             },
             TEST_NAMES: {
