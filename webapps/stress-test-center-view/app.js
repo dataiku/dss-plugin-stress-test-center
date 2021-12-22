@@ -187,7 +187,9 @@ const versionId = webAppConfig['versionId'];
 
         const featureTypesToIconClass = {
             NUMERIC: "numerical",
-            CATEGORY: "icon-font"
+            CATEGORY: "icon-font",
+            TEXT: "icon-italic",
+            VECTOR: "vector"
         };
 
         $scope.featureToTypeIcon = function(feature) {

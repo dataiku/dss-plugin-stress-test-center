@@ -427,20 +427,20 @@ transform: translate(-125%, -50%);
     background: var(--blue-lighten-5);
 }
 
-.custom-dropdown-row .icon-font, .custom-dropdown-row .numerical {
+.custom-dropdown-row .icon-font, .custom-dropdown-row .icon-italic, .custom-dropdown-row .numerical, .custom-dropdown-row .vector {
     width: 12px;
     margin-right: 4px;
 }
 
-.custom-dropdown-row .icon-font {
+.custom-dropdown-row .icon-font, .custom-dropdown-row .icon-italic {
     font-size: 11px;
 }
 
-.icon-font {
+.icon-font, .icon-italic {
     color: #ffc241;
 }
 
-.numerical {
+.numerical, .vector {
     color: #3075ae;
     font-size: 17px;
 }
