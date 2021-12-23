@@ -1,14 +1,17 @@
 import numpy as np
 import copy
 
-from drift_dac.perturbation_shared_utils import Shift, sample_random_indices, PerturbationConstants
+from drift_dac.perturbation_shared_utils import Shift, PerturbationConstants
 
 __all__ = ['MissingValues', 'Scaling', 'sample_random_indices']
 
-def sample_random_indices(total_size, fraction, replace=False):
-    num_rows_to_pick = int(np.ceil(fraction * total_size))
-    affected_indexes = sorted(list(np.random.choice(total_size, size=num_rows_to_pick, replace=replace)))
-    return affected_indexes
+def sample_random_indices(total_size, fraction):
+    if fraction == 1:
+        return np.arange(total_size)
+    nr_samples_to_pick = int(np.ceil(fraction * total_size))
+    indices = np.random.choice(total_size, size=nr_samples_to_pick, replace=False)
+    indices.sort()
+    return indices
 
 class MissingValues(Shift):
     """ Insert missing values into a portion of data.
