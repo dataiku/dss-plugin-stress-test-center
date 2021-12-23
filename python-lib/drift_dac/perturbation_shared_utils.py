@@ -2,12 +2,6 @@ import copy
 import numpy as np
 
 
-def sample_random_indices(total_size, fraction, replace=False):
-    num_rows_to_pick = int(np.ceil(fraction * total_size))
-    affected_indexes = sorted(list(np.random.choice(total_size, size=num_rows_to_pick, replace=replace)))
-    return affected_indexes
-
-
 class Shift(object):
     def __init__(self):
         self.name = None
@@ -60,4 +54,3 @@ class PerturbationConstants(object):
     CATEGORICAL = 1
     ANY = 2
     TEXT = 3
-
