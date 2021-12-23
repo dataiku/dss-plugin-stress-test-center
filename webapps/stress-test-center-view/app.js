@@ -6,28 +6,27 @@ const versionId = webAppConfig['versionId'];
     'use strict';
     app.service("CorruptionUtils", function(MetricNames) {
         function metrics(metric, isRegression) {
-            let metricUsedDesc;
-            if (metric.initial === "CUSTOM") {
-                metricUsedDesc = `(the default metric for ${isRegression ? "regression" : "classification"} ` +
-                "tasks, as the model used a custom metric for hyperparameter optimization which "+
-                "is not supported by the plugin)";
-            } else {
-                metricUsedDesc = "(the metric selected for hyperparameter optimization)";
-            }
-
             const [shortName, longName] = [
                 MetricNames[metric.actual].shortName || metric.actual,
                 MetricNames[metric.actual].longName
             ];
-            const perfVarDesc = "Performance variation is the difference, " +
-            `${metric.greaterIsBetter ? "after and before" : "before and after"} the corruption, `+
-            `of the model's ${longName} ${metricUsedDesc}.`;
+
+            let metricUsedDesc;
+            if (metric.initial === "CUSTOM") {
+                metricUsedDesc = "the default metric for "+
+                `${isRegression ? "regression tasks (R2 score)" : "classification tasks (ROC AUC)"}.`;
+            } else {
+                metricUsedDesc = `the model's hyperparameter optimization metric (here, ${longName}).`;
+            }
+
+            const perfVarDesc = "Performance variation is the difference in the model's performance " +
+            `between the altered and unaltered dataset. Performance is assessed via ${metricUsedDesc}`;
 
             const resilienceDescClassif = "Corruption resilience is the ratio of rows where " +
                 "the prediction is not altered after the corruption.";
 
             const resilienceDescReg = "Corruption resilience is the ratio of rows where the " +
-                "error between predicted and true values is not increased after the corruption.";
+                "error between predicted and true values is not greater after the corruption.";
 
             return {
                 FEATURE_PERTURBATION: [
@@ -76,13 +75,19 @@ const versionId = webAppConfig['versionId'];
             metrics,
             types: {
                 FEATURE_PERTURBATION: {
-                    displayName: "Feature perturbations",
-                    description: "These stress tests corrupt the value of one or several features across randomly sampled rows."
+                    displayName: "Feature corruptions",
+                    description: "Each of these independent tests corrupts one or several features across randomly sampled rows."
                 },
                 TARGET_SHIFT: {
                     displayName: "Target distribution shift",
-                    description: "This stress test resamples the dataset to match a desired distribution for the target column."
+                    description: "This stress test resamples the test set to match the desired distribution for the target column."
                 }
+            },
+            TEST_NAMES: {
+                _dku_stress_test_uncorrupted: "No corruption",
+                Rebalance: "Shift target distribution",
+                MissingValues: "Insert missing values",
+                Scaling: "Multiply by a coefficient"
             }
         };
     });
@@ -142,7 +147,7 @@ const versionId = webAppConfig['versionId'];
         }
     });
 
-    app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils) {
+    app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils, $filter) {
         $scope.modal = {};
         $scope.removeModal = ModalService.remove($scope.modal);
         $scope.createModal = ModalService.create($scope.modal);
@@ -154,18 +159,18 @@ const versionId = webAppConfig['versionId'];
         $scope.tests = {
             perturbations: {
                 Rebalance: {
-                    displayName: "Target distribution",
+                    displayName: "Shift target distribution",
                     needsTargetClasses: true,
                     params: { priors: {} }
                 },
                 MissingValues: {
-                    displayName: "Missing values",
+                    displayName: "Insert missing values",
                     allowedFeatureTypes: ["NUMERIC", "CATEGORY", "VECTOR", "TEXT"],
                     params: { samples_fraction: .5 },
                     selected_features: new Set()
                 },
                 Scaling: {
-                    displayName: "Scaling",
+                    displayName: "Multiply by a coefficient",
                     allowedFeatureTypes: ["NUMERIC"],
                     params: {
                         samples_fraction: .5,
@@ -174,14 +179,16 @@ const versionId = webAppConfig['versionId'];
                     selected_features: new Set()
                 }
             },
-            samples: 1,
-            randomSeed: 65537
+            samples: .8,
+            randomSeed: 1337
         };
         $scope.modelInfo = {};
 
         const featureTypesToIconClass = {
             NUMERIC: "numerical",
-            CATEGORY: "icon-font"
+            CATEGORY: "icon-font",
+            TEXT: "icon-italic",
+            VECTOR: "vector"
         };
 
         $scope.featureToTypeIcon = function(feature) {
@@ -225,8 +232,18 @@ const versionId = webAppConfig['versionId'];
                 getWebAppBackendUrl("stress-tests-config"), requestParams).then(function() {
                 $http.get(getWebAppBackendUrl("compute"))
                     .then(function(response) {
-                        $scope.loading.results = false;
+                        angular.forEach(response.data, function(result) {
+                            if (result.critical_samples) {
+                                result.critical_samples.details = result.critical_samples.details.map(function(details) {
+                                    return Object.entries(details).map(function(_) {
+                                        const [testName, result] = _;
+                                        return [CorruptionUtils.TEST_NAMES[testName], $filter("toFixedIfNeeded")(result, 3)];
+                                    });
+                                });
+                            }
+                        });
                         $scope.results = response.data;
+                        $scope.loading.results = false;
                 }, function(e) {
                     $scope.loading.results = false;
                     $scope.createModal.error(e.data);

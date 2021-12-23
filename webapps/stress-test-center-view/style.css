@@ -265,16 +265,30 @@ transform: translate(-125%, -50%);
     display: flex;
 }
 
-.webapp-section + .webapp-section {
-    border-left: 1px solid var(--grey-lighten-6);
+.webapp-panel + .webapp-panel {
+    border-left: 1px solid var(--grey-lighten-4);
 }
 
-.webapp__subsection {
+.webapp-subsection {
     padding: 16px;
+}
+
+.webapp-subsection__delimiter {
     border-bottom: 1px solid var(--grey-lighten-6);
 }
 
-.webapp__subsection p {
+.webapp-subsection__delimiter_title {
+    text-transform: uppercase;
+    font-weight: 500;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.webapp-subsection__delimiter_text {
+    text-align: justify;
+}
+
+.webapp-subsection p {
     padding: unset;
     text-align: justify;
 }
@@ -285,10 +299,14 @@ transform: translate(-125%, -50%);
 
 /** SETTINGS **/
 
-.webapp-section__settings {
+.webapp-panel__settings {
     width: 300px;
     flex: 0 0 auto;
     overflow-x: auto;
+}
+
+.settings-section {
+    border-bottom: 1px solid var(--grey-lighten-4);
 }
 
 .settings-section__header {
@@ -310,16 +328,16 @@ transform: translate(-125%, -50%);
     color: var(--grey);
 }
 
-.settings-subsection__form {
+.settings__form {
     margin: 0;
     padding: 8px 0 0 0;
 }
 
-.settings-subsection__form_field + .settings-subsection__form_field {
+.settings__form_field + .settings__form_field {
     margin-top: 8px;
 }
 
-.webapp-section__settings .spinner-div {
+.webapp-panel__settings .spinner-div {
     height: calc(100% - 210px);
 }
 
@@ -387,6 +405,7 @@ transform: translate(-125%, -50%);
     cursor: pointer;
     overflow-y: auto;
     position: absolute;
+    font-size: 12px;
     top: 27px;
     left: 0;
     background: var(--white);
@@ -409,20 +428,20 @@ transform: translate(-125%, -50%);
     background: var(--blue-lighten-5);
 }
 
-.custom-dropdown-row .icon-font, .custom-dropdown-row .numerical {
+.custom-dropdown-row .icon-font, .custom-dropdown-row .icon-italic, .custom-dropdown-row .numerical, .custom-dropdown-row .vector {
     width: 12px;
     margin-right: 4px;
 }
 
-.custom-dropdown-row .icon-font {
+.custom-dropdown-row .icon-font, .custom-dropdown-row .icon-italic {
     font-size: 11px;
 }
 
-.icon-font {
+.icon-font, .icon-italic {
     color: #ffc241;
 }
 
-.numerical {
+.numerical, .vector {
     color: #3075ae;
     font-size: 17px;
 }
@@ -455,7 +474,6 @@ transform: translate(-125%, -50%);
     position: absolute;
     left: 316px;
     padding: 8px;
-    font-weight: 400;
     font-size: 13px;
     color: #144C71;
     box-shadow: 0px 8px 10px rgba(0, 0, 0, 0.14), 0px 3px 14px rgba(0, 0, 0, 0.12), 0px 5px 5px rgba(0, 0, 0, 0.2);
@@ -470,9 +488,31 @@ transform: translate(-125%, -50%);
     display: none;
 }
 
+.top-cell__critical-sample {
+    position: relative;
+}
+
+.details__tooltip {
+    font-family: var(--font-family);
+    max-width: 400px;
+    position: absolute;
+    top: 32px;
+    right: 0px;
+    padding: 4px;
+    font-weight: 200;
+    font-size: 11px;
+    color: var(--grey-lighten-2);
+    box-shadow: 0px 8px 10px rgba(0, 0, 0, 0.14), 0px 3px 14px rgba(0, 0, 0, 0.12), 0px 5px 5px rgba(0, 0, 0, 0.2);
+    background: var(--white);
+}
+
 /** RESULTS **/
 
-.webapp-section__results {
+.results-section:not(:only-child) {
+    border-bottom: 1px solid var(--grey-lighten-4);
+}
+
+.webapp-panel__results {
     width: calc(100% - 300px);
     overflow-x: auto;
 }
@@ -483,11 +523,7 @@ transform: translate(-125%, -50%);
     padding-bottom: 8px;
 }
 
-.results__subsection + .results__subsection {
-    margin-top: 16px;
-}
-
-.webapp-section__results .spinner-div {
+.webapp-panel__results .spinner-div {
     height: 100%;
 }
 
@@ -503,12 +539,11 @@ transform: translate(-125%, -50%);
 
 .empty-state__title, .empty-state__subtitle {
     width: 75%;
-    margin-bottom: 16px;
+    font-size: 18px;
 }
 
 .empty-state__title {
-    font-size: 16px;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 /* dku-grid (critical samples) */
@@ -579,7 +614,7 @@ table {
     border-top: 4px solid #FF7E0E;
  }
 
- .top-cell__row {
+ .top-cell {
     justify-content: space-between;
  }
 
