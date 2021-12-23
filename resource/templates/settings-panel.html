@@ -3,7 +3,7 @@
         Stress tests
         <help-icon
             class="small-title text-sb"
-            help-text="Select and configure the tests corresponding to data changes you expect to have at deployment time">
+            help-text="Select and configure stress tests to simulate likely real-world data degradations and variations.">
         </help-icon>
     </div>
     <div class="webapp-subsection">
@@ -61,7 +61,7 @@
                 </label>
                 <div>{{ tests.perturbations.Rebalance.displayName }}</div>
             </label>
-            <help-icon help-text="Resample data to match a given taget distribution"></help-icon>
+            <help-icon help-text="Resample data to match a given target distribution"></help-icon>
         </div>
         <form name="forms.Rebalance" class="settings__form"
             ng-show="tests.perturbations.Rebalance.$activated" ng-submit="runAnalysis()">
