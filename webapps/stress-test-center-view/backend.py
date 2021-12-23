@@ -43,8 +43,7 @@ def get_model_info():
             },
             metric={
                 "initial": stressor.model_accessor.get_metric().initial,
-                "actual": stressor.model_accessor.get_metric().actual,
-                "greaterIsBetter": stressor.model_accessor.get_metric().is_greater_better()
+                "actual": stressor.model_accessor.get_metric().actual
             }
         )
     except:
