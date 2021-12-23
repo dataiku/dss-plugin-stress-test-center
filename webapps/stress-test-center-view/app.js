@@ -159,7 +159,7 @@ const versionId = webAppConfig['versionId'];
         $scope.tests = {
             perturbations: {
                 Rebalance: {
-                    displayName: "Shift target distribution",
+                    displayName: "Shift target distribution", // TODO: remove (use CorruptionUtils.TEST_NAMES instead)
                     needsTargetClasses: true,
                     params: { priors: {} }
                 },
@@ -234,11 +234,13 @@ const versionId = webAppConfig['versionId'];
                     .then(function(response) {
                         angular.forEach(response.data, function(result) {
                             if (result.critical_samples) {
-                                result.critical_samples.details = result.critical_samples.details.map(function(details) {
-                                    return Object.entries(details).map(function(_) {
-                                        const [testName, result] = _;
-                                        return [CorruptionUtils.TEST_NAMES[testName], $filter("toFixedIfNeeded")(result, 3)];
+                                result.critical_samples.predList = result.critical_samples.predList.map(function(predList) {
+                                    predList = Object.entries(predList).map(function(pred) {
+                                        const [testName, result] = pred;
+                                        return `${CorruptionUtils.TEST_NAMES[testName]}: ${$filter("toFixedIfNeeded")(result, 3)}`;
                                     });
+                                    predList.unshift($scope.modelInfo.isRegression ? "Predicted values" : "True class probas");
+                                    return predList;
                                 });
                             }
                         });
