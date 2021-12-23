@@ -56,7 +56,7 @@ def set_stress_tests_config():
     try:
         config = json.loads(request.data)
         stressor.set_config(config)
-        return {"result": "ok"}
+        return jsonify(result="ok")
     except:
         logger.error(traceback.format_exc())
         return traceback.format_exc(), 500
