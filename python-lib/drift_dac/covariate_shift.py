@@ -18,7 +18,7 @@ class MissingValues(Shift):
     Args:
         samples_fraction (float): proportion of samples to perturb.
         features_fraction (float): proportion of features to perturb.
-        value_to_put_in (float): desired representation of the missing value
+        value_to_put_in (any, default np.nan): desired representation of the missing value
     Attributes:
         samples_fraction (float): proportion of samples to perturb.
         features_fraction (float): proportion of features to perturb.
@@ -27,7 +27,7 @@ class MissingValues(Shift):
         feature_type (int): identifier of the type of feature for which this perturbation is valid
             (see PerturbationConstants).
     """
-    def __init__(self, samples_fraction=1.0, features_fraction=1.0, value_to_put_in=None):
+    def __init__(self, samples_fraction=1.0, features_fraction=1.0, value_to_put_in=np.nan):
         super(MissingValues, self).__init__()
         self.samples_fraction = samples_fraction
         self.features_fraction = features_fraction
@@ -42,7 +42,7 @@ class MissingValues(Shift):
             X (numpy.ndarray): feature data.
             y (numpy.ndarray): target data.
         """
-        if X.dtype <= np.int and self.value_to_put_in is None:
+        if X.dtype <= np.int and (self.value_to_put_in is None or isinstance(self.value_to_put_in, float)):
             Xt = X.astype(float)
         else:
             Xt = copy.deepcopy(X)
@@ -92,7 +92,10 @@ class Scaling(Shift):
             X (numpy.ndarray): feature data.
             y (numpy.ndarray): target data.
         """
-        Xt = copy.deepcopy(X)
+        if X.dtype <= np.int and isinstance(self.scaling_factor, float):
+            Xt = X.astype(float)
+        else:
+            Xt = copy.deepcopy(X)
         yt = y
 
         self.shifted_indices = sample_random_indices(Xt.shape[0], self.samples_fraction)
