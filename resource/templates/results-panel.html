@@ -1,6 +1,6 @@
 <div class="empty-state" ng-if="!results && !loading.results">
     <div class="empty-state__title">
-        Select and configure stress tests to simulate likely real-world data degradations.
+        Select and configure stress tests to simulate likely real-world data degradations and variations.
     </div>
     <div class="empty-state__subtitle">
         <p>
@@ -69,8 +69,8 @@
                 Critical samples
             </div>
             <p class="text-lighter">
-                Critical samples are the top observations in the test set that are most vulnerable to the selected corruptions.
-                They are rows where the prediction (probability for classification, predicted value for regression) has varied the most across all the configured corruption scenarios.
+                Critical samples are the test set rows the most vulnerable to the selected feature corruptions.
+                They are the records where the {{ modelInfo.isRegression ? 'predicted value' : 'true class probability' }} varied the most across all the tested corruption scenarios.
             </p>
             <div class="flex dku-grid">
                 <div ng-repeat="sample in results[corruptionType].critical_samples.samples">
@@ -88,7 +88,16 @@
                                         <span class="text-regular">
                                             ± {{ results[corruptionType].critical_samples.uncertainties[$index] | toFixedIfNeeded: 3}}
                                         </span>
-                                        <details-icon details="results[corruptionType].critical_samples.details[$index]"></details-icon>
+                                        <i class="icon-info-sign icon--hoverable"
+                                           ng-mouseleave="showPredList[$index] = !showPredList[$index]"
+                                           ng-mouseover="showPredList[$index] = !showPredList[$index]">
+                                            <div class="details__tooltip" ng-show="showPredList[$index]">
+                                                <div ng-repeat="detail in results[corruptionType].critical_samples.predList[$index] track by $index"
+                                                     ng-class="{ 'text-sb': $first }">
+                                                    {{ detail }}
+                                                </div>
+                                            </div>
+                                        </i>
                                     </div>
                                 </th>
                             </tr>

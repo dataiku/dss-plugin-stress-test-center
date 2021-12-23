@@ -254,25 +254,6 @@ app.directive("helpIcon", function () {
     }
 });
 
-app.directive("detailsIcon", function () {
-    return {
-        restrict: 'E',
-        scope: {
-            details: '=',
-
-        },
-        template: `<i class="icon-info-sign icon--hoverable" ng-mouseleave="show = !show" ng-mouseover="show = !show">
-            <div class="details__tooltip" ng-if="show">
-                <div ng-repeat="detail in details">
-                    {{ detail[0] }}: {{ detail[1] }}
-                </div>
-            </div>
-        </i>`,
-        link: function(scope, elem) {
-        }
-    }
-});
-
 app.filter("toFixedIfNeeded", function() {
     return function(number, decimals) {
         const lowerBound = 5 * Math.pow(10, -(decimals + 1));
