@@ -132,7 +132,7 @@ class TargetShiftTest(SubpopulationShiftTest):
 
 
 class StressTestGenerator(object):
-    def __init__(self, random_state=65537):
+    def __init__(self, random_state=1337):
         self._random_state = random_state
 
         self.tests = None
