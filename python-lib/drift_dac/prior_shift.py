@@ -66,10 +66,11 @@ def rebalance_shift(x, y, priors):
                                             for target_class in unmapped_classes)
         redistribution_coef = nr_samples_to_redistribute / nr_samples_from_unmapped_classes
 
+    class_to_initialize = list(priors.keys())[0]
     classes_to_resample = [
-        target_class for target_class in actual_class_counts if priors.get(target_class) != 0
+        target_class
+        for target_class in actual_class_counts if priors.get(target_class) != 0 and target_class != class_to_initialize
     ]
-    class_to_initialize = classes_to_resample.pop()
     rebalanced_x_indices = np.random.choice(np.where(y==class_to_initialize)[0], y.size)
     rebalanced_y = np.full(y.shape, class_to_initialize, dtype=y.dtype)
     desired_freq = priors.get(class_to_initialize)
