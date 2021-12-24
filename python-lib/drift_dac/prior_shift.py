@@ -66,21 +66,25 @@ def rebalance_shift(x, y, priors):
                                             for target_class in unmapped_classes)
         redistribution_coef = nr_samples_to_redistribute / nr_samples_from_unmapped_classes
 
-    class_to_initialize = list(priors.keys())[0]
-    classes_to_resample = [
-        target_class
-        for target_class in actual_class_counts if priors.get(target_class) != 0 and target_class != class_to_initialize
+    class_with_non_null_priors = [
+        target_class for target_class in actual_class_counts if priors.get(target_class, 0) != 0
     ]
+    class_with_null_priors = [
+        target_class for target_class in actual_class_counts if priors.get(target_class) is None
+    ]
+    if class_with_non_null_priors:
+        class_to_initialize = class_with_non_null_priors[-1]
+        offset = round(priors[class_to_initialize] * nr_samples)
+    else:
+        class_to_initialize = class_with_null_priors[-1]
+        offset = round(redistribution_coef * actual_class_counts[class_to_initialize])
     rebalanced_x_indices = np.random.choice(np.where(y==class_to_initialize)[0], y.size)
     rebalanced_y = np.full(y.shape, class_to_initialize, dtype=y.dtype)
-    desired_freq = priors.get(class_to_initialize)
-    if desired_freq is None:
-        desired_count = round(redistribution_coef * actual_class_counts[class_to_initialize])
-    else:
-        desired_count = round(desired_freq * nr_samples)
-    offset = desired_count
 
+    classes_to_resample = class_with_non_null_priors + class_with_null_priors
     for target_class in classes_to_resample:
+        if target_class == class_to_initialize:
+            continue
         desired_freq = priors.get(target_class)
         if desired_freq is None:
             desired_count = round(redistribution_coef * actual_class_counts[target_class])
@@ -89,7 +93,6 @@ def rebalance_shift(x, y, priors):
         if desired_count == 0:
             continue
         desired_count = min(len(rebalanced_x_indices) - offset, desired_count)
-
         rebalanced_x_indices[offset : desired_count + offset] = np.random.choice(
             np.where(y==target_class)[0], desired_count
         )
