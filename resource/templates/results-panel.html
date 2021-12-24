@@ -1,0 +1,118 @@
+<div class="empty-state" ng-if="!results && !loading.results">
+    <div class="empty-state__title">
+        Select and configure stress tests to simulate likely real-world data degradations and variations.
+    </div>
+    <div class="empty-state__subtitle">
+        <p>
+            Each selected stress test generates an altered dataset from the model's test set, that is then preprocessed and scored with the model.
+        </p>   
+        <p>
+            After running the tests, the model view will display several metrics to assess how the model's performance changes between altered and unaltered data.
+        </p>
+    </div>
+    <div>
+        <button class="dku-btn dku-btn-primary"
+                type="button"
+                ng-disabled="!checkTestConfig().canRun"
+                ng-click="runAnalysis()">
+            Run tests
+        </button>
+    </div>
+</div>
+
+<div class="spinner-div" ng-if="loading.results">
+    <spinner></spinner>
+</div>
+
+<div ng-if="results && !loading.results">
+    <div class="results-section" ng-repeat="(corruptionType, corruptionTypeResults) in results">
+        <div class="webapp-subsection">
+            <div class="grand-title results-subsection__header">
+                {{ CORRUPTION_TYPES[corruptionType].displayName }}
+            </div>
+            <p class="text-lighter">
+                {{ CORRUPTION_TYPES[corruptionType].description }}
+            </p>
+        </div>
+        <div class="webapp-subsection">
+            <div>
+                <div class="small-title text-sb">
+                    Metrics
+                </div>
+                <p class="text-lighter" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]" ng-if="metric.description">
+                    {{ metric.description }}
+                </p>
+            </div>
+            <table class="table-metric">
+                <thead>
+                    <tr>
+                        <th scope="col" class="fake-cell"></th>
+                        <th scope="col" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]"
+                            ng-class="{'top-cell--blue': $even, 'top-cell--orange': $odd, 'text-regular': metric.contextual}"
+                            class="cell small-title">
+                            {{ metric.displayName }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="(testName, metrics) in results[corruptionType].metrics">
+                        <td class="cell">{{ tests.perturbations[testName].displayName }}</td>
+                        <td class="cell" ng-class="{'text-sb': !metric.contextual}" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]">
+                            {{ metrics[metric.name] | toFixedIfNeeded: 3 }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="webapp-subsection" ng-if="results[corruptionType].critical_samples">
+            <div class="small-title text-sb">
+                Critical samples
+            </div>
+            <p class="text-lighter">
+                Critical samples are the rows in the test set identified as the most vulnerable to the selected feature corruptions.
+                They are the records where the {{ modelInfo.isRegression ? 'predicted value' : 'true class probability' }} varied the most across all the tested corruption scenarios.
+            </p>
+            <div class="flex dku-grid">
+                <div ng-repeat="sample in results[corruptionType].critical_samples.samples">
+                    <table class="table-sample table-striped">
+                        <thead>
+                            <tr>
+                                <th class="top-cell--blue small-title flex text-sb top-cell top-cell__critical-sample">
+                                    <div>
+                                        Average {{ modelInfo.isRegression ? 'predicted value' : 'true class probability' }}
+                                    </div>
+                                    <div>
+                                        <span>
+                                            {{ results[corruptionType].critical_samples.means[$index] | toFixedIfNeeded: 3}}
+                                        </span>
+                                        <span class="text-regular">
+                                            ± {{ results[corruptionType].critical_samples.uncertainties[$index] | toFixedIfNeeded: 3}}
+                                        </span>
+                                        <i class="icon-info-sign icon--hoverable"
+                                           ng-mouseleave="showPredList[$index] = !showPredList[$index]"
+                                           ng-mouseover="showPredList[$index] = !showPredList[$index]">
+                                            <div class="details__tooltip" ng-show="showPredList[$index]">
+                                                <div ng-repeat="detail in results[corruptionType].critical_samples.predList[$index] track by $index"
+                                                     ng-class="{ 'text-sb': $first }">
+                                                    {{ detail }}
+                                                </div>
+                                            </div>
+                                        </i>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="table-sample-feature" ng-repeat="(key, value) in sample">
+                            <td class="flex">
+                                <div class="table-sample-feature__name ellipsed-text">{{key}}</div>
+                                &nbsp;<div class="table-sample-feature__value ellipsed-text text-lighter">= {{value}}</div>
+                            </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

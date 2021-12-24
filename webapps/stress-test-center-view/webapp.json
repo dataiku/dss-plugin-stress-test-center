@@ -1,0 +1,25 @@
+{
+    "meta": {
+        "label": "Stress test center",
+        "description": "Put your model through a battery of tests and see how it handles the unexpected",
+        "icon": "icon-stethoscope"
+    },
+    "baseType": "STANDARD",
+    "hasBackend": "true",
+    "standardWebAppLibraries": ["dataiku", "font_awesome"],
+    "virtualWebAppAffinity": "PREFER_VIRTUAL",
+    "roles": [
+        {
+            "type": "SAVED_MODEL",
+            "contentType": "prediction",
+            "targetParamsKey": "modelId",
+            "pathParamsKey": "versionId"
+        },
+         {
+          "type": "ANALYSIS",
+          "contentType": "prediction",
+          "targetParamsKey": "trainedModelFullModelId"
+        }
+    ],
+    "params":[]
+}

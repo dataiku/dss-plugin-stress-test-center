@@ -1,0 +1,158 @@
+<div class="settings-section">
+    <div class="webapp-subsection grand-title flex settings-section__header">
+        Stress tests
+        <help-icon
+            class="small-title text-sb"
+            help-text="Select and configure stress tests to simulate likely real-world data degradations and variations.">
+        </help-icon>
+    </div>
+    <div class="webapp-subsection">
+        <div class="webapp-subsection__delimiter_title">
+            General settings
+        </div>
+        <form name="forms.SAMPLES" class="settings__form" ng-submit="runAnalysis()">
+            <div class="control-group settings__form_field">
+                <label for="samples" class="label-text">Ratio of samples for the stress tests</label>
+                <input type="number" id="samples" ng-model="tests.samples" step="0.01" min="0.01" max="1" required>
+                <div class="text-tiny text-lighter">
+                    Set the ratio of rows from the model's test dataset to run the selected tests
+                </div>
+            </div>
+            <div class="control-group settings__form_field">
+                <label for="randomSeed" class="label-text">Random seed</label>
+                <input type="number" id="randomSeed"
+                    ng-model="tests.randomSeed"
+                    step="1" required>
+                <div class="text-tiny text-lighter">
+                    Using a fixed random seed allows for reproducible results
+                </div>
+            </div>
+            <div class="dku-btn-container--right-align settings__form_field">
+                <button class="dku-btn dku-btn-primary"
+                        type="button"
+                        ng-disabled="loading.results || !checkTestConfig().canRun"
+                        ng-click="runAnalysis()">
+                    Run tests
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div ng-if="loading.modelInfo" class="settings-section spinner-div">
+    <spinner></spinner>
+</div>
+
+<div class=settings-section ng-if="!loading.modelInfo && tests.perturbations.Rebalance">
+    <div class="webapp-subsection webapp-subsection__delimiter">
+        <div class="webapp-subsection__delimiter_title">
+            {{ CORRUPTION_TYPES.TARGET_SHIFT.displayName }}
+        </div>
+        <div class="text-lighter webapp-subsection__delimiter_text">
+            {{ CORRUPTION_TYPES.TARGET_SHIFT.description }}
+        </div>
+    </div>
+    <div class="webapp-subsection">
+        <div class="flex small-title text-sb settings-subsection__header">
+            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.Rebalance.$activated}">
+                <label class="switch">
+                    <input type="checkbox" ng-model="tests.perturbations.Rebalance.$activated">
+                    <div class="slider round"></div>
+                </label>
+                <div>{{ tests.perturbations.Rebalance.displayName }}</div>
+            </label>
+            <help-icon help-text="Resample data to match a given target distribution"></help-icon>
+        </div>
+        <form name="forms.Rebalance" class="settings__form"
+            ng-show="tests.perturbations.Rebalance.$activated" ng-submit="runAnalysis()">
+            <div key-value-list
+                map="tests.perturbations.Rebalance.params.priors"
+                key-options="modelInfo.targetClasses"
+                key-label="Target class"
+                key-item-label="class"
+                value-label="Proportion"
+                value-range="[0,1]"
+                step=".01"
+                default-value=".5"
+                form="forms.Rebalance"
+                class="settings__form_field">
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class=settings-section>
+    <div class="webapp-subsection webapp-subsection__delimiter">
+        <div class="webapp-subsection__delimiter_title">
+            {{ CORRUPTION_TYPES.FEATURE_PERTURBATION.displayName }}
+        </div>
+        <div class="text-lighter webapp-subsection__delimiter_text">
+            {{ CORRUPTION_TYPES.FEATURE_PERTURBATION.description }}
+        </div>
+    </div>
+    <div ng-if="!loading.modelInfo && tests.perturbations.MissingValues" class="webapp-subsection">
+        <div class="flex small-title text-sb settings-subsection__header">
+            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.MissingValues.$activated}">
+                <label class="switch">
+                    <input type="checkbox" ng-model="tests.perturbations.MissingValues.$activated">
+                    <div class="slider round"></div>
+                </label>
+                <div>{{ tests.perturbations.MissingValues.displayName }}</div>
+            </label>
+            <help-icon help-text="Randomly inserts missing values in one or several feature columns"></help-icon>
+        </div>
+        <form name="forms.MissingValues" class="settings__form"
+            ng-show="tests.perturbations.MissingValues.$activated" ng-submit="runAnalysis()">
+            <div custom-dropdown
+                form="forms.MissingValues"
+                possible-values="tests.perturbations.MissingValues.availableColumns"
+                items="tests.perturbations.MissingValues.selected_features"
+                item-name="feature"
+                item-image="featureToTypeIcon"
+                label="Corrupted features"
+                class="settings__form_field">
+            </div>
+            <div class="control-group settings__form_field">
+                <label for="missingValuesSamples" class="label-text">Proportion of corrupted samples</label>
+                <input type="number" id="missingValuesSamples"
+                    ng-model="tests.perturbations.MissingValues.params.samples_fraction"
+                    placeholder="0.5" step="0.01" min="0.01" max="1" required>
+            </div>
+        </form>
+    </div>
+    <div ng-if="!loading.modelInfo && tests.perturbations.Scaling" class="webapp-subsection">
+        <div class="flex small-title text-sb settings-subsection__header">
+            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.Scaling.$activated}">
+                <label class="switch">
+                    <input type="checkbox" ng-model="tests.perturbations.Scaling.$activated">
+                    <div class="slider round"></div>
+                </label>
+                <div>{{ tests.perturbations.Scaling.displayName }}</div>
+            </label>
+            <help-icon help-text="Multiplies one or several numerical features by a specified coefficient"></help-icon>
+        </div>
+        <form name="forms.Scaling" class="settings__form"
+            ng-show="tests.perturbations.Scaling.$activated" ng-submit="runAnalysis()">
+            <div custom-dropdown
+                form="forms.Scaling"
+                possible-values="tests.perturbations.Scaling.availableColumns"
+                items="tests.perturbations.Scaling.selected_features"
+                item-name="feature"
+                item-image="featureToTypeIcon"
+                label="Corrupted features"
+                class="settings__form_field">
+            </div>
+            <div class="control-group settings__form_field">
+                <label for="scalingFactor" class="label-text">Coefficient</label>
+                <input type="number" id="scalingFactor"
+                    ng-model="tests.perturbations.Scaling.params.scaling_factor" required>
+            </div>
+            <div class="control-group settings__form_field">
+                <label for="scalingSamples" class="label-text">Proportion of corrupted samples</label>
+                <input type="number" id="scalingSamples"
+                    ng-model="tests.perturbations.Scaling.params.samples_fraction"
+                    placeholder="0.5" step="0.01" min="0.01" max="1" required>
+            </div>
+        </form>
+    </div>
+</div>
