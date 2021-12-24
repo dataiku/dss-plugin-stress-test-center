@@ -198,7 +198,6 @@ app.directive("keyValueList", function($timeout) {
             scope.form.$setValidity(VALIDITY, false);
 
             scope.deleteListItem = function(index) {
-                if (!index) return;
                 const removedKey = scope.keys.splice(index, 1)[0];
                 delete scope.map[removedKey];
                 scope.form.$setValidity(
