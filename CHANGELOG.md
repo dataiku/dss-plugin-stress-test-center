@@ -1,13 +1,6 @@
 # Changelog
 
-## Version X.Y.Z - Type of release (*) - YYYY-MM-DD
-- Changes 1 ...
-- Changes 2 ... 
-- ...
-
-(*) Possible types of releases
-
+## Version 1.0.0 - Initial release - 2021-12-24
 - Initial release
-- Bugfix release
-- Feature release
-- .... 
+- Model view component featuring three stress tests
+- Recipe component featuring two stress tests
