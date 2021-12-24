@@ -45,7 +45,7 @@ def rebalance_shift(x, y, priors):
 
     positive_priors = +Counter(priors)
     # Check current target distribution has all the classes in desired distribution
-    if positive_priors.keys() > actual_class_counts.keys():
+    if positive_priors.keys() - actual_class_counts.keys():
         raise ValueError(
             "One of the classes to resample is absent from the actual target distribution"
         )
@@ -70,9 +70,15 @@ def rebalance_shift(x, y, priors):
         target_class for target_class in actual_class_counts if priors.get(target_class) != 0
     ]
     class_to_initialize = classes_to_resample.pop()
-    rebalanced_x_indices = np.random.choice(np.where(y==class_to_initialize)[0], y.shape)
+    rebalanced_x_indices = np.random.choice(np.where(y==class_to_initialize)[0], y.size)
     rebalanced_y = np.full(y.shape, class_to_initialize, dtype=y.dtype)
-    offset = 0
+    desired_freq = priors.get(class_to_initialize)
+    if desired_freq is None:
+        desired_count = round(redistribution_coef * actual_class_counts[class_to_initialize])
+    else:
+        desired_count = round(desired_freq * nr_samples)
+    offset = desired_count
+
     for target_class in classes_to_resample:
         desired_freq = priors.get(target_class)
         if desired_freq is None:
@@ -81,13 +87,12 @@ def rebalance_shift(x, y, priors):
             desired_count = round(desired_freq * nr_samples)
         if desired_count == 0:
             continue
-
-        class_samples_indices = np.where(y==target_class)[0]
         desired_count = min(len(rebalanced_x_indices) - offset, desired_count)
-        rebalanced_x_indices[offset : offset + desired_count] = np.random.choice(
-            class_samples_indices, desired_count
+
+        rebalanced_x_indices[offset : desired_count + offset] = np.random.choice(
+            np.where(y==target_class)[0], desired_count
         )
-        rebalanced_y[offset : offset+desired_count] = target_class
+        rebalanced_y[offset : offset + desired_count] = target_class
 
         offset += desired_count
         if offset == len(rebalanced_x_indices):
