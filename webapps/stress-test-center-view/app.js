@@ -154,7 +154,7 @@ const versionId = webAppConfig['versionId'];
             shortName: metric => metrics[metric].shortName || metric
         }
     });
-        
+
     app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils, MetricNames, $filter) {
         $scope.modal = {};
         $scope.removeModal = ModalService.remove($scope.modal);
