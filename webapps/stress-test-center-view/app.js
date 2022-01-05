@@ -10,7 +10,7 @@ const versionId = webAppConfig['versionId'];
             const longName = MetricNames.longName(metric);
 
             const perfVarDesc = `${longName} variation is the difference in the model's ` +
-            `${longName.toLowerCase()} between the altered and unaltered dataset`;
+            `${longName.toLowerCase()} between the altered dataset and the unaltered one.`;
 
             const resilienceDescClassif = "Corruption resilience is the ratio of rows where " +
                 "the prediction is not altered after the corruption.";
