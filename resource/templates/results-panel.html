@@ -70,7 +70,7 @@
             </div>
             <p class="text-lighter">
                 Critical samples are the rows in the test set identified as the most vulnerable to the selected feature corruptions.
-                They are the records where the {{ modelInfo.isRegression ? 'predicted value' : 'true class probability' }} varied the most across all the tested corruption scenarios.
+                They are the records where the {{ modelInfo.predType === 'REGRESSION' ? 'predicted value' : 'true class probability' }} varied the most across all the tested corruption scenarios.
             </p>
             <div class="flex dku-grid">
                 <div ng-repeat="sample in results[corruptionType].critical_samples.samples">
@@ -79,7 +79,7 @@
                             <tr>
                                 <th class="top-cell--blue small-title flex text-sb top-cell top-cell__critical-sample">
                                     <div>
-                                        Average {{ modelInfo.isRegression ? 'predicted value' : 'true class probability' }}
+                                        Average {{ modelInfo.predType === 'REGRESSION' ? 'predicted value' : 'true class probability' }}
                                     </div>
                                     <div>
                                         <span>

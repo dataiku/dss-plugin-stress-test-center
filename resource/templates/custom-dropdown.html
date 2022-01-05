@@ -13,7 +13,7 @@
                 ng-repeat="item in possibleValues | filter: canBeSelected">
                 <i class="icon-ok" ng-class="{'icon--hidden': !isSelected(item)}"></i>
                 <i class="{{ itemImage(item) }}" ng-if="itemImage"></i>
-                <div class="ellipsed-text">{{ item }}</div>
+                <div class="ellipsed-text">{{ display(item) }}</div>
             </div>
         </div>
     </div>
