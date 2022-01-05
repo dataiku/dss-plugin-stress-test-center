@@ -26,24 +26,13 @@ class Metric(object):
     CUSTOM="CUSTOM"
     GREATER_IS_BETTER={ACCURACY, PRECISION, RECALL, F1, COST_MATRIX, ROC_AUC, CUMULATIVE_LIFT, EVS, R2}
 
-    def __init__(self, config: dict, pred_type: str):
-        self.pred_type = pred_type
+    def __init__(self, config: dict, name: str, pred_type: str):
         self.config = config
-
-    @property
-    def initial(self):
-        return self.config["evaluationMetric"]
-
-    @property
-    def actual(self):
-        if self.initial == self.CUSTOM:
-            if self.pred_type == DkuStressTestCenterConstants.REGRESSION:
-                return self.R2
-            return self.ROC_AUC
-        return self.initial
+        self.name = name
+        self.pred_type = pred_type
 
     def is_greater_better(self):
-        return self.actual in self.GREATER_IS_BETTER
+        return self.name in self.GREATER_IS_BETTER
 
     def compute(self, y_true: np.array, y_pred: np.array, probas: np.array):
         if self.pred_type == DkuStressTestCenterConstants.MULTICLASS:
@@ -75,10 +64,10 @@ class Metric(object):
             self.RMSE: lambda y_true, y_pred, probas: sqrt(mean_squared_error(y_true, y_pred)),
             self.RMSLE: lambda y_true, y_pred, probas: rmsle_score(y_true, y_pred),
             self.R2: lambda y_true, y_pred, probas: r2_score(y_true, y_pred),
-        }.get(self.actual)
+        }.get(self.name)
 
         if perf_metric is None:
-            raise ValueError("Unknown training metric: {}".format(self.actual))
+            raise ValueError("Unknown evaluation metric: {}".format(self.name))
         return perf_metric(y_true, y_pred, probas)
 
 
