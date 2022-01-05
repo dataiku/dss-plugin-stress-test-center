@@ -7,16 +7,16 @@ const versionId = webAppConfig['versionId'];
     app.service("CorruptionUtils", function(MetricNames) {
         function metrics(metric, isRegression) {
             const shortName = MetricNames.shortName(metric);
-            const longName = MetricNames.longName(metric).toLowerCase();
+            const longName = MetricNames.longName(metric);
 
-            const perfVarDesc = "Performance variation is the difference in the model's performance " +
-            `between the altered and unaltered dataset. Performance is assessed via the ${longName}.`;
+            const perfVarDesc = `${longName} variation is the difference in the model's ` +
+            `${longName.toLowerCase()} between the altered and unaltered dataset`;
 
             const resilienceDescClassif = "Corruption resilience is the ratio of rows where " +
                 "the prediction is not altered after the corruption.";
 
             const resilienceDescReg = "Corruption resilience is the ratio of rows where the " +
-                "error between predicted and true values is not greater after the corruption.";
+                "corruption does not increase the prediction error.";
 
             return {
                 FEATURE_PERTURBATION: [
