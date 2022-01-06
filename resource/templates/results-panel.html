@@ -59,9 +59,9 @@
                         <td class="cell cell--with-tooltip">
                             {{ TEST_NAMES[testName] }}
                             <i class="icon-warning-sign icon--hoverable" ng-show="metrics.not_relevant_explanation"
-                               ng-mouseleave="showPredList[$index] = !showPredList[$index]"
-                               ng-mouseover="showPredList[$index] = !showPredList[$index]">
-                                <div class="details__tooltip" ng-show="showPredList[$index]">
+                               ng-mouseleave="showNotRelevantWarning[testName] = !showNotRelevantWarning[testName]"
+                               ng-mouseover="showNotRelevantWarning[testName] = !showNotRelevantWarning[testName]">
+                                <div class="details__tooltip" ng-show="showNotRelevantWarning[testName]">
                                     <div>
                                         Not relevant test: {{ metrics.not_relevant_explanation }}
                                     </div>
