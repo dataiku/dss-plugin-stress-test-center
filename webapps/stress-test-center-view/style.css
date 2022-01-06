@@ -493,6 +493,7 @@ transform: translate(-125%, -50%);
 }
 
 .details__tooltip {
+    z-index: 1000;
     font-family: var(--font-family);
     max-width: 400px;
     position: absolute;
