@@ -505,6 +505,15 @@ transform: translate(-125%, -50%);
     background: var(--white);
 }
 
+.icon-warning-sign {
+    color: var(--warning-orange);
+}
+
+.icon-warning-sign.icon--hoverable:hover {
+    color: #F6AF73;
+}
+
+
 /** RESULTS **/
 
 .results-section:not(:only-child) {
@@ -603,6 +612,10 @@ table {
 
  .cell {
     border: 1px solid var(--grey-lighten-6);
+ }
+
+ .cell--with-tooltip {
+    position: relative;
  }
 
  .top-cell--blue {

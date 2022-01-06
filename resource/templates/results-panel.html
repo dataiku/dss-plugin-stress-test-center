@@ -56,7 +56,18 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="(testName, metrics) in results[corruptionType].metrics">
-                        <td class="cell">{{ tests.perturbations[testName].displayName }}</td>
+                        <td class="cell cell--with-tooltip">
+                            {{ tests.perturbations[testName].displayName }}
+                            <i class="icon-warning-sign icon--hoverable" ng-show="metrics.not_relevant_explanation"
+                               ng-mouseleave="showPredList[$index] = !showPredList[$index]"
+                               ng-mouseover="showPredList[$index] = !showPredList[$index]">
+                                <div class="details__tooltip" ng-show="showPredList[$index]">
+                                    <div>
+                                        Not relevant test: {{ metrics.not_relevant_explanation }}
+                                    </div>
+                                </div>
+                            </i>
+                        </td>
                         <td class="cell" ng-class="{'text-sb': !metric.contextual}" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]">
                             {{ metrics[metric.name] | toFixedIfNeeded: 3 }}
                         </td>

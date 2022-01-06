@@ -14,6 +14,7 @@ class StressTest(object):
     def __init__(self, shift: Shift):
         self.shift = shift
         self.df_with_pred = None
+        self.not_relevant_explanation = None
 
     def perturb_df(self, df: pd.DataFrame):
         raise NotImplementedError()
@@ -22,6 +23,12 @@ class StressTest(object):
     def name(self):
         return self.shift.__class__.__name__
 
+    @property
+    def relevant(self):
+        return not bool(self.not_relevant_explanation)
+
+    def check_relevance(self, preprocessing: dict):
+        pass
 
 class FeaturePerturbationTest(StressTest):
     TEST_TYPE = DkuStressTestCenterConstants.FEATURE_PERTURBATION
@@ -31,7 +38,19 @@ class FeaturePerturbationTest(StressTest):
         super(FeaturePerturbationTest, self).__init__(shift)
         self.features = features
 
-    def _check(self, df: pd.DataFrame):
+    def check_relevance(self, preprocessing: dict):
+        if type(self.shift) is Scaling:
+            if self.shift.scaling_factor == 1:
+                self.not_relevant_explanation = "The scaling factor is set to 1."
+        elif type(self.shift) is MissingValues:
+            for feature in self.features:
+                if preprocessing[feature]["missing_handling"] == "DROP_ROW":
+                    self.not_relevant_explanation = ("The feature '{}' drops ".format(feature) +\
+                        "the rows with missing values and does not predict them.")
+        else:
+            raise ValueError("Wrong feature corruption test class: {}".format(type(self.shift)))
+
+    def _check_proper_column_types(self, df: pd.DataFrame):
         for feature in df:
             if self.shift.feature_type == PerturbationConstants.NUMERIC:
                 if not pd.api.types.is_numeric_dtype(df[feature]):
@@ -43,7 +62,7 @@ class FeaturePerturbationTest(StressTest):
     def perturb_df(self, df: pd.DataFrame):
         df = df.copy()
         X = df.loc[:, self.features]
-        self._check(X)
+        self._check_proper_column_types(X)
 
         X, _ = self.shift.transform(X.values)
         df.loc[:, self.features] = X
@@ -87,17 +106,19 @@ class StressTestGenerator(object):
 
     def generate_test(self, test_name, test_config):
         test = DkuStressTestCenterConstants.TESTS[test_name](**test_config["params"])
-        feature_preprocessing = self.model_accessor.get_per_feature()
 
         if test.__class__ in FeaturePerturbationTest.TESTS:
             features = test_config["selected_features"]
-            return FeaturePerturbationTest(test, features)
-
-        if test.__class__ in TargetShiftTest.TESTS:
+            stress_test = FeaturePerturbationTest(test, features)
+        elif test.__class__ in TargetShiftTest.TESTS:
             target = self.model_accessor.get_target_variable()
-            return TargetShiftTest(test, target)
+            stress_test = TargetShiftTest(test, target)
+        else:
+            raise ValueError("Unknown stress test %s" % test_name)
 
-        raise ValueError("Unknown stress test %s" % test_name)
+        feature_preprocessing = self.model_accessor.get_per_feature()
+        stress_test.check_relevance(feature_preprocessing)
+        return stress_test
 
     def set_config(self, config: dict):
         self._sampling_proportion = config["samples"]
@@ -125,19 +146,27 @@ class StressTestGenerator(object):
         clean_df_with_pred = self._clean_df.loc[test.df_with_pred.index, :]
 
         clean_y_true, clean_y_pred, clean_probas = self._get_col_for_metrics(clean_df_with_pred)
-        perturbed_y_true, perturbed_y_pred, perturbed_probas = self._get_col_for_metrics(test.df_with_pred)
-
         perf_before = self._metric.compute(clean_y_true, clean_y_pred, clean_probas)
-        perf_after = self._metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
+
         common_metrics = {
-            "perf_var": (perf_before - perf_after) * (-1 if self._metric.is_greater_better() else 1),
-            "perf_before": perf_before,
-            "perf_after": perf_after
+            "perf_before": perf_before
         }
+        if test.relevant:
+            perturbed_y_true, perturbed_y_pred, perturbed_probas = self._get_col_for_metrics(test.df_with_pred)
+            perf_after = self._metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
+        else:
+            perf_after = perf_before
+            common_metrics["not_relevant_explanation"] = test.not_relevant_explanation
+        common_metrics.update({
+            "perf_after": perf_after,
+            "perf_var": (perf_before - perf_after) * (-1 if self._metric.is_greater_better() else 1)
+        })
 
         extra_metrics = {}
         if test.TEST_TYPE == DkuStressTestCenterConstants.FEATURE_PERTURBATION:
-            if self.model_accessor.get_prediction_type() == DkuStressTestCenterConstants.REGRESSION:
+            if not test.relevant:
+                corruption_resilience = 1
+            elif self.model_accessor.get_prediction_type() == DkuStressTestCenterConstants.REGRESSION:
                 corruption_resilience = corruption_resilience_regression(
                     clean_y_pred, perturbed_y_pred, clean_y_true
                 )
