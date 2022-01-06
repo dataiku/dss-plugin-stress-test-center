@@ -57,7 +57,7 @@
                 <tbody>
                     <tr ng-repeat="(testName, metrics) in results[corruptionType].metrics">
                         <td class="cell cell--with-tooltip">
-                            {{ tests.perturbations[testName].displayName }}
+                            {{ TEST_NAMES[testName] }}
                             <i class="icon-warning-sign icon--hoverable" ng-show="metrics.not_relevant_explanation"
                                ng-mouseleave="showPredList[$index] = !showPredList[$index]"
                                ng-mouseover="showPredList[$index] = !showPredList[$index]">
