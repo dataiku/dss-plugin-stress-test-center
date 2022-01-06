@@ -47,7 +47,7 @@
         },
         {
             "name": "samples_fraction",
-            "label": "Proportion of samples to corrupt",
+            "label": "Ratio of samples to corrupt",
             "type": "DOUBLE",
             "defaultValue": 0.5,
             "mandatory": true
