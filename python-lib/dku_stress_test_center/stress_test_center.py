@@ -18,11 +18,6 @@ class StressTest(object):
     def perturb_df(self, df: pd.DataFrame):
         raise NotImplementedError()
 
-    def compute_metrics(self, metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
-                        clean_y_pred: np.array, perturbed_y_pred: np.array,
-                        clean_probas: np.array, perturbed_probas: np.array):
-        raise NotImplementedError()
-
     @property
     def name(self):
         return self.shift.__class__.__name__
@@ -36,7 +31,7 @@ class FeaturePerturbationTest(StressTest):
         super(FeaturePerturbationTest, self).__init__(shift)
         self.features = features
 
-    def check(self, df: pd.DataFrame):
+    def _check(self, df: pd.DataFrame):
         for feature in df:
             if self.shift.feature_type == PerturbationConstants.NUMERIC:
                 if not pd.api.types.is_numeric_dtype(df[feature]):
@@ -48,34 +43,12 @@ class FeaturePerturbationTest(StressTest):
     def perturb_df(self, df: pd.DataFrame):
         df = df.copy()
         X = df.loc[:, self.features]
-        self.check(X)
+        self._check(X)
 
         X, _ = self.shift.transform(X.values)
         df.loc[:, self.features] = X
 
         return df
-
-    def compute_metrics(self, metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
-                        clean_y_pred: np.array, perturbed_y_pred: np.array,
-                        clean_probas: np.array, perturbed_probas: np.array):
-        perf_before = metric.compute(clean_y_true, clean_y_pred, clean_probas)
-        perf_after = metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
-        delta = perf_before - perf_after
-
-        if metric.pred_type == DkuStressTestCenterConstants.REGRESSION:
-            corruption_resilience = corruption_resilience_regression(
-                clean_y_pred,perturbed_y_pred, clean_y_true
-            )
-        else:
-            corruption_resilience = corruption_resilience_classification(
-                clean_y_pred, perturbed_y_pred
-            )
-        return {
-            "corruption_resilience": corruption_resilience,
-            "performance_variation": delta * (-1 if metric.is_greater_better() else 1),
-            "perf_before": perf_before,
-            "perf_after": perf_after
-        }
 
 
 class SubpopulationShiftTest(StressTest):
@@ -97,46 +70,18 @@ class SubpopulationShiftTest(StressTest):
 
         return df
 
-    def compute_metrics(self, metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
-                        clean_y_pred: np.array, perturbed_y_pred: np.array,
-                        clean_probas: np.array, perturbed_probas: np.array):
-        perf_before = metric.compute(clean_y_true, clean_y_pred, clean_probas)
-        perf_after = metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
-        delta = perf_before - perf_after
-
-        return {
-            "worst_group_subpop": worst_group_performance(
-                metric, perturbed_y_true, perturbed_y_true, perturbed_y_pred, perturbed_probas
-            ),
-            "performance_variation": delta * (-1 if metric.is_greater_better() else 1),
-            "perf_before": perf_before,
-            "perf_after": perf_after
-        }
-
 
 class TargetShiftTest(SubpopulationShiftTest):
     TEST_TYPE = DkuStressTestCenterConstants.TARGET_SHIFT
 
-    def compute_metrics(self, metric: Metric, clean_y_true: np.array, perturbed_y_true: np.array,
-                    clean_y_pred: np.array, perturbed_y_pred: np.array,
-                    clean_probas: np.array, perturbed_probas: np.array):
-        perf_before = metric.compute(clean_y_true, clean_y_pred, clean_probas)
-        perf_after = metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
-        delta = perf_before - perf_after
-
-        return {
-            "performance_variation": delta * (-1 if metric.is_greater_better() else 1),
-            "perf_before": perf_before,
-            "perf_after": perf_after
-        }
-
 
 class StressTestGenerator(object):
-    def __init__(self, random_state=1337):
-        self._random_state = random_state
-
-        self.tests = None
+    def __init__(self):
         self.model_accessor = None
+
+        self._metric = None
+        self._random_state = None
+        self._tests = None
         self._sampling_proportion = None
         self._clean_df = None
 
@@ -156,33 +101,62 @@ class StressTestGenerator(object):
 
     def set_config(self, config: dict):
         self._sampling_proportion = config["samples"]
-        self.random_state = config["randomSeed"]
+        self._random_state = config["randomSeed"]
+        self._metric = Metric(self.model_accessor.metrics,
+                              config["perfMetric"],
+                              self.model_accessor.get_prediction_type())
+
         tests_config = config["perturbations"]
-        self.tests = defaultdict(list)
+        self._tests = defaultdict(list)
         for test_name, test_config in tests_config.items():
             test = self.generate_test(test_name, test_config)
-            self.tests[test.TEST_TYPE].append(test)
+            self._tests[test.TEST_TYPE].append(test)
+
+    def _get_col_for_metrics(self, df: pd.DataFrame):
+        target = self.model_accessor.get_target_variable()
+        target_map = self.model_accessor.get_target_map()
+
+        y_true = df[target].replace(target_map)
+        y_pred = df[DkuStressTestCenterConstants.PREDICTION].replace(target_map)
+        probas = df.filter(regex=r'^proba_', axis=1).values
+        return y_true, y_pred, probas
 
     def compute_test_metrics(self, test: StressTest):
         clean_df_with_pred = self._clean_df.loc[test.df_with_pred.index, :]
 
-        target = self.model_accessor.get_target_variable()
-        target_map = self.model_accessor.get_target_map()
+        clean_y_true, clean_y_pred, clean_probas = self._get_col_for_metrics(clean_df_with_pred)
+        perturbed_y_true, perturbed_y_pred, perturbed_probas = self._get_col_for_metrics(test.df_with_pred)
 
-        clean_y_true = clean_df_with_pred[target].replace(target_map)
-        perturbed_y_true = test.df_with_pred[target].replace(target_map)
-        clean_y_pred = clean_df_with_pred[DkuStressTestCenterConstants.PREDICTION].replace(target_map)
-        perturbed_y_pred = test.df_with_pred[DkuStressTestCenterConstants.PREDICTION].replace(target_map)
+        perf_before = self._metric.compute(clean_y_true, clean_y_pred, clean_probas)
+        perf_after = self._metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
+        common_metrics = {
+            "perf_var": (perf_before - perf_after) * (-1 if self._metric.is_greater_better() else 1),
+            "perf_before": perf_before,
+            "perf_after": perf_after
+        }
 
-        clean_probas = clean_df_with_pred.filter(regex=r'^proba_', axis=1).values
-        perturbed_probas = test.df_with_pred.filter(regex=r'^proba_', axis=1).values
+        extra_metrics = {}
+        if test.TEST_TYPE == DkuStressTestCenterConstants.FEATURE_PERTURBATION:
+            if self.model_accessor.get_prediction_type() == DkuStressTestCenterConstants.REGRESSION:
+                corruption_resilience = corruption_resilience_regression(
+                    clean_y_pred, perturbed_y_pred, clean_y_true
+                )
+            else:
+                corruption_resilience = corruption_resilience_classification(
+                    clean_y_pred, perturbed_y_pred
+                )
+            extra_metrics["corruption_resilience"] = corruption_resilience
 
+        elif test.TEST_TYPE == DkuStressTestCenterConstants.SUBPOPULATION_SHIFT:
+            extra_metrics["worst_subpop_perf"] = worst_group_performance(
+                metric, test.subpopulation, perturbed_y_true, perturbed_y_pred, perturbed_probas
+            )
 
         return {
-            test.name: test.compute_metrics(
-                self.model_accessor.get_metric(), clean_y_true, perturbed_y_true,
-                clean_y_pred, perturbed_y_pred, clean_probas, perturbed_probas
-            )
+            test.name: {
+                **common_metrics,
+                **extra_metrics
+            }
         }
 
     def predict_clean_df(self, df: pd.DataFrame):
@@ -195,7 +169,7 @@ class StressTestGenerator(object):
                                                       random_state=self._random_state)
         self.predict_clean_df(df)
 
-        for test_type, tests in self.tests.items():
+        for test_type, tests in self._tests.items():
             for test in tests:
                 perturbed_df = test.perturb_df(df)
                 test.df_with_pred = self.model_accessor.predict_and_concatenate(perturbed_df)
@@ -212,7 +186,7 @@ class StressTestGenerator(object):
             DkuStressTestCenterConstants.UNCORRUPTED: uncorrupted_probas,
         }, index=true_probas_mask.index)
 
-        for test in self.tests[test_type]:
+        for test in self._tests[test_type]:
             perturbed_probas = test.df_with_pred[true_probas_mask.columns]
             cropped_true_class_probas = true_probas_mask.loc[perturbed_probas.index, :]
             true_class_probas[test.name] = pd.Series(
@@ -228,8 +202,7 @@ class StressTestGenerator(object):
             DkuStressTestCenterConstants.UNCORRUPTED: uncorrupted_predictions
         })
 
-
-        for test in self.tests[test_type]:
+        for test in self._tests[test_type]:
             predictions[test.name] = test.df_with_pred[DkuStressTestCenterConstants.PREDICTION]
         return predictions
 

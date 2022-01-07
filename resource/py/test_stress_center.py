@@ -10,7 +10,6 @@ def stress_test_generator(mocker):
     mocked_accessor.get_target_variable.return_value = "target"
     mocked_accessor.get_target_map.return_value = {"A": 1, "B": 0, "C": 2}
     mocked_accessor.get_prediction_type.return_value = "REGRESSION"
-    mocked_accessor.get_metric.return_value = "fake metric"
 
     generator = StressTestGenerator()
     generator._clean_df = pd.DataFrame({
@@ -26,8 +25,10 @@ def stress_test_generator(mocker):
     generator.model_accessor = mocked_accessor
 
     def get_generator(regression=False):
+        mocker.spy(generator, "_metric")
+        generator._metric.compute.return_value = 42
         if regression:
-            generator._clean_df.drop(columns=["proba_A", "proba_B", "proba_C"], inplace=True)
+            generator._clean_df = generator._clean_df.drop(columns=["proba_A", "proba_B", "proba_C"])
         return generator
     return get_generator
 
@@ -43,6 +44,7 @@ def stress_test(mocker):
         "proba_B": [.6, .5, .5, .4, 0],
         "proba_C": [.4, .5, .2, .5, .1],
     }, index=[1,2,5,0,3]))
+    test.name = "test"
 
     def get_mocked_test(regression=False):
         if regression:
@@ -53,10 +55,11 @@ def stress_test(mocker):
 def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
     generator = stress_test_generator()
     test = stress_test()
-    generator.compute_test_metrics(test)
+    result = generator.compute_test_metrics(test)
 
-    metric, clean_y_true, corrup_y_true, clean_y_pred, corrup_y_pred, clean_probas, perturbed_probas = test.compute_metrics.call_args[0]
-    assert metric == "fake metric"
+    clean_y_true, clean_y_pred, clean_probas = generator._metric.compute.call_args_list[0][0]
+    corrup_y_true, corrup_y_pred, corrup_probas = generator._metric.compute.call_args_list[1][0]
+
     pd.testing.assert_series_equal(
         clean_y_true, pd.Series([2, 0, 1, 2, 1], name="target", index=[1,2,5,0,3])
     )
@@ -74,18 +77,29 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
         [.7, .5, .1, .1, .5],
         [.1, .2, 0, .7, .2]
     ]).transpose())
-    np.testing.assert_array_equal(perturbed_probas, np.array([
+    np.testing.assert_array_equal(corrup_probas, np.array([
         [0, 0, 0, .1, .9],
         [.6, .5, .5, .4, 0],
         [.4, .5, .2, .5, .1]
     ]).transpose())
+    assert result == {
+        "test": {
+            "perf_var": 0,
+            "perf_before": 42,
+            "perf_after": 42,
+        }
+    }
 
     generator = stress_test_generator(True)
     test = stress_test(True)
-    generator.compute_test_metrics(test)
+    test.TEST_TYPE = "FEATURE_PERTURBATION"
+    mocker.patch("dku_stress_test_center.stress_test_center.corruption_resilience_regression", return_value=.2)
+    mocker.patch("dku_stress_test_center.stress_test_center.corruption_resilience_classification", return_value=.8)
+    result = generator.compute_test_metrics(test)
 
-    metric, clean_y_true, corrup_y_true, clean_y_pred, corrup_y_pred, clean_probas, perturbed_probas = test.compute_metrics.call_args[0]
-    assert metric == "fake metric"
+    clean_y_true, clean_y_pred, clean_probas = generator._metric.compute.call_args_list[0][0]
+    corrup_y_true, corrup_y_pred, corrup_probas = generator._metric.compute.call_args_list[1][0]
+
     pd.testing.assert_series_equal(
         clean_y_true, pd.Series([2, 0, 1, 2, 1], name="target", index=[1,2,5,0,3])
     )
@@ -99,12 +113,19 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
         corrup_y_pred, pd.Series([2, 2, 1, 2, 1], name="prediction", index=[1,2,5,0,3])
     )
     np.testing.assert_array_equal(clean_probas, np.empty((5,0)))
-    np.testing.assert_array_equal(perturbed_probas, np.empty((5,0)))
+    np.testing.assert_array_equal(corrup_probas, np.empty((5,0)))
+    assert result == {
+        "test": {
+            "perf_var": 0,
+            "perf_before": 42,
+            "perf_after": 42,
+            "corruption_resilience": .2
+        }
+    }
 
 def test__get_true_class_proba_columns(mocker, stress_test_generator, stress_test):
     generator = stress_test_generator()
     test = stress_test()
-    test.name = "test"
     other_test = mocker.Mock(df_with_pred=pd.DataFrame({
         "f1": [0, 30],
         "target": ["A", "B"],
@@ -115,7 +136,7 @@ def test__get_true_class_proba_columns(mocker, stress_test_generator, stress_tes
     }, index=[4, 0]))
     other_test.name ="other"
 
-    generator.tests = { "FEATURE_PERTURBATION": [test, other_test]}
+    generator._tests = { "FEATURE_PERTURBATION": [test, other_test]}
     df = generator._get_true_class_proba_columns("FEATURE_PERTURBATION")
     pd.testing.assert_frame_equal(df, pd.DataFrame({
         "_dku_stress_test_uncorrupted": [.7, .1, .5, .3, .1, .9],
@@ -126,7 +147,6 @@ def test__get_true_class_proba_columns(mocker, stress_test_generator, stress_tes
 def test__get_prediction_columns(mocker, stress_test_generator, stress_test):
     generator = stress_test_generator()
     test = stress_test()
-    test.name = "test"
     other_test = mocker.Mock(df_with_pred=pd.DataFrame({
         "f1": [0, 30],
         "target": ["A", "B"],
@@ -137,7 +157,7 @@ def test__get_prediction_columns(mocker, stress_test_generator, stress_test):
     }, index=[4, 0]))
     other_test.name ="other"
 
-    generator.tests = { "FEATURE_PERTURBATION": [test, other_test]}
+    generator._tests = { "FEATURE_PERTURBATION": [test, other_test]}
     df = generator._get_prediction_columns("FEATURE_PERTURBATION")
     pd.testing.assert_frame_equal(df, pd.DataFrame({
         "_dku_stress_test_uncorrupted": ["C", "A", "B", "A", "A", "B"],

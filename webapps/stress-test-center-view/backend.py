@@ -36,15 +36,13 @@ def get_model_info():
 
         return jsonify(
             target_classes=stressor.model_accessor.get_target_classes(),
+            pred_type=stressor.model_accessor.get_prediction_type(),
             features={
                 feature: preprocessing["type"]
                 for (feature, preprocessing) in stressor.model_accessor.get_per_feature().items()
                     if preprocessing["role"] == "INPUT"
             },
-            metric={
-                "initial": stressor.model_accessor.get_metric().initial,
-                "actual": stressor.model_accessor.get_metric().actual
-            }
+            metric=stressor.model_accessor.get_evaluation_metric()
         )
     except:
         logger.error(traceback.format_exc())
