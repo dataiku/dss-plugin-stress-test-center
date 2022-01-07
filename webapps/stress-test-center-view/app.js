@@ -153,6 +153,7 @@ const versionId = webAppConfig['versionId'];
         $scope.createModal = ModalService.create($scope.modal);
 
         $scope.CORRUPTION_TYPES = CorruptionUtils.types;
+        $scope.TEST_NAMES = CorruptionUtils.TEST_NAMES;
         $scope.userFriendlyMetricName = MetricNames.longName
 
         $scope.loading = {};
@@ -160,18 +161,15 @@ const versionId = webAppConfig['versionId'];
         $scope.tests = {
             perturbations: {
                 Rebalance: {
-                    displayName: "Shift target distribution", // TODO: remove (use CorruptionUtils.TEST_NAMES instead)
                     needsTargetClasses: true,
                     params: { priors: {} }
                 },
                 MissingValues: {
-                    displayName: "Insert missing values",
                     allowedFeatureTypes: ["NUMERIC", "CATEGORY", "VECTOR", "TEXT"],
                     params: { samples_fraction: .5 },
                     selected_features: new Set()
                 },
                 Scaling: {
-                    displayName: "Multiply by a coefficient",
                     allowedFeatureTypes: ["NUMERIC"],
                     params: {
                         samples_fraction: .5,
@@ -239,7 +237,7 @@ const versionId = webAppConfig['versionId'];
                             result.critical_samples.predList = result.critical_samples.predList.map(function(predList) {
                                 predList = Object.entries(predList).map(function(pred) {
                                     const [testName, result] = pred;
-                                    return `${CorruptionUtils.TEST_NAMES[testName]}: ${$filter("toFixedIfNeeded")(result, 3)}`;
+                                    return `${$scope.TEST_NAMES[testName]}: ${$filter("toFixedIfNeeded")(result, 3)}`;
                                 });
                                 predList.unshift($scope.modelInfo.predType === 'REGRESSION' ? "Predicted values" : "True class probas");
                                 return predList;
