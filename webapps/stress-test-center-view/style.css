@@ -3,6 +3,10 @@
     white-space: nowrap;
 }
 
+.elem--with-tooltip {
+    position: relative;
+ }
+
 /** FORM **/
 
 form {
@@ -553,6 +557,10 @@ transform: translate(-125%, -50%);
     font-size: 18px;
 }
 
+.empty-state__btn {
+    width: 30%;
+}
+
 .empty-state__title {
     font-weight: 500;
 }
@@ -620,10 +628,6 @@ table {
 
  .cell {
     border: 1px solid var(--grey-lighten-6);
- }
-
- .cell--with-tooltip {
-    position: relative;
  }
 
  .top-cell--blue {

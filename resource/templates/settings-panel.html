@@ -41,13 +41,18 @@
                     Using a fixed random seed allows for reproducible results
                 </div>
             </div>
-            <div class="dku-btn-container--right-align settings__form_field">
+            <div class="dku-btn-container--right-align settings__form_field elem--with-tooltip">
                 <button class="dku-btn dku-btn-primary"
                         type="button"
                         ng-disabled="loading.results || !checkTestConfig().canRun"
-                        ng-click="runAnalysis()">
+                        ng-click="runAnalysis()"
+                        ng-mouseover="showDisabledTooltip = !showDisabledTooltip"
+                        ng-mouseleave="showDisabledTooltip = !showDisabledTooltip">
                     Run tests
                 </button>
+                <div class="details__tooltip" ng-show="!checkTestConfig().canRun && showDisabledTooltip">
+                    Some stress tests settings are invalid or incomplete
+                </div>
             </div>
         </form>
     </div>
