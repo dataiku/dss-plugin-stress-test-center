@@ -155,6 +155,8 @@ class StressTestGenerator(object):
             perturbed_y_true, perturbed_y_pred, perturbed_probas = self._get_col_for_metrics(test.df_with_pred)
             perf_after = self._metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
         else:
+            # Altered and unaltered datasets are the same, including the prediction columns.
+            # By definition, the performance is the same before and after the stress test.
             perf_after = perf_before
             common_metrics["not_relevant_explanation"] = test.not_relevant_explanation
         common_metrics.update({
