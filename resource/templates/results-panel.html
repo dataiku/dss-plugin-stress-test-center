@@ -10,13 +10,18 @@
             After running the tests, the model view will display several metrics to assess how the model's performance changes between altered and unaltered data.
         </p>
     </div>
-    <div>
+    <div class="elem--with-tooltip empty-state__btn">
         <button class="dku-btn dku-btn-primary"
                 type="button"
-                ng-disabled="!checkTestConfig().canRun"
-                ng-click="runAnalysis()">
+                ng-class="{ 'dku-btn--disabled': !checkTestConfig().canRun }"
+                ng-click="runAnalysis()"
+                ng-mouseover="showDisabledTooltip = !showDisabledTooltip"
+                ng-mouseleave="showDisabledTooltip = !showDisabledTooltip">
             Run tests
         </button>
+        <div class="details__tooltip" ng-show="!checkTestConfig().canRun && showDisabledTooltip">
+            Some stress tests settings are invalid or incomplete
+        </div>
     </div>
 </div>
 
@@ -56,7 +61,7 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="(testName, metrics) in results[corruptionType].metrics">
-                        <td class="cell cell--with-tooltip">
+                        <td class="cell elem--with-tooltip">
                             {{ TEST_NAMES[testName] }}
                             <i class="icon-warning-sign icon--hoverable" ng-show="metrics.not_relevant_explanation"
                                ng-mouseleave="showNotRelevantWarning[testName] = !showNotRelevantWarning[testName]"
@@ -115,9 +120,9 @@
                         </thead>
                         <tbody>
                             <tr class="table-sample-feature" ng-repeat="(key, value) in sample">
-                            <td class="flex">
+                            <td class="flex no-wrap">
                                 <div class="table-sample-feature__name ellipsed-text">{{key}}</div>
-                                &nbsp;<div class="table-sample-feature__value ellipsed-text text-lighter">= {{value}}</div>
+                                <div class="table-sample-feature__value ellipsed-text text-lighter">= {{value}}</div>
                             </td>
                             </tr>
                         </tbody>

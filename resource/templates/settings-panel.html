@@ -41,13 +41,18 @@
                     Using a fixed random seed allows for reproducible results
                 </div>
             </div>
-            <div class="dku-btn-container--right-align settings__form_field">
+            <div class="dku-btn-container--right-align settings__form_field elem--with-tooltip">
                 <button class="dku-btn dku-btn-primary"
                         type="button"
-                        ng-disabled="loading.results || !checkTestConfig().canRun"
-                        ng-click="runAnalysis()">
+                        ng-class="{ 'dku-btn--disabled': loading.results || !checkTestConfig().canRun }"
+                        ng-click="runAnalysis()"
+                        ng-mouseover="showDisabledTooltip = !showDisabledTooltip"
+                        ng-mouseleave="showDisabledTooltip = !showDisabledTooltip">
                     Run tests
                 </button>
+                <div class="details__tooltip" ng-show="!checkTestConfig().canRun && showDisabledTooltip">
+                    Some stress tests settings are invalid or incomplete
+                </div>
             </div>
         </form>
     </div>
@@ -58,7 +63,7 @@
 </div>
 
 <div class=settings-section ng-if="!loading.modelInfo && tests.perturbations.Rebalance">
-    <div class="webapp-subsection webapp-subsection__delimiter">
+    <div class="webapp-subsection">
         <div class="webapp-subsection__delimiter_title">
             {{ CORRUPTION_TYPES.TARGET_SHIFT.displayName }}
         </div>
@@ -96,7 +101,7 @@
 </div>
 
 <div class=settings-section>
-    <div class="webapp-subsection webapp-subsection__delimiter">
+    <div class="webapp-subsection">
         <div class="webapp-subsection__delimiter_title">
             {{ CORRUPTION_TYPES.FEATURE_PERTURBATION.displayName }}
         </div>
@@ -127,7 +132,7 @@
                 class="settings__form_field">
             </div>
             <div class="control-group settings__form_field">
-                <label for="missingValuesSamples" class="label-text">Proportion of corrupted samples</label>
+                <label for="missingValuesSamples" class="label-text">Ratio of corrupted samples</label>
                 <input type="number" id="missingValuesSamples"
                     ng-model="tests.perturbations.MissingValues.params.samples_fraction"
                     placeholder="0.5" step="0.01" min="0.01" max="1" required>
@@ -162,7 +167,7 @@
                     ng-model="tests.perturbations.Scaling.params.scaling_factor" required>
             </div>
             <div class="control-group settings__form_field">
-                <label for="scalingSamples" class="label-text">Proportion of corrupted samples</label>
+                <label for="scalingSamples" class="label-text">Ratio of corrupted samples</label>
                 <input type="number" id="scalingSamples"
                     ng-model="tests.perturbations.Scaling.params.samples_fraction"
                     placeholder="0.5" step="0.01" min="0.01" max="1" required>
