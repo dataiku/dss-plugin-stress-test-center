@@ -165,6 +165,8 @@ class StressTestGenerator(object):
         extra_metrics = {}
         if test.TEST_TYPE == DkuStressTestCenterConstants.FEATURE_PERTURBATION:
             if not test.relevant:
+                # Altered and unaltered datasets are the same, including the prediction columns.
+                # By definition, corruption resilience will hence always be 1.
                 corruption_resilience = 1
             elif self.model_accessor.get_prediction_type() == DkuStressTestCenterConstants.REGRESSION:
                 corruption_resilience = corruption_resilience_regression(
