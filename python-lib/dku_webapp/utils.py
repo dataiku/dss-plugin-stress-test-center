@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 
 def convert_numpy_int64_to_int(o):
     if isinstance(o, np.int64):
