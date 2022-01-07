@@ -287,6 +287,7 @@ const versionId = webAppConfig['versionId'];
                     }
                 });
         }, function(e) {
+            $scope.loading.modelInfo = false;
             $scope.createModal.error(e.data);
         });
     })}
