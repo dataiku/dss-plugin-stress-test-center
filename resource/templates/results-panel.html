@@ -13,7 +13,7 @@
     <div class="elem--with-tooltip empty-state__btn">
         <button class="dku-btn dku-btn-primary"
                 type="button"
-                ng-disabled="!checkTestConfig().canRun"
+                ng-class="{ 'dku-btn--disabled': !checkTestConfig().canRun }"
                 ng-click="runAnalysis()"
                 ng-mouseover="showDisabledTooltip = !showDisabledTooltip"
                 ng-mouseleave="showDisabledTooltip = !showDisabledTooltip">
