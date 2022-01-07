@@ -39,15 +39,15 @@
                 <div class="small-title text-sb">
                     Metrics
                 </div>
-                <p class="text-lighter" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]" ng-if="metric.description">
-                    {{ metric.description }}
+                <p class="text-lighter" ng-repeat="metric in perfMetrics(corruptionType)" ng-if="metric.description">
+                    <span class="text-sb">{{metric.longName || metric.displayName}}</span>{{ metric.description }}
                 </p>
             </div>
             <table class="table-metric">
                 <thead>
                     <tr>
                         <th scope="col" class="fake-cell"></th>
-                        <th scope="col" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]"
+                        <th scope="col" ng-repeat="metric in perfMetrics(corruptionType)"
                             ng-class="{'top-cell--blue': $even, 'top-cell--orange': $odd, 'text-regular': metric.contextual}"
                             class="cell small-title">
                             {{ metric.displayName }}
@@ -68,7 +68,7 @@
                                 </div>
                             </i>
                         </td>
-                        <td class="cell" ng-class="{'text-sb': !metric.contextual}" ng-repeat="metric in CORRUPTION_METRICS[corruptionType]">
+                        <td class="cell" ng-class="{'text-sb': !metric.contextual}" ng-repeat="metric in perfMetrics(corruptionType)">
                             {{ metrics[metric.name] | toFixedIfNeeded: 3 }}
                         </td>
                     </tr>
@@ -80,8 +80,8 @@
                 Critical samples
             </div>
             <p class="text-lighter">
-                Critical samples are the rows in the test set identified as the most vulnerable to the selected feature corruptions.
-                They are the records where the {{ modelInfo.predType === 'REGRESSION' ? 'predicted value' : 'true class probability' }} varied the most across all the tested corruption scenarios.
+                <span class="text-sb">Critical samples</span> are the rows in the test set identified as the most vulnerable to the selected feature corruptions.
+                They are the records where the {{ modelInfo.predType === 'REGRESSION' ? 'predicted value' : 'true class probability' }} varied the most across all the tested feature corruption scenarios.
             </p>
             <div class="flex dku-grid">
                 <div ng-repeat="sample in results[corruptionType].critical_samples.samples">

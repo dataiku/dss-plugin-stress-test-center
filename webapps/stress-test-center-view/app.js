@@ -5,59 +5,51 @@ const versionId = webAppConfig['versionId'];
 (function() {
     'use strict';
     app.service("CorruptionUtils", function(MetricNames) {
+        function toLowerCaseIfNotAcronym(string) {
+            if (string === string.toUpperCase()) return string;
+            return string.toLowerCase();
+        }
         function metrics(metric, isRegression) {
             const shortName = MetricNames.shortName(metric);
             const longName = MetricNames.longName(metric);
 
-            const perfVarDesc = `${longName} variation is the difference in the model's ` +
-            `${longName.toLowerCase()} between the altered dataset and the unaltered one.`;
+            const perfVarDesc = ` is the difference in the model's ` +
+                `${toLowerCaseIfNotAcronym(longName)} between the altered dataset and the ` +
+                "unaltered one.";
 
-            const resilienceDescClassif = "Corruption resilience is the ratio of rows where " +
-                "the prediction is not altered after the corruption.";
+            const resilienceDescClassif = " is the ratio of rows where the prediction is not " +
+                "altered after the corruption.";
 
-            const resilienceDescReg = "Corruption resilience is the ratio of rows where the " +
-                "corruption does not increase the prediction error.";
+            const resilienceDescReg = " is the ratio of rows where the corruption does not " +
+                "increase the prediction error.";
 
-            return {
-                FEATURE_PERTURBATION: [
-                    {
-                        name: "perf_before",
-                        displayName: `${shortName} before`,
-                        contextual: true
-                    },
-                    {
-                        name: "perf_after",
-                        displayName: `${shortName} after`,
-                        contextual: true
-                    },
-                    {
-                        name: "perf_var",
-                        displayName: `${shortName} variation`,
-                        description: perfVarDesc
-                    },
-                    {
-                        name: "corruption_resilience",
-                        displayName: "Corruption resilience",
-                        description: isRegression ? resilienceDescReg : resilienceDescClassif
-                    },
-                ],
-                TARGET_SHIFT: [
-                    {
-                        name: "perf_before",
-                        displayName: `${shortName} before`,
-                        contextual: true
-                    },
-                    {
-                        name: "perf_after",
-                        displayName: `${shortName} after`,
-                        contextual: true
-                    },
-                    {
-                        name: "perf_var",
-                        displayName: `${shortName} variation`,
-                        description: perfVarDesc
-                    },
-                ]
+            const perfMetrics = [
+                {
+                    name: "perf_before",
+                    displayName: `${shortName} before`,
+                    contextual: true
+                },
+                {
+                    name: "perf_after",
+                    displayName: `${shortName} after`,
+                    contextual: true
+                },
+                {
+                    name: "perf_var",
+                    displayName: `${shortName} variation`,
+                    longName: `${longName} variation`,
+                    description: perfVarDesc
+                },
+                {
+                    name: "corruption_resilience",
+                    displayName: "Corruption resilience",
+                    description: isRegression ? resilienceDescReg : resilienceDescClassif,
+                    excludedStressTestTypes: ["TARGET_SHIFT"]
+                }
+            ];
+
+            return function(testType) {
+                return perfMetrics.filter(metric => !(metric.excludedStressTestTypes || []).includes(testType));
             };
         };
 
@@ -233,7 +225,7 @@ const versionId = webAppConfig['versionId'];
                 }
                 return fullParams;
             }, {});
-            $scope.CORRUPTION_METRICS = CorruptionUtils.metrics(
+            $scope.perfMetrics = CorruptionUtils.metrics(
                 requestParams.perfMetric,  $scope.modelInfo.predType === 'REGRESSION'
             );
 
