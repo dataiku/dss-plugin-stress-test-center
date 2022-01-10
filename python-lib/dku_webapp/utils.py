@@ -1,9 +1,18 @@
 import numpy as np
+import sys
+import json
 
-def convert_numpy_int64_to_int(o):
-    if isinstance(o, np.int64):
-        return int(o)
-    raise TypeError
+class DKUJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.float64):
+            return float(obj)
+        if isinstance(obj, np.ndarray) and obj.ndim == 1:
+            return obj.tolist()
+        if isinstance(obj, np.generic):
+            return obj.item()
+        if isinstance(obj, np.int64):
+            return int(obj)
+        return json.JSONEncoder.default(self, obj)
 
 
 def safe_str(val):
