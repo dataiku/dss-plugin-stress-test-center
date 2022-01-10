@@ -58,11 +58,11 @@
     </div>
 </div>
 
-<div ng-if="loading.modelInfo" class="settings-section spinner-div">
+<div ng-if="loading.modelInfo" class="spinner-div">
     <spinner></spinner>
 </div>
 
-<div class=settings-section ng-if="!loading.modelInfo && tests.perturbations.Rebalance">
+<div class="settings-section" ng-if="!loading.modelInfo && tests.perturbations.Rebalance">
     <div class="webapp-subsection">
         <div class="webapp-subsection__delimiter_title">
             {{ CORRUPTION_TYPES.TARGET_SHIFT.displayName }}
@@ -100,7 +100,7 @@
     </div>
 </div>
 
-<div class=settings-section>
+<div class="settings-section" ng-if="!loading.modelInfo">
     <div class="webapp-subsection">
         <div class="webapp-subsection__delimiter_title">
             {{ CORRUPTION_TYPES.FEATURE_PERTURBATION.displayName }}
@@ -109,7 +109,7 @@
             {{ CORRUPTION_TYPES.FEATURE_PERTURBATION.description }}
         </div>
     </div>
-    <div ng-if="!loading.modelInfo && tests.perturbations.MissingValues" class="webapp-subsection">
+    <div ng-if="tests.perturbations.MissingValues" class="webapp-subsection">
         <div class="flex small-title text-sb settings-subsection__header">
             <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.MissingValues.$activated}">
                 <label class="switch">
@@ -139,7 +139,7 @@
             </div>
         </form>
     </div>
-    <div ng-if="!loading.modelInfo && tests.perturbations.Scaling" class="webapp-subsection">
+    <div ng-if="tests.perturbations.Scaling" class="webapp-subsection">
         <div class="flex small-title text-sb settings-subsection__header">
             <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.Scaling.$activated}">
                 <label class="switch">

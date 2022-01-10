@@ -194,6 +194,8 @@ const versionId = webAppConfig['versionId'];
             return featureTypesToIconClass[features[feature]];
         }
 
+        $scope.TEST_ORDER =  ["TARGET_SHIFT", "FEATURE_PERTURBATION"];
+
         $scope.checkTestConfig = function() {
             if (!$scope.forms.GENERAL || $scope.forms.GENERAL.$invalid) return { canRun: false };
             const testEntries = Object.entries($scope.tests.perturbations);
