@@ -110,14 +110,17 @@ app.directive("customDropdown", function() {
             possibleValues: '=',
             notAvailableValues: '=',
             validity: '@',
-            onChange: '='
+            onChange: '=',
+            display: '=?'
         },
         restrict: 'A',
         templateUrl:'/plugins/model-stress-test/resource/templates/custom-dropdown.html',
         link: function(scope, elem, attrs) {
             const isMulti = !!attrs.items;
             scope.validity = scope.validity || "dropdown-not-empty";
-            scope.form.$setValidity(scope.validity, false);
+            scope.form.$setValidity(scope.validity, !!scope.item || !!(scope.items || {}).size);
+
+            scope.display = scope.display || (item => item);
 
             scope.canBeSelected = function(item) {
                 if (!scope.notAvailableValues) return true;
@@ -155,7 +158,7 @@ app.directive("customDropdown", function() {
                     return scope.items.size + " " + scope.itemName + (scope.items.size > 1 ? "s" : "");
                 }
                 if (!scope.item) return "Select a " + scope.itemName;
-                return scope.item;
+                return scope.display(scope.item);
             };
 
             scope.toggleDropdown = function() {

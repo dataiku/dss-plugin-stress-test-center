@@ -52,6 +52,14 @@ class ModelAccessor(object):
         df_with_pred = self.model_handler.predict_and_concatenate(df)
         return df_with_pred.dropna(subset=[DkuStressTestCenterConstants.PREDICTION])
 
-    def get_metric(self):
-        return Metric(self.model_handler.get_modeling_params()["metrics"],
-                       self.get_prediction_type())
+    @property
+    def metrics(self):
+        return self.model_handler.get_modeling_params()["metrics"]
+
+    def get_evaluation_metric(self):
+        initial_evaluation_metric = self.metrics["evaluationMetric"]
+        if initial_evaluation_metric == Metric.CUSTOM:
+            if self.get_prediction_type() == DkuStressTestCenterConstants.REGRESSION:
+                return Metric.R2
+            return Metric.ROC_AUC
+        return initial_evaluation_metric

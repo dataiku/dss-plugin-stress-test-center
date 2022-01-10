@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import logging
-import simplejson # might want to use flask.jsonify instead
 import traceback
 from flask import request, jsonify
 import json
@@ -15,7 +14,7 @@ from dku_stress_test_center.metrics import Metric
 from dku_stress_test_center.model_accessor import ModelAccessor
 from dku_stress_test_center.stress_test_center import StressTestGenerator
 from model_metadata import get_model_handler
-from dku_webapp import convert_numpy_int64_to_int
+from dku_webapp import DKUJSONEncoder
 
 logger = logging.getLogger(__name__)
 
@@ -36,15 +35,13 @@ def get_model_info():
 
         return jsonify(
             target_classes=stressor.model_accessor.get_target_classes(),
+            pred_type=stressor.model_accessor.get_prediction_type(),
             features={
                 feature: preprocessing["type"]
                 for (feature, preprocessing) in stressor.model_accessor.get_per_feature().items()
                     if preprocessing["role"] == "INPUT"
             },
-            metric={
-                "initial": stressor.model_accessor.get_metric().initial,
-                "actual": stressor.model_accessor.get_metric().actual
-            }
+            metric=stressor.model_accessor.get_evaluation_metric()
         )
     except:
         logger.error(traceback.format_exc())
@@ -74,7 +71,7 @@ def compute():
                 )
             )
 
-        return simplejson.dumps(results, ignore_nan=True, default=convert_numpy_int64_to_int)
+        return jsonify(results)
     except:
         logger.error("When trying to call compute endpoint: {}.".format(traceback.format_exc()))
         return "{}. Check backend log for more details.".format(traceback.format_exc()), 500
