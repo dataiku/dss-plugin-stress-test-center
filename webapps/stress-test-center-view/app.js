@@ -194,8 +194,6 @@ const versionId = webAppConfig['versionId'];
             return featureTypesToIconClass[features[feature]];
         }
 
-        $scope.TEST_ORDER =  ["TARGET_SHIFT", "FEATURE_PERTURBATION"];
-
         $scope.checkTestConfig = function() {
             if (!$scope.forms.GENERAL || $scope.forms.GENERAL.$invalid) return { canRun: false };
             const testEntries = Object.entries($scope.tests.perturbations);
@@ -268,6 +266,10 @@ const versionId = webAppConfig['versionId'];
 
                 $scope.tests.perfMetric = response.data["metric"];
                 $scope.METRIC_NAMES = MetricNames.availableMetrics($scope.modelInfo.predType);
+                $scope.TEST_ORDER =  ["FEATURE_PERTURBATION"];
+                if ($scope.modelInfo.predType !== 'REGRESSION') {
+                    $scope.TEST_ORDER.unshift("TARGET_SHIFT")
+                }
 
                 features = response.data["features"];
 
