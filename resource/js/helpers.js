@@ -101,7 +101,7 @@ app.directive("spinner", function () {
 app.directive("customDropdown", function() {
     return {
         scope: {
-            form: '=',
+            form: '=?',
             itemImage: '=?',
             label: '@',
             itemName: '@',
@@ -109,16 +109,18 @@ app.directive("customDropdown", function() {
             items: '=',
             possibleValues: '=',
             notAvailableValues: '=',
-            validity: '@',
             onChange: '=',
             display: '=?'
         },
         restrict: 'A',
         templateUrl:'/plugins/model-stress-test/resource/templates/custom-dropdown.html',
         link: function(scope, elem, attrs) {
-            const isMulti = !!attrs.items;
-            scope.validity = scope.validity || "dropdown-not-empty";
-            scope.form.$setValidity(scope.validity, !!scope.item || !!(scope.items || {}).size);
+            const VALIDITY = "dropdown-not-empty" + (attrs.id ? ("__" + attrs.id) : "");
+            function setValidity() {
+                if (!scope.form) return;
+                scope.form.$setValidity(VALIDITY, !!scope.item || !!(scope.items || {}).size);
+            }
+            setValidity();
 
             scope.display = scope.display || (item => item);
 
@@ -127,6 +129,7 @@ app.directive("customDropdown", function() {
                 return item === scope.item || !(item in scope.notAvailableValues);
             };
 
+            const isMulti = !!attrs.items;
             scope.isSelected = function(value) {
                 if (isMulti) {
                     return scope.items.has(value);
@@ -149,7 +152,7 @@ app.directive("customDropdown", function() {
                     }
                     scope.item = value;
                 }
-                scope.form.$setValidity(scope.validity, !!scope.item || !!(scope.items || {}).size);
+                setValidity();
             };
 
             scope.getPlaceholder = function() {
@@ -172,6 +175,10 @@ app.directive("customDropdown", function() {
                     || angular.element(target).closest(labelElem)[0] )) { return; }
                 scope.isOpen = false;
             });
+
+            scope.$on("$destroy", function() {
+                scope.form && scope.form.$setValidity(VALIDITY, true);
+            });
         }
     }
 })
@@ -189,24 +196,23 @@ app.directive("keyValueList", function($timeout) {
             valueRange: '@',
             step: '=',
             defaultValue: '=',
-            form: '='
         },
         restrict: 'A',
         templateUrl:'/plugins/model-stress-test/resource/templates/key-value-list.html',
         link: function(scope) {
-            scope.keys = [null];
+            const keys = Object.keys(scope.map);
+            if (keys.length) {
+                scope.keys = keys;
+            } else {
+                scope.keys = [null];
+            }
+
             scope.step = scope.step || "any";
             [ scope.valueMin, scope.valueMax ] = scope.$eval(scope.valueRange) || [null, null];
-            const VALIDITY = "key-value-list-valid";
-            scope.form.$setValidity(VALIDITY, false);
 
             scope.deleteListItem = function(index) {
                 const removedKey = scope.keys.splice(index, 1)[0];
                 delete scope.map[removedKey];
-                scope.form.$setValidity(
-                    VALIDITY,
-                    !!scope.keys.length && scope.keys.every(key => !!key)
-                );
             };
 
             scope.canAddListItem = function() {
@@ -214,9 +220,6 @@ app.directive("keyValueList", function($timeout) {
             };
 
             scope.addListItem = function() {
-                if (!scope.keys.length) {
-                    scope.form.$setValidity(VALIDITY, true);
-                }
                 scope.keys.push(null);
             };
 

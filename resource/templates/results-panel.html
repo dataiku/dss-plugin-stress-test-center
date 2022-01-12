@@ -13,13 +13,13 @@
     <div class="elem--with-tooltip empty-state__btn">
         <button class="dku-btn dku-btn-primary"
                 type="button"
-                ng-class="{ 'dku-btn--disabled': !checkTestConfig().canRun }"
+                ng-class="{ 'dku-btn--disabled': !canRunTests() }"
                 ng-click="runAnalysis()"
                 ng-mouseover="showDisabledTooltip = !showDisabledTooltip"
                 ng-mouseleave="showDisabledTooltip = !showDisabledTooltip">
             Run tests
         </button>
-        <div class="details__tooltip" ng-show="!checkTestConfig().canRun && showDisabledTooltip">
+        <div class="details__tooltip" ng-show="!canRunTests() && showDisabledTooltip">
             Some stress tests settings are invalid or incomplete
         </div>
     </div>
@@ -30,7 +30,7 @@
 </div>
 
 <div ng-if="results && !loading.results">
-    <div class="results-section" ng-repeat="stressTestType in TEST_ORDER">
+    <div class="results-section" ng-repeat="stressTestType in TEST_ORDER" ng-if="results[stressTestType]">
         <div class="webapp-subsection">
             <div class="grand-title results-subsection__header">
                 {{ CORRUPTION_TYPES[stressTestType].displayName }}

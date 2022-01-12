@@ -10,12 +10,13 @@
         <div class="webapp-subsection__delimiter_title">
             General settings
         </div>
-        <form name="forms.GENERAL" class="settings__form" ng-submit="runAnalysis()">
+        <div class="settings__form">
             <div class="control-group settings__form_field">
                 <div custom-dropdown
-                    form="forms.GENERAL"
+                    id="general"
+                    form="forms.settings"
                     possible-values="METRIC_NAMES"
-                    item="tests.perfMetric"
+                    item="settings.perfMetric"
                     item-name="metric"
                     label="Evaluation metric"
                     display="userFriendlyMetricName"
@@ -27,7 +28,7 @@
             </div>
             <div class="control-group settings__form_field">
                 <label for="samples" class="label-text">Ratio of samples for the stress tests</label>
-                <input type="number" id="samples" ng-model="tests.samples" step="0.01" min="0.01" max="1" required>
+                <input type="number" id="samples" ng-model="settings.samples" step="0.01" min="0.01" max="1" required>
                 <div class="text-tiny text-lighter">
                     Set the ratio of rows from the model's test dataset to run the selected tests
                 </div>
@@ -35,7 +36,7 @@
             <div class="control-group settings__form_field">
                 <label for="randomSeed" class="label-text">Random seed</label>
                 <input type="number" id="randomSeed"
-                    ng-model="tests.randomSeed"
+                    ng-model="settings.randomSeed"
                     step="1" required>
                 <div class="text-tiny text-lighter">
                     Using a fixed random seed allows for reproducible results
@@ -43,18 +44,18 @@
             </div>
             <div class="dku-btn-container--right-align settings__form_field elem--with-tooltip">
                 <button class="dku-btn dku-btn-primary"
-                        type="button"
-                        ng-class="{ 'dku-btn--disabled': loading.results || !checkTestConfig().canRun }"
+                        type="submit"
+                        ng-class="{ 'dku-btn--disabled': loading.results || !canRunTests() }"
                         ng-click="runAnalysis()"
                         ng-mouseover="showDisabledTooltip = !showDisabledTooltip"
                         ng-mouseleave="showDisabledTooltip = !showDisabledTooltip">
                     Run tests
                 </button>
-                <div class="details__tooltip" ng-show="!checkTestConfig().canRun && showDisabledTooltip">
+                <div class="details__tooltip" ng-show="!canRunTests() && showDisabledTooltip">
                     Some stress tests settings are invalid or incomplete
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -62,7 +63,7 @@
     <spinner></spinner>
 </div>
 
-<div class="settings-section" ng-if="!loading.modelInfo && tests.perturbations.Rebalance">
+<div class="settings-section" ng-if="!loading.modelInfo && settings.tests.Rebalance">
     <div class="webapp-subsection">
         <div class="webapp-subsection__delimiter_title">
             {{ CORRUPTION_TYPES.TARGET_SHIFT.displayName }}
@@ -73,19 +74,19 @@
     </div>
     <div class="webapp-subsection">
         <div class="flex small-title text-sb settings-subsection__header">
-            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.Rebalance.$activated}">
+            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !settings.tests.Rebalance.$activated}">
                 <label class="switch">
-                    <input type="checkbox" ng-model="tests.perturbations.Rebalance.$activated">
+                    <input type="checkbox" ng-model="settings.tests.Rebalance.$activated">
                     <div class="slider round"></div>
                 </label>
                 <div>{{ TEST_NAMES.Rebalance }}</div>
             </label>
             <help-icon help-text="Resample data to match a given target distribution"></help-icon>
         </div>
-        <form name="forms.Rebalance" class="settings__form"
-            ng-show="tests.perturbations.Rebalance.$activated" ng-submit="runAnalysis()">
+        <div class="settings__form"
+            ng-if="settings.tests.Rebalance.$activated" ng-submit="runAnalysis()">
             <div key-value-list
-                map="tests.perturbations.Rebalance.params.priors"
+                map="settings.tests.Rebalance.params.priors"
                 key-options="modelInfo.targetClasses"
                 key-label="Target class"
                 key-item-label="class"
@@ -93,10 +94,10 @@
                 value-range="[0,1]"
                 step=".01"
                 default-value=".5"
-                form="forms.Rebalance"
+                form="forms.settings"
                 class="settings__form_field">
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -109,23 +110,24 @@
             {{ CORRUPTION_TYPES.FEATURE_PERTURBATION.description }}
         </div>
     </div>
-    <div ng-if="tests.perturbations.MissingValues" class="webapp-subsection">
+    <div ng-if="settings.tests.MissingValues" class="webapp-subsection">
         <div class="flex small-title text-sb settings-subsection__header">
-            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.MissingValues.$activated}">
+            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !settings.tests.MissingValues.$activated}">
                 <label class="switch">
-                    <input type="checkbox" ng-model="tests.perturbations.MissingValues.$activated">
+                    <input type="checkbox" ng-model="settings.tests.MissingValues.$activated">
                     <div class="slider round"></div>
                 </label>
                 <div>{{ TEST_NAMES.MissingValues }}</div>
             </label>
             <help-icon help-text="Randomly inserts missing values in one or several feature columns"></help-icon>
         </div>
-        <form name="forms.MissingValues" class="settings__form"
-            ng-show="tests.perturbations.MissingValues.$activated" ng-submit="runAnalysis()">
+        <div class="settings__form"
+            ng-if="settings.tests.MissingValues.$activated" ng-submit="runAnalysis()">
             <div custom-dropdown
-                form="forms.MissingValues"
-                possible-values="tests.perturbations.MissingValues.availableColumns"
-                items="tests.perturbations.MissingValues.selected_features"
+                id="missing"
+                form="forms.settings"
+                possible-values="settings.tests.MissingValues.availableColumns"
+                items="settings.tests.MissingValues.selected_features"
                 item-name="feature"
                 item-image="featureToTypeIcon"
                 label="Corrupted features"
@@ -134,28 +136,29 @@
             <div class="control-group settings__form_field">
                 <label for="missingValuesSamples" class="label-text">Ratio of corrupted samples</label>
                 <input type="number" id="missingValuesSamples"
-                    ng-model="tests.perturbations.MissingValues.params.samples_fraction"
+                    ng-model="settings.tests.MissingValues.params.samples_fraction"
                     placeholder="0.5" step="0.01" min="0.01" max="1" required>
             </div>
-        </form>
+        </div>
     </div>
-    <div ng-if="tests.perturbations.Scaling" class="webapp-subsection">
+    <div ng-if="settings.tests.Scaling" class="webapp-subsection">
         <div class="flex small-title text-sb settings-subsection__header">
-            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !tests.perturbations.Scaling.$activated}">
+            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !settings.tests.Scaling.$activated}">
                 <label class="switch">
-                    <input type="checkbox" ng-model="tests.perturbations.Scaling.$activated">
+                    <input type="checkbox" ng-model="settings.tests.Scaling.$activated">
                     <div class="slider round"></div>
                 </label>
                 <div>{{ TEST_NAMES.Scaling }}</div>
             </label>
             <help-icon help-text="Multiplies one or several numerical features by a specified coefficient"></help-icon>
         </div>
-        <form name="forms.Scaling" class="settings__form"
-            ng-show="tests.perturbations.Scaling.$activated" ng-submit="runAnalysis()">
+        <div class="settings__form"
+            ng-if="settings.tests.Scaling.$activated" ng-submit="runAnalysis()">
             <div custom-dropdown
-                form="forms.Scaling"
-                possible-values="tests.perturbations.Scaling.availableColumns"
-                items="tests.perturbations.Scaling.selected_features"
+                id="scaling"
+                form="forms.settings"
+                possible-values="settings.tests.Scaling.availableColumns"
+                items="settings.tests.Scaling.selected_features"
                 item-name="feature"
                 item-image="featureToTypeIcon"
                 label="Corrupted features"
@@ -164,14 +167,14 @@
             <div class="control-group settings__form_field">
                 <label for="scalingFactor" class="label-text">Coefficient</label>
                 <input type="number" id="scalingFactor"
-                    ng-model="tests.perturbations.Scaling.params.scaling_factor" required>
+                    ng-model="settings.tests.Scaling.params.scaling_factor" required>
             </div>
             <div class="control-group settings__form_field">
                 <label for="scalingSamples" class="label-text">Ratio of corrupted samples</label>
                 <input type="number" id="scalingSamples"
-                    ng-model="tests.perturbations.Scaling.params.samples_fraction"
+                    ng-model="settings.tests.Scaling.params.samples_fraction"
                     placeholder="0.5" step="0.01" min="0.01" max="1" required>
             </div>
-        </form>
+        </div>
     </div>
 </div>

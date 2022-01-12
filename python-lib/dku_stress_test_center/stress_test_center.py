@@ -127,7 +127,7 @@ class StressTestGenerator(object):
                               config["perfMetric"],
                               self.model_accessor.get_prediction_type())
 
-        tests_config = config["perturbations"]
+        tests_config = config["tests"]
         self._tests = defaultdict(list)
         for test_name, test_config in tests_config.items():
             test = self.generate_test(test_name, test_config)
