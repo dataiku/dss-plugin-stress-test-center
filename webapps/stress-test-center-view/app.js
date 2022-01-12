@@ -159,8 +159,8 @@ const versionId = webAppConfig['versionId'];
 
         $scope.loading = {};
         $scope.forms = {};
-        $scope.tests = {
-            perturbations: {
+        $scope.settings = {
+            tests: {
                 Rebalance: {
                     needsTargetClasses: true,
                     params: { priors: {} }
@@ -197,18 +197,18 @@ const versionId = webAppConfig['versionId'];
 
         $scope.canRunTests = function() {
             return $scope.forms.settings.$valid
-                && Object.values($scope.tests.perturbations).some(t => t.$activated);
+                && Object.values($scope.settings.tests).some(t => t.$activated);
         }
 
         $scope.runAnalysis = function () {
             if (!$scope.canRunTests()) return;
-            const requestParams = Object.assign({}, $scope.tests);
-            requestParams.perturbations = {};
-            angular.forEach($scope.tests.perturbations, function(v, k) {
+            const requestParams = Object.assign({}, $scope.settings);
+            requestParams.tests = {};
+            angular.forEach($scope.settings.tests, function(v, k) {
                 if (!v.$activated) return;
-                requestParams.perturbations[k] = Object.assign({}, v);
+                requestParams.tests[k] = Object.assign({}, v);
                 if (v.selected_features) { // test is a sample perturbation
-                    requestParams.perturbations[k].selected_features = Array.from(v.selected_features);
+                    requestParams.tests[k].selected_features = Array.from(v.selected_features);
                 }
             });
 
@@ -251,7 +251,7 @@ const versionId = webAppConfig['versionId'];
                 $scope.modelInfo.targetClasses = response.data["target_classes"];
                 $scope.modelInfo.predType = response.data["pred_type"];
 
-                $scope.tests.perfMetric = response.data["metric"];
+                $scope.settings.perfMetric = response.data["metric"];
                 $scope.METRIC_NAMES = MetricNames.availableMetrics($scope.modelInfo.predType);
                 $scope.TEST_ORDER =  ["FEATURE_PERTURBATION"];
                 if ($scope.modelInfo.predType !== 'REGRESSION') {
@@ -262,19 +262,19 @@ const versionId = webAppConfig['versionId'];
 
                 // Only display relevant tests for the current model
                 const featureNames = Object.keys(features);
-                Object.keys($scope.tests.perturbations).forEach(function(testName) {
-                    const testConfig = $scope.tests.perturbations[testName];
+                Object.keys($scope.settings.tests).forEach(function(testName) {
+                    const testConfig = $scope.settings.tests[testName];
                     if (testConfig.allowedFeatureTypes) {
                         testConfig.availableColumns = featureNames.filter(function(name) {
                             return testConfig.allowedFeatureTypes.includes(features[name]);
                         });
                         if (!testConfig.availableColumns.length) {
-                            delete $scope.tests.perturbations[testName];
+                            delete $scope.settings.tests[testName];
                         }
                     }
                     if (testConfig.needsTargetClasses) {
                         if ($scope.modelInfo.predType === 'REGRESSION') {
-                            delete $scope.tests.perturbations[testName];
+                            delete $scope.settings.tests[testName];
                         }
                     }
                 });
