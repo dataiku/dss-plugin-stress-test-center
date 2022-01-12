@@ -9,6 +9,7 @@ const versionId = webAppConfig['versionId'];
             if (string === string.toUpperCase()) return string;
             return string.toLowerCase();
         }
+
         function metrics(metric, isRegression) {
             const shortName = MetricNames.shortName(metric);
             const longName = MetricNames.longName(metric);
@@ -194,37 +195,23 @@ const versionId = webAppConfig['versionId'];
             return featureTypesToIconClass[features[feature]];
         }
 
-        $scope.checkTestConfig = function() {
-            if (!$scope.forms.GENERAL || $scope.forms.GENERAL.$invalid) return { canRun: false };
-            const testEntries = Object.entries($scope.tests.perturbations);
-            const validActivatedTests = testEntries.filter(function(entry) {
-                const [testName, testSettings] = entry;
-                return testSettings.$activated && $scope.forms[testName].$valid;
-            });
-            const invalidActivatedTests = testEntries.filter(function(entry) {
-                const [testName, testSettings] = entry;
-                return testSettings.$activated && $scope.forms[testName].$invalid;
-            });
-            return {
-                canRun: validActivatedTests.length && !invalidActivatedTests.length,
-                config: validActivatedTests
-            }
+        $scope.canRunTests = function() {
+            return $scope.forms.settings.$valid
+                && Object.values($scope.tests.perturbations).some(t => t.$activated);
         }
 
         $scope.runAnalysis = function () {
-            const { canRun, config } = $scope.checkTestConfig();
-            if (!canRun) return;
+            if (!$scope.canRunTests()) return;
             const requestParams = Object.assign({}, $scope.tests);
-            requestParams.perturbations = config.reduce(function(fullParams, currentEntry) {
-                const [testName, testSettings] = currentEntry;
-                fullParams[testName] = {
-                    params: testSettings.params
+            requestParams.perturbations = {};
+            angular.forEach($scope.tests.perturbations, function(v, k) {
+                if (!v.$activated) return;
+                requestParams.perturbations[k] = Object.assign({}, v);
+                if (v.selected_features) { // test is a sample perturbation
+                    requestParams.perturbations[k].selected_features = Array.from(v.selected_features);
                 }
-                if (testSettings.selected_features) { // test is a sample perturbation
-                    fullParams[testName].selected_features = Array.from(testSettings.selected_features);
-                }
-                return fullParams;
-            }, {});
+            });
+
             $scope.perfMetrics = CorruptionUtils.metrics(
                 requestParams.perfMetric,  $scope.modelInfo.predType === 'REGRESSION'
             );

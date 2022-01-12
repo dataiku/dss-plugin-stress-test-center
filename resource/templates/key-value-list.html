@@ -7,13 +7,11 @@
         <div>
             <div class="flex key-value-element" ng-repeat="key in keys track by $index">
                 <div custom-dropdown
-                    form="form"
                     item="keys[$index]"
                     possible-values="keyOptions"
                     item-name="{{ keyItemLabel }}"
                     not-available-values="map"
                     on-change="dropdownChange"
-                    validity="key-value-list-valid"
                     class="key-value-element__key"></div>
                 <i class="icon-long-arrow-right"></i>
                 <input type="number"

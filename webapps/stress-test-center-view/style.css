@@ -306,6 +306,7 @@ transform: translate(-125%, -50%);
     width: 300px;
     flex: 0 0 auto;
     overflow-x: auto;
+    padding: 0;
 }
 
 .settings-section {

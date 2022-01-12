@@ -10,10 +10,11 @@
         <div class="webapp-subsection__delimiter_title">
             General settings
         </div>
-        <form name="forms.GENERAL" class="settings__form" ng-submit="runAnalysis()">
+        <div class="settings__form">
             <div class="control-group settings__form_field">
                 <div custom-dropdown
-                    form="forms.GENERAL"
+                    id="general"
+                    form="forms.settings"
                     possible-values="METRIC_NAMES"
                     item="tests.perfMetric"
                     item-name="metric"
@@ -43,18 +44,18 @@
             </div>
             <div class="dku-btn-container--right-align settings__form_field elem--with-tooltip">
                 <button class="dku-btn dku-btn-primary"
-                        type="button"
-                        ng-class="{ 'dku-btn--disabled': loading.results || !checkTestConfig().canRun }"
+                        type="submit"
+                        ng-class="{ 'dku-btn--disabled': loading.results || !canRunTests() }"
                         ng-click="runAnalysis()"
                         ng-mouseover="showDisabledTooltip = !showDisabledTooltip"
                         ng-mouseleave="showDisabledTooltip = !showDisabledTooltip">
                     Run tests
                 </button>
-                <div class="details__tooltip" ng-show="!checkTestConfig().canRun && showDisabledTooltip">
+                <div class="details__tooltip" ng-show="!canRunTests() && showDisabledTooltip">
                     Some stress tests settings are invalid or incomplete
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -82,8 +83,8 @@
             </label>
             <help-icon help-text="Resample data to match a given target distribution"></help-icon>
         </div>
-        <form name="forms.Rebalance" class="settings__form"
-            ng-show="tests.perturbations.Rebalance.$activated" ng-submit="runAnalysis()">
+        <div class="settings__form"
+            ng-if="tests.perturbations.Rebalance.$activated" ng-submit="runAnalysis()">
             <div key-value-list
                 map="tests.perturbations.Rebalance.params.priors"
                 key-options="modelInfo.targetClasses"
@@ -93,10 +94,10 @@
                 value-range="[0,1]"
                 step=".01"
                 default-value=".5"
-                form="forms.Rebalance"
+                form="forms.settings"
                 class="settings__form_field">
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -120,10 +121,11 @@
             </label>
             <help-icon help-text="Randomly inserts missing values in one or several feature columns"></help-icon>
         </div>
-        <form name="forms.MissingValues" class="settings__form"
-            ng-show="tests.perturbations.MissingValues.$activated" ng-submit="runAnalysis()">
+        <div class="settings__form"
+            ng-if="tests.perturbations.MissingValues.$activated" ng-submit="runAnalysis()">
             <div custom-dropdown
-                form="forms.MissingValues"
+                id="missing"
+                form="forms.settings"
                 possible-values="tests.perturbations.MissingValues.availableColumns"
                 items="tests.perturbations.MissingValues.selected_features"
                 item-name="feature"
@@ -137,7 +139,7 @@
                     ng-model="tests.perturbations.MissingValues.params.samples_fraction"
                     placeholder="0.5" step="0.01" min="0.01" max="1" required>
             </div>
-        </form>
+        </div>
     </div>
     <div ng-if="tests.perturbations.Scaling" class="webapp-subsection">
         <div class="flex small-title text-sb settings-subsection__header">
@@ -150,10 +152,11 @@
             </label>
             <help-icon help-text="Multiplies one or several numerical features by a specified coefficient"></help-icon>
         </div>
-        <form name="forms.Scaling" class="settings__form"
-            ng-show="tests.perturbations.Scaling.$activated" ng-submit="runAnalysis()">
+        <div class="settings__form"
+            ng-if="tests.perturbations.Scaling.$activated" ng-submit="runAnalysis()">
             <div custom-dropdown
-                form="forms.Scaling"
+                id="scaling"
+                form="forms.settings"
                 possible-values="tests.perturbations.Scaling.availableColumns"
                 items="tests.perturbations.Scaling.selected_features"
                 item-name="feature"
@@ -172,6 +175,6 @@
                     ng-model="tests.perturbations.Scaling.params.samples_fraction"
                     placeholder="0.5" step="0.01" min="0.01" max="1" required>
             </div>
-        </form>
+        </div>
     </div>
 </div>
