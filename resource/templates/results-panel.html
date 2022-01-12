@@ -30,7 +30,7 @@
 </div>
 
 <div ng-if="results && !loading.results">
-    <div class="results-section" ng-repeat="stressTestType in TEST_ORDER">
+    <div class="results-section" ng-repeat="stressTestType in TEST_ORDER" ng-if="results[stressTestType]">
         <div class="webapp-subsection">
             <div class="grand-title results-subsection__header">
                 {{ CORRUPTION_TYPES[stressTestType].displayName }}
