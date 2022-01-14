@@ -174,7 +174,7 @@ class StressTestGenerator(object):
 
         elif test.TEST_TYPE == DkuStressTestCenterConstants.SUBPOPULATION_SHIFT:
             extra_metrics["worst_subpop_accuracy"] = worst_group_accuracy(
-                test.df_with_pred[test.population], perturbed_y_true, perturbed_y_pred, perturbed_probas
+                test.df_with_pred[test.population], perturbed_y_true, perturbed_y_pred
             )
 
         return {
