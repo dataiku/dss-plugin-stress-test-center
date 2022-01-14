@@ -45,7 +45,13 @@ const versionId = webAppConfig['versionId'];
                     name: "corruption_resilience",
                     displayName: "Corruption resilience",
                     description: isRegression ? resilienceDescReg : resilienceDescClassif,
-                    excludedStressTestTypes: ["TARGET_SHIFT"]
+                    excludedStressTestTypes: ["TARGET_SHIFT", "SUBPOPULATION_SHIFT"]
+                },
+                {
+                    name: "worst_subpop_accuracy",
+                    displayName: "Worst subpopulation accuracy",
+                    description: " is the worst-case subpopulation accuracy across all the subpopulations of a categorical feature.",
+                    excludedStressTestTypes: ["TARGET_SHIFT", "FEATURE_PERTURBATION"]
                 }
             ];
 
@@ -64,11 +70,16 @@ const versionId = webAppConfig['versionId'];
                 TARGET_SHIFT: {
                     displayName: "Target distribution shift",
                     description: "This stress test resamples the test set to match the desired distribution for the target column."
+                },
+                SUBPOPULATION_SHIFT: {
+                    displayName: "Feature distribution shift",
+                    description: "This stress test resamples the test set to match the desired distribution for the selected feature."
                 }
             },
             TEST_NAMES: {
                 _dku_stress_test_uncorrupted: "No corruption",
-                Rebalance: "Shift target distribution",
+                RebalanceTarget: "Shift target distribution",
+                RebalanceFeature: "Shift feature distribution",
                 MissingValues: "Insert missing values",
                 Scaling: "Multiply by a coefficient"
             }
@@ -161,8 +172,12 @@ const versionId = webAppConfig['versionId'];
         $scope.forms = {};
         $scope.settings = {
             tests: {
-                Rebalance: {
+                RebalanceTarget: {
                     needsTargetClasses: true,
+                    params: { priors: {} }
+                },
+                RebalanceFeature: {
+                    allowedFeatureTypes: ["CATEGORY"],
                     params: { priors: {} }
                 },
                 MissingValues: {
@@ -182,7 +197,9 @@ const versionId = webAppConfig['versionId'];
             samples: .8,
             randomSeed: 1337
         };
-        $scope.modelInfo = {};
+        $scope.modelInfo = {
+            featureCategories: {}
+        };
 
         const featureTypesToIconClass = {
             NUMERIC: "numerical",
@@ -198,6 +215,20 @@ const versionId = webAppConfig['versionId'];
         $scope.canRunTests = function() {
             return $scope.forms.settings.$valid
                 && Object.values($scope.settings.tests).some(t => t.$activated);
+        }
+
+        $scope.getFeatureCategories = function(feature) {
+            if (!$scope.modelInfo.featureCategories[feature]) {
+                $scope.loading.featureCategories = true;
+                $http.get(getWebAppBackendUrl(feature + "/categories")).then(function(response) {
+                    $scope.loading.featureCategories = false;
+                    $scope.modelInfo.featureCategories[feature] = response.data;
+                }, function(e) {
+                    $scope.loading.featureCategories = false;
+                    $scope.createModal.error(e.data);
+                });
+            }
+            $scope.settings.tests.RebalanceFeature.params.priors = {};
         }
 
         $scope.runAnalysis = function () {
@@ -253,10 +284,7 @@ const versionId = webAppConfig['versionId'];
 
                 $scope.settings.perfMetric = response.data["metric"];
                 $scope.METRIC_NAMES = MetricNames.availableMetrics($scope.modelInfo.predType);
-                $scope.TEST_ORDER =  ["FEATURE_PERTURBATION"];
-                if ($scope.modelInfo.predType !== 'REGRESSION') {
-                    $scope.TEST_ORDER.unshift("TARGET_SHIFT")
-                }
+                $scope.TEST_ORDER =  ["TARGET_SHIFT", "SUBPOPULATION_SHIFT", "FEATURE_PERTURBATION"];
 
                 features = response.data["features"];
 
