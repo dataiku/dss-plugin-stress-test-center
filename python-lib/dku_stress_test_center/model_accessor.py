@@ -45,6 +45,9 @@ class ModelAccessor(object):
     def get_per_feature(self):
         return self.model_handler.get_per_feature()
 
+    def get_collector_data(self, feature):
+        return self.model_handler.get_collector_data()["per_feature"][feature]
+
     def get_predictor(self):
         return self.model_handler.get_predictor()
 

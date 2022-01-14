@@ -3,25 +3,21 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
-from dku_stress_test_center.metrics import Metric, worst_group_performance,\
+from dku_stress_test_center.metrics import Metric, worst_group_accuracy,\
     corruption_resilience_classification, corruption_resilience_regression
 
 from drift_dac.perturbation_shared_utils import Shift, PerturbationConstants
 from drift_dac.covariate_shift import MissingValues, Scaling
-from drift_dac.prior_shift import Rebalance
 
 class StressTest(object):
-    def __init__(self, shift: Shift):
-        self.shift = shift
+    def __init__(self, test_name: str, test_config: dict):
+        self.shift = DkuStressTestCenterConstants.TESTS[test_name](**test_config["params"])
+        self.name = test_name
         self.df_with_pred = None
         self.not_relevant_explanation = None
 
     def perturb_df(self, df: pd.DataFrame):
         raise NotImplementedError()
-
-    @property
-    def name(self):
-        return self.shift.__class__.__name__
 
     @property
     def relevant(self):
@@ -32,11 +28,11 @@ class StressTest(object):
 
 class FeaturePerturbationTest(StressTest):
     TEST_TYPE = DkuStressTestCenterConstants.FEATURE_PERTURBATION
-    TESTS = {MissingValues, Scaling}
+    TESTS = {"MissingValues", "Scaling"}
 
-    def __init__(self, shift: Shift, features: list):
-        super(FeaturePerturbationTest, self).__init__(shift)
-        self.features = features
+    def __init__(self, test_name: str, test_config: dict):
+        super(FeaturePerturbationTest, self).__init__(test_name, test_config)
+        self.features = test_config["selected_features"]
 
     def check_relevance(self, preprocessing: dict):
         if type(self.shift) is Scaling:
@@ -72,11 +68,11 @@ class FeaturePerturbationTest(StressTest):
 
 class SubpopulationShiftTest(StressTest):
     TEST_TYPE = DkuStressTestCenterConstants.SUBPOPULATION_SHIFT
-    TESTS = {Rebalance}
+    TESTS = {"RebalanceFeature"}
 
-    def __init__(self, shift: Shift, population: str):
-        super(SubpopulationShiftTest, self).__init__(shift)
-        self.population = population
+    def __init__(self, test_name: str, test_config: dict):
+        super(SubpopulationShiftTest, self).__init__(test_name, test_config)
+        self.population = test_config["population"]
 
     def perturb_df(self, df: pd.DataFrame):
         df = df.copy()
@@ -92,6 +88,7 @@ class SubpopulationShiftTest(StressTest):
 
 class TargetShiftTest(SubpopulationShiftTest):
     TEST_TYPE = DkuStressTestCenterConstants.TARGET_SHIFT
+    TESTS = {"RebalanceTarget"}
 
 
 class StressTestGenerator(object):
@@ -104,33 +101,28 @@ class StressTestGenerator(object):
         self._sampling_proportion = None
         self._clean_df = None
 
-    def generate_test(self, test_name, test_config):
-        test = DkuStressTestCenterConstants.TESTS[test_name](**test_config["params"])
-
-        if test.__class__ in FeaturePerturbationTest.TESTS:
-            features = test_config["selected_features"]
-            stress_test = FeaturePerturbationTest(test, features)
-        elif test.__class__ in TargetShiftTest.TESTS:
-            target = self.model_accessor.get_target_variable()
-            stress_test = TargetShiftTest(test, target)
-        else:
-            raise ValueError("Unknown stress test %s" % test_name)
-
-        feature_preprocessing = self.model_accessor.get_per_feature()
-        stress_test.check_relevance(feature_preprocessing)
-        return stress_test
+    def generate_test(self, test_name: str, test_config: dict):
+        if test_name in FeaturePerturbationTest.TESTS:
+            return FeaturePerturbationTest(test_name, test_config)
+        if test_name in TargetShiftTest.TESTS:
+            test_config["population"] = self.model_accessor.get_target_variable()
+            return TargetShiftTest(test_name, test_config)
+        if test_name in SubpopulationShiftTest.TESTS:
+            return SubpopulationShiftTest(test_name, test_config)
+        raise ValueError("Unknown stress test %s" % test_name)
 
     def set_config(self, config: dict):
         self._sampling_proportion = config["samples"]
         self._random_state = config["randomSeed"]
-        self._metric = Metric(self.model_accessor.metrics,
-                              config["perfMetric"],
+        self._metric = Metric(self.model_accessor.metrics, config["perfMetric"],
                               self.model_accessor.get_prediction_type())
 
-        tests_config = config["tests"]
         self._tests = defaultdict(list)
+        tests_config = config["tests"]
+        feature_preprocessing = self.model_accessor.get_per_feature()
         for test_name, test_config in tests_config.items():
             test = self.generate_test(test_name, test_config)
+            test.check_relevance(feature_preprocessing)
             self._tests[test.TEST_TYPE].append(test)
 
     def _get_col_for_metrics(self, df: pd.DataFrame):
@@ -181,8 +173,8 @@ class StressTestGenerator(object):
             extra_metrics["corruption_resilience"] = corruption_resilience
 
         elif test.TEST_TYPE == DkuStressTestCenterConstants.SUBPOPULATION_SHIFT:
-            extra_metrics["worst_subpop_perf"] = worst_group_performance(
-                metric, test.subpopulation, perturbed_y_true, perturbed_y_pred, perturbed_probas
+            extra_metrics["worst_subpop_accuracy"] = worst_group_accuracy(
+                test.df_with_pred[test.population], perturbed_y_true, perturbed_y_pred, perturbed_probas
             )
 
         return {
