@@ -50,7 +50,7 @@ const versionId = webAppConfig['versionId'];
                 {
                     name: "worst_subpop_accuracy",
                     displayName: "Worst subpopulation accuracy",
-                    description: " is the worst-case subpopulation accuracy across all the subpopulations of a categorical feature.",
+                    description: " is the worst-case accuracy across all the subpopulations of a categorical feature.",
                     excludedStressTestTypes: ["TARGET_SHIFT", "FEATURE_PERTURBATION"]
                 }
             ];
