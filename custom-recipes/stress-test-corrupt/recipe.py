@@ -1,12 +1,16 @@
 import dataiku
 from dataiku.customrecipe import get_input_names_for_role, get_output_names_for_role, get_recipe_config
-from dku_stress_test_center.stress_test_center import FeaturePerturbationTest
-from dku_stress_test_center.utils import DkuStressTestCenterConstants
+from dku_stress_test_center.stress_test_center import FeaturePerturbationTest, SubpopulationShiftTest
 
 recipe_config = get_recipe_config()
-test_class = DkuStressTestCenterConstants.TESTS[recipe_config["stress_test"]]
-feature_perturbation = test_class(**recipe_config)
-stress_test = FeaturePerturbationTest(feature_perturbation, recipe_config["selected_features"])
+test_name = recipe_config.pop("stress_test")
+if test_name in FeaturePerturbationTest.TESTS:
+    selected_features = recipe_config.pop("selected_features")
+    stress_test = FeaturePerturbationTest(
+        test_name, params=recipe_config, selected_features=selected_features
+    )
+else:
+    raise ValueError("Unknown stress test %s" % test_name)
 
 input_dataset = dataiku.Dataset(get_input_names_for_role("input_dataset")[0])
 corrupted_dataset = dataiku.Dataset(get_output_names_for_role("corrupted_dataset")[0])

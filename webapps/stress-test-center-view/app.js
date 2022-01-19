@@ -62,7 +62,7 @@ const versionId = webAppConfig['versionId'];
 
         return {
             metrics,
-            types: {
+            TYPES: {
                 FEATURE_PERTURBATION: {
                     displayName: "Feature corruptions",
                     description: "Each of these independent tests corrupts one or several features across randomly sampled rows."
@@ -73,15 +73,22 @@ const versionId = webAppConfig['versionId'];
                 },
                 SUBPOPULATION_SHIFT: {
                     displayName: "Feature distribution shift",
-                    description: "This stress test resamples the test set to match the desired distribution for the selected feature."
+                    description: "This stress test resamples the test set to match the desired distribution for the selected categorical feature."
                 }
             },
-            TEST_NAMES: {
-                _dku_stress_test_uncorrupted: "No corruption",
-                RebalanceTarget: "Shift target distribution",
-                RebalanceFeature: "Shift feature distribution",
-                MissingValues: "Insert missing values",
-                Scaling: "Multiply by a coefficient"
+            TEST_CONSTRAINTS: {
+                RebalanceTarget: {
+                    allowedPredictionTypes: ["BINARY_CLASSIFICATION", "MULTICLASS"]
+                },
+                RebalanceFeature: {
+                    allowedFeatureTypes: ["CATEGORY"]
+                },
+                MissingValues: {
+                    allowedFeatureTypes: ["NUMERIC", "CATEGORY", "VECTOR", "TEXT"]
+                },
+                Scaling: {
+                    allowedFeatureTypes: ["NUMERIC"]
+                }
             }
         };
     });
@@ -159,34 +166,33 @@ const versionId = webAppConfig['versionId'];
         }
     });
 
-    app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils, MetricNames, $filter) {
+    app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils,
+        MetricNames, $filter) {
+
         $scope.modal = {};
         $scope.removeModal = ModalService.remove($scope.modal);
         $scope.createModal = ModalService.create($scope.modal);
 
-        $scope.CORRUPTION_TYPES = CorruptionUtils.types;
-        $scope.TEST_NAMES = CorruptionUtils.TEST_NAMES;
+        $scope.CORRUPTION_TYPES = CorruptionUtils.TYPES;
         $scope.userFriendlyMetricName = MetricNames.longName
+        const testContraints = CorruptionUtils.TEST_CONSTRAINTS;
 
         $scope.loading = {};
         $scope.forms = {};
+
         $scope.settings = {
             tests: {
                 RebalanceTarget: {
-                    needsTargetClasses: true,
                     params: { priors: {} }
                 },
                 RebalanceFeature: {
-                    allowedFeatureTypes: ["CATEGORY"],
                     params: { priors: {} }
                 },
                 MissingValues: {
-                    allowedFeatureTypes: ["NUMERIC", "CATEGORY", "VECTOR", "TEXT"],
                     params: { samples_fraction: .5 },
                     selected_features: new Set()
                 },
                 Scaling: {
-                    allowedFeatureTypes: ["NUMERIC"],
                     params: {
                         samples_fraction: .5,
                         scaling_factor: 10
@@ -197,9 +203,28 @@ const versionId = webAppConfig['versionId'];
             samples: .8,
             randomSeed: 1337
         };
+
         $scope.modelInfo = {
             featureCategories: {}
         };
+
+        $scope.uiState = {
+            _dku_stress_test_uncorrupted: {
+                displayName: "No corruption"
+            },
+            RebalanceTarget: {
+                displayName: "Shift target distribution"
+            },
+            RebalanceFeature: {
+                displayName: "Shift feature distribution"
+            },
+            MissingValues: {
+                displayName: "Insert missing values"
+            },
+            Scaling: {
+                displayName: "Multiply by a coefficient"
+            }
+        }
 
         const featureTypesToIconClass = {
             NUMERIC: "numerical",
@@ -214,7 +239,7 @@ const versionId = webAppConfig['versionId'];
 
         $scope.canRunTests = function() {
             return $scope.forms.settings.$valid
-                && Object.values($scope.settings.tests).some(t => t.$activated);
+                && Object.values($scope.uiState).some(t => t.activated);
         }
 
         $scope.getFeatureCategories = function(feature) {
@@ -235,11 +260,11 @@ const versionId = webAppConfig['versionId'];
             if (!$scope.canRunTests()) return;
             const requestParams = Object.assign({}, $scope.settings);
             requestParams.tests = {};
-            angular.forEach($scope.settings.tests, function(v, k) {
-                if (!v.$activated) return;
-                requestParams.tests[k] = Object.assign({}, v);
-                if (v.selected_features) { // test is a sample perturbation
-                    requestParams.tests[k].selected_features = Array.from(v.selected_features);
+            angular.forEach($scope.settings.tests, function(testParams, testName) {
+                if (!$scope.uiState[testName].activated) return;
+                requestParams.tests[testName] = Object.assign({}, testParams);
+                if (testParams.selected_features) { // test is a sample perturbation
+                    requestParams.tests[testName].selected_features = Array.from(testParams.selected_features);
                 }
             });
 
@@ -253,9 +278,10 @@ const versionId = webAppConfig['versionId'];
                     angular.forEach(response.data, function(result) {
                         if (result.critical_samples) {
                             result.critical_samples.predList = result.critical_samples.predList.map(function(predList) {
-                                predList = Object.entries(predList).map(function(pred) {
-                                    const [testName, result] = pred;
-                                    return `${$scope.TEST_NAMES[testName]}: ${$filter("toFixedIfNeeded")(result, 3)}`;
+                                predList = Object.entries(predList).map(function(entry) {
+                                    const [testName, result] = entry;
+                                    const displayName = $scope.uiState[testName].displayName;
+                                    return `${displayName}: ${$filter("toFixedIfNeeded")(result, 3)}`;
                                 });
                                 predList.unshift($scope.modelInfo.predType === 'REGRESSION' ? "Predicted values" : "True class probas");
                                 return predList;
@@ -291,19 +317,17 @@ const versionId = webAppConfig['versionId'];
                 // Only display relevant tests for the current model
                 const featureNames = Object.keys(features);
                 Object.keys($scope.settings.tests).forEach(function(testName) {
-                    const testConfig = $scope.settings.tests[testName];
-                    if (testConfig.allowedFeatureTypes) {
-                        testConfig.availableColumns = featureNames.filter(function(name) {
-                            return testConfig.allowedFeatureTypes.includes(features[name]);
-                        });
-                        if (!testConfig.availableColumns.length) {
-                            delete $scope.settings.tests[testName];
-                        }
+                    const constraints = testContraints[testName];
+                    if (constraints.allowedFeatureTypes) {
+                        $scope.uiState[testName].availableColumns = featureNames.filter(
+                            function(name) {
+                                return constraints.allowedFeatureTypes.includes(features[name]);
+                            });
+                        $scope.uiState[testName].available = $scope.uiState[testName].availableColumns.length;
                     }
-                    if (testConfig.needsTargetClasses) {
-                        if ($scope.modelInfo.predType === 'REGRESSION') {
-                            delete $scope.settings.tests[testName];
-                        }
+
+                    if (constraints.allowedPredictionTypes) {
+                        $scope.uiState[testName].available = constraints.allowedPredictionTypes.includes($scope.modelInfo.predType)
                     }
                 });
         }, function(e) {
