@@ -134,8 +134,9 @@ class StressTestGenerator(object):
         probas = df.filter(regex=r'^proba_', axis=1).values
         return y_true, y_pred, probas
 
-    def compute_test_metrics(self, test: StressTest, sample_weight: np.array):
+    def compute_test_metrics(self, test: StressTest):
         clean_df_with_pred = self._clean_df.loc[test.df_with_pred.index, :]
+        sample_weight = self.model_accessor.get_sample_weights(clean_df_with_pred)
 
         clean_y_true, clean_y_pred, clean_probas = self._get_col_for_metrics(clean_df_with_pred)
         perf_before = self._metric.compute(clean_y_true, clean_y_pred, clean_probas, sample_weight)
@@ -144,8 +145,8 @@ class StressTestGenerator(object):
             "perf_before": perf_before
         }
         if test.relevant:
-            perturbed_y_true, perturbed_y_pred, perturbed_probas = self._get_col_for_metrics(test.df_with_pred, sample_weight)
-            perf_after = self._metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
+            perturbed_y_true, perturbed_y_pred, perturbed_probas = self._get_col_for_metrics(test.df_with_pred)
+            perf_after = self._metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas, sample_weight)
         else:
             # Altered and unaltered datasets are the same, including the prediction columns.
             # By definition, the performance is the same before and after the stress test.
@@ -174,7 +175,7 @@ class StressTestGenerator(object):
 
         elif test.TEST_TYPE == DkuStressTestCenterConstants.SUBPOPULATION_SHIFT:
             extra_metrics["worst_subpop_accuracy"] = worst_group_accuracy(
-                test.df_with_pred[test.population], perturbed_y_true, perturbed_y_pred
+                test.df_with_pred[test.population], perturbed_y_true, perturbed_y_pred, sample_weight
             )
 
         return {
@@ -190,13 +191,12 @@ class StressTestGenerator(object):
         df = self.model_accessor.get_original_test_df(sample_fraction=self._sampling_proportion,
                                                       random_state=self._random_state)
         self._clean_df = self.model_accessor.predict_and_concatenate(df)
-        sample_weight = self.model_accessor.get_sample_weights(self._clean_df)
 
         for test_type, tests in self._tests.items():
             for test in tests:
                 perturbed_df = test.perturb_df(df)
                 test.df_with_pred = self.model_accessor.predict_and_concatenate(perturbed_df)
-                metrics[test_type]["metrics"].update(self.compute_test_metrics(test, sample_weight))
+                metrics[test_type]["metrics"].update(self.compute_test_metrics(test))
 
         return metrics
 

@@ -71,12 +71,14 @@ class Metric(object):
         return perf_metric(y_true, y_pred, probas)
 
 
-def worst_group_accuracy(subpopulation: np.array, y_true: np.array, y_pred: np.array):
+def worst_group_accuracy(subpopulation: np.array, y_true: np.array, y_pred: np.array, sample_weight: np.array):
     performances = []
     subpopulation_values = np.unique(subpopulation)
     for subpop in subpopulation_values:
         subpop_mask = subpopulation == subpop
-        performance = accuracy_score(y_true[subpop_mask], y_pred[subpop_mask])
+        performance = accuracy_score(
+            y_true[subpop_mask], y_pred[subpop_mask], sample_weight=sample_weight[subpop_mask]
+        )
         performances.append(performance)
     return min(performances)
 
