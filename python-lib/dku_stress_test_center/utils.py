@@ -9,15 +9,15 @@ class DkuStressTestCenterConstants(object):
     TARGET_SHIFT = "TARGET_SHIFT"
 
     TESTS = {
-        "MissingValues": lambda **params: MissingValues(
+        "MissingValues": lambda params: MissingValues(
             samples_fraction=params["samples_fraction"], features_fraction=1, value_to_put_in=None
         ),
-        "Scaling": lambda **params: Scaling(
+        "Scaling": lambda params: Scaling(
             samples_fraction=params["samples_fraction"], scaling_factor=params["scaling_factor"],
             features_fraction=1
         ),
-        "RebalanceTarget": lambda **params: Rebalance(**params),
-        "RebalanceFeature": lambda **params: Rebalance(**params)
+        "RebalanceTarget": lambda params: Rebalance(priors=params["priors"]),
+        "RebalanceFeature": lambda params: Rebalance(priors=params["priors"])
     }
 
     NR_CRITICAL_SAMPLES = 5

@@ -62,7 +62,7 @@
                 <tbody>
                     <tr ng-repeat="(testName, metrics) in results[stressTestType].metrics">
                         <td class="cell elem--with-tooltip">
-                            {{ TEST_NAMES[testName] }}
+                            {{ uiState[testName].displayName }}
                             <i class="icon-warning-sign icon--hoverable" ng-show="metrics.not_relevant_explanation"
                                ng-mouseleave="showNotRelevantWarning[testName] = !showNotRelevantWarning[testName]"
                                ng-mouseover="showNotRelevantWarning[testName] = !showNotRelevantWarning[testName]">

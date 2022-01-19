@@ -63,7 +63,7 @@
     </div>
 </div>
 
-<div class="settings-section" ng-if="!loading.modelInfo && settings.tests.RebalanceTarget">
+<div class="settings-section" ng-if="!loading.modelInfo && uiState.RebalanceTarget.available">
     <div class="webapp-subsection">
         <div class="webapp-subsection__delimiter_title">
             {{ CORRUPTION_TYPES.TARGET_SHIFT.displayName }}
@@ -74,17 +74,17 @@
     </div>
     <div class="webapp-subsection">
         <div class="flex small-title text-sb settings-subsection__header">
-            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !settings.tests.RebalanceTarget.$activated}">
+            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !uiState.RebalanceTarget.activated}">
                 <label class="switch">
-                    <input type="checkbox" ng-model="settings.tests.RebalanceTarget.$activated">
+                    <input type="checkbox" ng-model="uiState.RebalanceTarget.activated">
                     <div class="slider round"></div>
                 </label>
-                <div>{{ TEST_NAMES.RebalanceTarget }}</div>
+                <div>{{ uiState.RebalanceTarget.displayName }}</div>
             </label>
             <help-icon help-text="Resample data to match a given target distribution"></help-icon>
         </div>
         <div class="settings__form"
-            ng-if="settings.tests.RebalanceTarget.$activated">
+            ng-if="uiState.RebalanceTarget.activated">
             <div key-value-list
                 map="settings.tests.RebalanceTarget.params.priors"
                 key-options="modelInfo.targetClasses"
@@ -101,7 +101,7 @@
     </div>
 </div>
 
-<div class="settings-section" ng-if="!loading.modelInfo && settings.tests.RebalanceFeature">
+<div class="settings-section" ng-if="!loading.modelInfo && uiState.RebalanceFeature.available">
     <div class="webapp-subsection">
         <div class="webapp-subsection__delimiter_title">
             {{ CORRUPTION_TYPES.SUBPOPULATION_SHIFT.displayName }}
@@ -112,22 +112,22 @@
     </div>
     <div class="webapp-subsection">
         <div class="flex small-title text-sb settings-subsection__header">
-            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !settings.tests.RebalanceFeature.$activated}">
+            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !uiState.RebalanceFeature.activated}">
                 <label class="switch">
-                    <input type="checkbox" ng-model="settings.tests.RebalanceFeature.$activated">
+                    <input type="checkbox" ng-model="uiState.RebalanceFeature.activated">
                     <div class="slider round"></div>
                 </label>
-                <div>{{ TEST_NAMES.RebalanceFeature }}</div>
+                <div>{{ uiState.RebalanceFeature.displayName }}</div>
             </label>
             <help-icon help-text="Resample data to match a given feature distribution"></help-icon>
         </div>
         <div class="settings__form"
-            ng-if="settings.tests.RebalanceFeature.$activated">
+            ng-if="uiState.RebalanceFeature.activated">
             <div class="control-group settings__form_field">
                 <div custom-dropdown
                     id="rebelance-feature"
                     form="forms.settings"
-                    possible-values="settings.tests.RebalanceFeature.availableColumns"
+                    possible-values="uiState.RebalanceFeature.availableColumns"
                     item="settings.tests.RebalanceFeature.population"
                     item-name="feature"
                     item-image="featureToTypeIcon"
@@ -165,23 +165,23 @@
             {{ CORRUPTION_TYPES.FEATURE_PERTURBATION.description }}
         </div>
     </div>
-    <div ng-if="settings.tests.MissingValues" class="webapp-subsection">
+    <div ng-if="uiState.MissingValues.available" class="webapp-subsection">
         <div class="flex small-title text-sb settings-subsection__header">
-            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !settings.tests.MissingValues.$activated}">
+            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !uiState.MissingValues.activated}">
                 <label class="switch">
-                    <input type="checkbox" ng-model="settings.tests.MissingValues.$activated">
+                    <input type="checkbox" ng-model="uiState.MissingValues.activated">
                     <div class="slider round"></div>
                 </label>
-                <div>{{ TEST_NAMES.MissingValues }}</div>
+                <div>{{ uiState.MissingValues.displayName }}</div>
             </label>
             <help-icon help-text="Randomly inserts missing values in one or several feature columns"></help-icon>
         </div>
         <div class="settings__form"
-            ng-if="settings.tests.MissingValues.$activated">
+            ng-if="uiState.MissingValues.activated">
             <div custom-dropdown
                 id="missing"
                 form="forms.settings"
-                possible-values="settings.tests.MissingValues.availableColumns"
+                possible-values="uiState.MissingValues.availableColumns"
                 items="settings.tests.MissingValues.selected_features"
                 item-name="feature"
                 item-image="featureToTypeIcon"
@@ -196,23 +196,23 @@
             </div>
         </div>
     </div>
-    <div ng-if="settings.tests.Scaling" class="webapp-subsection">
+    <div ng-if="uiState.Scaling.available" class="webapp-subsection">
         <div class="flex small-title text-sb settings-subsection__header">
-            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !settings.tests.Scaling.$activated}">
+            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !uiState.Scaling.activated}">
                 <label class="switch">
-                    <input type="checkbox" ng-model="settings.tests.Scaling.$activated">
+                    <input type="checkbox" ng-model="uiState.Scaling.activated">
                     <div class="slider round"></div>
                 </label>
-                <div>{{ TEST_NAMES.Scaling }}</div>
+                <div>{{ uiState.Scaling.displayName }}</div>
             </label>
             <help-icon help-text="Multiplies one or several numerical features by a specified coefficient"></help-icon>
         </div>
         <div class="settings__form"
-            ng-if="settings.tests.Scaling.$activated">
+            ng-if="uiState.Scaling.activated">
             <div custom-dropdown
                 id="scaling"
                 form="forms.settings"
-                possible-values="settings.tests.Scaling.availableColumns"
+                possible-values="uiState.Scaling.availableColumns"
                 items="settings.tests.Scaling.selected_features"
                 item-name="feature"
                 item-image="featureToTypeIcon"
