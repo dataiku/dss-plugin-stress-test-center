@@ -10,58 +10,50 @@ const versionId = webAppConfig['versionId'];
             return string.toLowerCase();
         }
 
-        function metrics(metric, isRegression) {
-            const shortName = MetricNames.shortName(metric);
-            const longName = MetricNames.longName(metric);
-
-            const perfVarDesc = ` is the difference in the model's ` +
-                `${toLowerCaseIfNotAcronym(longName)} between the altered dataset and the ` +
-                "unaltered one.";
-
-            const resilienceDescClassif = " is the ratio of rows where the prediction is not " +
-                "altered after the corruption.";
-
-            const resilienceDescReg = " is the ratio of rows where the corruption does not " +
-                "increase the prediction error.";
-
-            const perfMetrics = [
-                {
-                    name: "perf_before",
-                    displayName: `${shortName} before`,
-                    contextual: true
-                },
-                {
-                    name: "perf_after",
-                    displayName: `${shortName} after`,
-                    contextual: true
-                },
-                {
-                    name: "perf_var",
-                    displayName: `${shortName} variation`,
-                    longName: `${longName} variation`,
-                    description: perfVarDesc
-                },
-                {
-                    name: "corruption_resilience",
-                    displayName: "Corruption resilience",
-                    description: isRegression ? resilienceDescReg : resilienceDescClassif,
-                    excludedStressTestTypes: ["TARGET_SHIFT", "SUBPOPULATION_SHIFT"]
-                },
-                {
-                    name: "worst_subpop_accuracy",
-                    displayName: "Worst subpopulation accuracy",
-                    description: " is the worst-case accuracy across all the subpopulations of a categorical feature.",
-                    excludedStressTestTypes: ["TARGET_SHIFT", "FEATURE_PERTURBATION"]
+        function perfMetricDescription(perfMetric, baseMetric, isRegression) {
+            const longName = baseMetric && toLowerCaseIfNotAcronym(MetricNames.longName(baseMetric));
+            switch(perfMetric) {
+            case "perf_var":
+                return ` is the difference in the model's ${longName} between the altered ` +
+                    "dataset and the unaltered one.";
+            case "corruption_resilience":
+                if (isRegression) {
+                    return " is the ratio of rows where the corruption does not increase " +
+                        "the prediction error.";
                 }
-            ];
+                return " is the ratio of rows where the prediction is not altered after " +
+                    "the corruption.";
+            case "worst_subpop_perf":
+                return ` is the worst-case ${longName} across all the modalities of a ` +
+                    "categorical feature.";
+            default:
+                return null;
+            }
+        }
 
-            return function(testType) {
-                return perfMetrics.filter(metric => !(metric.excludedStressTestTypes || []).includes(testType));
-            };
-        };
+        function perfMetricName(perfMetric, baseMetric, longer) {
+            if (perfMetric === "corruption_resilience") return "Corruption resilience";
+            const name = longer ? MetricNames.longName(baseMetric) : MetricNames.shortName(baseMetric);
+            switch(perfMetric) {
+                case "perf_before":
+                return `${name} before`;
+            case "perf_after":
+                return `${name} after`;
+            case "perf_var":
+                return `${name} variation`;
+            case "worst_subpop_perf":
+                return `Worst subpopulation ${toLowerCaseIfNotAcronym(name)}`;
+            default:
+                return null;
+            }
+        }
 
         return {
-            metrics,
+            perfMetric: {
+                name: perfMetricName,
+                description: perfMetricDescription,
+                isContextual: (perfMetric) => ["perf_before", "perf_after"].includes(perfMetric)
+            },
             TYPES: {
                 FEATURE_PERTURBATION: {
                     displayName: "Feature corruptions",
@@ -174,6 +166,7 @@ const versionId = webAppConfig['versionId'];
         $scope.createModal = ModalService.create($scope.modal);
 
         $scope.CORRUPTION_TYPES = CorruptionUtils.TYPES;
+        $scope.perfMetric = CorruptionUtils.perfMetric;
         $scope.userFriendlyMetricName = MetricNames.longName
         const testContraints = CorruptionUtils.TEST_CONSTRAINTS;
 
@@ -267,10 +260,6 @@ const versionId = webAppConfig['versionId'];
                     requestParams.tests[testName].selected_features = Array.from(testParams.selected_features);
                 }
             });
-
-            $scope.perfMetrics = CorruptionUtils.metrics(
-                requestParams.perfMetric,  $scope.modelInfo.predType === 'REGRESSION'
-            );
 
             $scope.loading.results = true;
             $http.post(getWebAppBackendUrl("stress-tests-config"), requestParams).then(function() {

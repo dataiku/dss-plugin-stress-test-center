@@ -44,37 +44,51 @@
                 <div class="small-title text-sb">
                     Metrics
                 </div>
-                <p class="text-lighter" ng-repeat="metric in perfMetrics(stressTestType)" ng-if="metric.description">
-                    <span class="text-sb">{{metric.longName || metric.displayName}}</span>{{ metric.description }}
+                <p class="text-lighter"
+                   ng-repeat="metric in results[stressTestType].per_test[0].metrics"
+                   ng-if="!perfMetric.isContextual(metric.name)">
+                    <span class="text-sb">
+                        {{ perfMetric.name(metric.name, metric.base_metric, true) }}
+                    </span>
+                    {{ perfMetric.description(metric.name, metric.base_metric, modelInfo.predType === 'REGRESSION') }}
                 </p>
             </div>
             <table class="table-metric">
                 <thead>
                     <tr>
                         <th scope="col" class="fake-cell"></th>
-                        <th scope="col" ng-repeat="metric in perfMetrics(stressTestType)"
-                            ng-class="{'top-cell--blue': $even, 'top-cell--orange': $odd, 'text-regular': metric.contextual}"
+                        <th scope="col" ng-repeat="metric in results[stressTestType].per_test[0].metrics"
+                            ng-class="{'top-cell--blue': $even, 'top-cell--orange': $odd, 'text-regular': perfMetric.isContextual(metric.name)}"
                             class="cell small-title">
-                            {{ metric.displayName }}
+                            {{ perfMetric.name(metric.name, metric.base_metric) }}
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="(testName, metrics) in results[stressTestType].metrics">
+                    <tr ng-repeat="test_results in results[stressTestType].per_test">
                         <td class="cell elem--with-tooltip">
-                            {{ uiState[testName].displayName }}
-                            <i class="icon-warning-sign icon--hoverable" ng-show="metrics.not_relevant_explanation"
-                               ng-mouseleave="showNotRelevantWarning[testName] = !showNotRelevantWarning[testName]"
-                               ng-mouseover="showNotRelevantWarning[testName] = !showNotRelevantWarning[testName]">
-                                <div class="details__tooltip" ng-show="showNotRelevantWarning[testName]">
+                            {{ uiState[test_results.name].displayName }}
+                            <i class="icon-warning-sign icon--hoverable"
+                               ng-show="test_results.not_relevant_explanation"
+                               ng-mouseleave="showNotRelevantWarning[test_results.name] = !showNotRelevantWarning[test_results.name]"
+                               ng-mouseover="showNotRelevantWarning[test_results.name] = !showNotRelevantWarning[test_results.name]">
+                                <div class="details__tooltip" ng-show="showNotRelevantWarning[test_results.name]">
                                     <div>
-                                        Not relevant test: {{ metrics.not_relevant_explanation }}
+                                        Not relevant test: {{ test_results.not_relevant_explanation }}
                                     </div>
                                 </div>
                             </i>
                         </td>
-                        <td class="cell" ng-class="{'text-sb': !metric.contextual}" ng-repeat="metric in perfMetrics(stressTestType)">
-                            {{ metrics[metric.name] | toFixedIfNeeded: 3 }}
+                        <td class="cell elem--with-tooltip" ng-class="{'text-sb': metric.description}" ng-repeat="metric in test_results.metrics">
+                            {{ metric.value | toFixedIfNeeded: 3 }}
+                            <i class="icon-warning-sign icon--hoverable"
+                               ng-show="metric.warning"
+                               ng-mouseleave="showMetricWarning[metric.name] = !showMetricWarning[metric.name]"
+                               ng-mouseover="showMetricWarning[metric.name] = !showMetricWarning[metric.name]">
+                                <div class="details__tooltip" ng-show="showMetricWarning[metric.name]">
+                                    <div>{{ metric.warning }}</div>
+                                </div>
+                            </i>
                         </td>
                     </tr>
                 </tbody>
