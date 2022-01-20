@@ -4,7 +4,7 @@
     </label>
     <div class="custom-dropdown" ng-click="toggleDropdown()">
         <div class="flex custom-dropdown__title">
-            {{ getPlaceholder() }}
+            <div class="ellipsed-text">{{ getPlaceholder() }}</div>
             <i class="icon-caret-down"></i>
         </div>
         <div class="custom-dropdown__body" ng-if="isOpen">

@@ -355,11 +355,11 @@ transform: translate(-125%, -50%);
 }
 
 .key-value-labels__key, .key-value-element__key {
-    flex: 1 0 auto;
+    width: calc(100% - 125px);
 }
 
 .key-value-labels__value, .key-value-element__value {
-    flex: 0 1 75px;
+    flex: 0 0 75px;
 }
 
 .key-value-list {
