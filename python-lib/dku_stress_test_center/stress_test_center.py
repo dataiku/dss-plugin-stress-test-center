@@ -199,7 +199,7 @@ class StressTestGenerator(object):
                 )
             except:
                 worst_subpop_perf_dict["warning"] = self._metric.name + " is ill-defined for " +\
-                    " some modalities. Fell back to using accuracy."
+                    "some modalities. Fell back to using accuracy."
                 metric = Metric(Metric.ACCURACY)
                 worst_group_perf = worst_group_performance(
                     metric, test.df_with_pred[test.population], perturbed_y_true,
