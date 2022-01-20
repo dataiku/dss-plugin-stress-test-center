@@ -1,6 +1,6 @@
 import dataiku
 from dataiku.customrecipe import get_input_names_for_role, get_output_names_for_role, get_recipe_config
-from dku_stress_test_center.stress_test_center import FeaturePerturbationTest, SubpopulationShiftTest
+from dku_stress_test_center.stress_test_center import FeaturePerturbationTest
 
 recipe_config = get_recipe_config()
 test_name = recipe_config.pop("stress_test")

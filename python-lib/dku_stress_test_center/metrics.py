@@ -71,12 +71,15 @@ class Metric(object):
         return perf_metric(y_true, y_pred, probas)
 
 
-def worst_group_performance(metric: Metric, subpopulation: np.array, y_true: np.array, y_pred: np.array, probas: np.array):
+def worst_group_performance(metric: Metric, subpopulation: np.array, y_true: np.array,
+                            y_pred: np.array, probas: np.array):
     performances = []
     subpopulation_values = np.unique(subpopulation)
     for subpop in subpopulation_values:
         subpop_mask = subpopulation == subpop
-        performance = metric.compute(y_true[subpop_mask], y_pred[subpop_mask], probas[subpop_mask])
+        performance = metric.compute(
+            y_true[subpop_mask], y_pred[subpop_mask], probas[subpop_mask]
+        )
         performances.append(performance)
     return min(performances) if metric.is_greater_better() else max(performances)
 
