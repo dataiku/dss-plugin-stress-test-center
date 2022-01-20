@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
-import numpy as np
 import pandas as pd
+import warnings
 from collections import defaultdict
+from sklearn.exceptions import UndefinedMetricWarning
+
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
 from dku_stress_test_center.metrics import Metric, worst_group_performance,\
     corruption_resilience_classification, corruption_resilience_regression
 
-from drift_dac.perturbation_shared_utils import Shift, PerturbationConstants
+from drift_dac.perturbation_shared_utils import PerturbationConstants
 from drift_dac.covariate_shift import MissingValues, Scaling
+
+warnings.filterwarnings("error", category=UndefinedMetricWarning)
 
 class StressTest(object):
     def __init__(self, test_name: str, params: dict):
@@ -194,8 +198,8 @@ class StressTestGenerator(object):
                     perturbed_y_pred, perturbed_probas
                 )
             except:
-                worst_subpop_perf_dict["warning"] = "Failed to compute " + self._metric.name +\
-                    " for every modality. Fell back to using accuracy."
+                worst_subpop_perf_dict["warning"] = self._metric.name + " is ill-defined for " +\
+                    " some modalities. Fell back to using accuracy."
                 metric = Metric(Metric.ACCURACY)
                 worst_group_perf = worst_group_performance(
                     metric, test.df_with_pred[test.population], perturbed_y_true,
