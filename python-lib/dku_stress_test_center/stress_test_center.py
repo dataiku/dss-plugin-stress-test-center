@@ -145,7 +145,8 @@ class StressTestGenerator(object):
 
         clean_df_with_pred = self._clean_df.loc[test.df_with_pred.index, :]
         clean_y_true, clean_y_pred, clean_probas = self._get_col_for_metrics(clean_df_with_pred)
-        perf_before = self._metric.compute(clean_y_true, clean_y_pred, clean_probas)
+        sample_weight = self.model_accessor.get_sample_weights(clean_df_with_pred)
+        perf_before = self._metric.compute(clean_y_true, clean_y_pred, clean_probas, sample_weight)
         per_test_metrics["metrics"] = [{
             "name": "perf_before",
             "value": perf_before,
@@ -154,7 +155,7 @@ class StressTestGenerator(object):
 
         if test.relevant:
             perturbed_y_true, perturbed_y_pred, perturbed_probas = self._get_col_for_metrics(test.df_with_pred)
-            perf_after = self._metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
+            perf_after = self._metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas, sample_weight)
         else:
             # Altered and unaltered datasets are the same, including the prediction columns.
             # By definition, the performance is the same before and after the stress test.
@@ -195,7 +196,7 @@ class StressTestGenerator(object):
                 metric = self._metric
                 worst_group_perf = worst_group_performance(
                     metric, test.df_with_pred[test.population], perturbed_y_true,
-                    perturbed_y_pred, perturbed_probas
+                    perturbed_y_pred, perturbed_probas, sample_weight
                 )
             except:
                 worst_subpop_perf_dict["warning"] = self._metric.name + " is ill-defined for " +\
@@ -203,7 +204,7 @@ class StressTestGenerator(object):
                 metric = Metric(Metric.ACCURACY)
                 worst_group_perf = worst_group_performance(
                     metric, test.df_with_pred[test.population], perturbed_y_true,
-                    perturbed_y_pred, perturbed_probas
+                    perturbed_y_pred, perturbed_probas, sample_weight
                 )
             worst_subpop_perf_dict["base_metric"] = metric.name
             worst_subpop_perf_dict["value"] = worst_group_perf
@@ -211,15 +212,12 @@ class StressTestGenerator(object):
 
         return per_test_metrics
 
-    def predict_clean_df(self, df: pd.DataFrame):
-        self._clean_df = self.model_accessor.predict_and_concatenate(df)
-
     def build_results(self):
         results = {}
 
         df = self.model_accessor.get_original_test_df(sample_fraction=self._sampling_proportion,
                                                       random_state=self._random_state)
-        self.predict_clean_df(df)
+        self._clean_df = self.model_accessor.predict_and_concatenate(df)
 
         for test_type, tests in self._tests.items():
             results[test_type] = {"per_test": []}

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import numpy as np
+import pandas as pd
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
 from dku_stress_test_center.metrics import Metric
 
@@ -66,3 +67,9 @@ class ModelAccessor(object):
                 return Metric.R2
             return Metric.ROC_AUC
         return initial_evaluation_metric
+
+    def get_sample_weights(self, df: pd.DataFrame):
+        if self.model_handler.with_sample_weights():
+            weight_var = self.model_handler.get_sample_weight_variable()
+            if weight_var is not None:
+                return df[weight_var].values
