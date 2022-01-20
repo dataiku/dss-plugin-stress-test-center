@@ -6,6 +6,7 @@ from collections import Counter
 
 __all__ = ['Rebalance']
 
+# This class is used both for rebalancing the distribution of target classes and feature categories
 class Rebalance(Shift):
     """ Sample data to match a given distribution of classes.
     Args:
@@ -19,9 +20,9 @@ class Rebalance(Shift):
     def __init__(self, priors):
         super(Rebalance, self).__init__()
         if min(priors.values()) < 0:
-            raise ValueError("Class frequencies cannot be negative")
+            raise ValueError("Frequencies cannot be negative")
         if sum(priors.values()) > 1:
-            raise ValueError("The sum of the desired class frequencies exceeds 1")
+            raise ValueError("The sum of the desired frequencies exceeds 1")
         self.priors = priors
         self.name = 'rebalance_shift'
         for target_class, proba in priors.items():
@@ -47,7 +48,7 @@ def rebalance_shift(x, y, priors):
     # Check current target distribution has all the classes in desired distribution
     if positive_priors.keys() - actual_class_counts.keys():
         raise ValueError(
-            "One of the classes to resample is absent from the actual target distribution"
+            "One of the modalities to resample is absent from the actual distribution"
         )
 
     # If prior distribution is incomplete (sum < 1), we redistribute onto the unmapped classes
@@ -60,7 +61,7 @@ def rebalance_shift(x, y, priors):
         # Redistribution can only be done if current distribution has some unmapped classes left
         unmapped_classes = actual_class_counts.keys() - priors.keys()
         if not unmapped_classes:
-            raise ValueError("The desired prior distribution is incomplete")
+            raise ValueError("The desired distribution is incomplete")
 
         nr_samples_from_unmapped_classes = sum(actual_class_counts[target_class]
                                             for target_class in unmapped_classes)
