@@ -61,7 +61,7 @@ def set_stress_tests_config():
 def compute():
     try:
         # Compute the performance drop metrics
-        results = stressor.build_stress_metrics()
+        results = stressor.build_results()
  
         # Compute the critical samples
         if DkuStressTestCenterConstants.FEATURE_PERTURBATION in results:

@@ -26,7 +26,7 @@ class Metric(object):
     CUSTOM="CUSTOM"
     GREATER_IS_BETTER={ACCURACY, PRECISION, RECALL, F1, COST_MATRIX, ROC_AUC, CUMULATIVE_LIFT, EVS, R2}
 
-    def __init__(self, config: dict, name: str, pred_type: str):
+    def __init__(self, name:str, config: dict=None, pred_type: str=None):
         self.config = config
         self.name = name
         self.pred_type = pred_type
@@ -71,16 +71,18 @@ class Metric(object):
         return perf_metric(y_true, y_pred, probas)
 
 
-def worst_group_accuracy(subpopulation: np.array, y_true: np.array, y_pred: np.array, sample_weight: np.array):
+def worst_group_performance(metric: Metric, subpopulation: np.array, y_true: np.array,
+                            y_pred: np.array, probas: np.array, sample_weight: np.array):
     performances = []
     subpopulation_values = np.unique(subpopulation)
     for subpop in subpopulation_values:
         subpop_mask = subpopulation == subpop
-        performance = accuracy_score(
-            y_true[subpop_mask], y_pred[subpop_mask], sample_weight=sample_weight[subpop_mask]
+        performance = metric.compute(
+            y_true[subpop_mask], y_pred[subpop_mask], probas[subpop_mask],
+            sample_weight[subpop_mask]
         )
         performances.append(performance)
-    return min(performances)
+    return min(performances) if metric.is_greater_better() else max(performances)
 
 
 def corruption_resilience_classification(clean_y_pred: np.array, perturbed_y_pred: np.array):

@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
-import numpy as np
 import pandas as pd
+import warnings
 from collections import defaultdict
+from sklearn.exceptions import UndefinedMetricWarning
+
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
-from dku_stress_test_center.metrics import Metric, worst_group_accuracy,\
+from dku_stress_test_center.metrics import Metric, worst_group_performance,\
     corruption_resilience_classification, corruption_resilience_regression
 
-from drift_dac.perturbation_shared_utils import Shift, PerturbationConstants
+from drift_dac.perturbation_shared_utils import PerturbationConstants
 from drift_dac.covariate_shift import MissingValues, Scaling
 
+warnings.filterwarnings("error", category=UndefinedMetricWarning)
+
 class StressTest(object):
-    def __init__(self, test_name: str, test_config: dict):
-        self.shift = DkuStressTestCenterConstants.TESTS[test_name](**test_config["params"])
+    def __init__(self, test_name: str, params: dict):
+        self.shift = DkuStressTestCenterConstants.TESTS[test_name](params)
         self.name = test_name
         self.df_with_pred = None
         self.not_relevant_explanation = None
@@ -30,9 +34,9 @@ class FeaturePerturbationTest(StressTest):
     TEST_TYPE = DkuStressTestCenterConstants.FEATURE_PERTURBATION
     TESTS = {"MissingValues", "Scaling"}
 
-    def __init__(self, test_name: str, test_config: dict):
-        super(FeaturePerturbationTest, self).__init__(test_name, test_config)
-        self.features = test_config["selected_features"]
+    def __init__(self, test_name: str, params: dict, selected_features: list):
+        super(FeaturePerturbationTest, self).__init__(test_name, params)
+        self.features = selected_features
 
     def check_relevance(self, preprocessing: dict):
         if type(self.shift) is Scaling:
@@ -70,9 +74,9 @@ class SubpopulationShiftTest(StressTest):
     TEST_TYPE = DkuStressTestCenterConstants.SUBPOPULATION_SHIFT
     TESTS = {"RebalanceFeature"}
 
-    def __init__(self, test_name: str, test_config: dict):
-        super(SubpopulationShiftTest, self).__init__(test_name, test_config)
-        self.population = test_config["population"]
+    def __init__(self, test_name: str, params: dict, population: str):
+        super(SubpopulationShiftTest, self).__init__(test_name, params)
+        self.population = population
 
     def perturb_df(self, df: pd.DataFrame):
         df = df.copy()
@@ -103,24 +107,24 @@ class StressTestGenerator(object):
 
     def generate_test(self, test_name: str, test_config: dict):
         if test_name in FeaturePerturbationTest.TESTS:
-            return FeaturePerturbationTest(test_name, test_config)
+            return FeaturePerturbationTest(test_name, **test_config)
         if test_name in TargetShiftTest.TESTS:
             test_config["population"] = self.model_accessor.get_target_variable()
-            return TargetShiftTest(test_name, test_config)
+            return TargetShiftTest(test_name, **test_config)
         if test_name in SubpopulationShiftTest.TESTS:
-            return SubpopulationShiftTest(test_name, test_config)
+            return SubpopulationShiftTest(test_name, **test_config)
         raise ValueError("Unknown stress test %s" % test_name)
 
     def set_config(self, config: dict):
         self._sampling_proportion = config["samples"]
         self._random_state = config["randomSeed"]
-        self._metric = Metric(self.model_accessor.metrics, config["perfMetric"],
+        self._metric = Metric(config["perfMetric"], self.model_accessor.metrics,
                               self.model_accessor.get_prediction_type())
 
         self._tests = defaultdict(list)
-        tests_config = config["tests"]
+        tests = config["tests"]
         feature_preprocessing = self.model_accessor.get_per_feature()
-        for test_name, test_config in tests_config.items():
+        for test_name, test_config in tests.items():
             test = self.generate_test(test_name, test_config)
             test.check_relevance(feature_preprocessing)
             self._tests[test.TEST_TYPE].append(test)
@@ -135,15 +139,20 @@ class StressTestGenerator(object):
         return y_true, y_pred, probas
 
     def compute_test_metrics(self, test: StressTest):
-        clean_df_with_pred = self._clean_df.loc[test.df_with_pred.index, :]
-        sample_weight = self.model_accessor.get_sample_weights(clean_df_with_pred)
-
-        clean_y_true, clean_y_pred, clean_probas = self._get_col_for_metrics(clean_df_with_pred)
-        perf_before = self._metric.compute(clean_y_true, clean_y_pred, clean_probas, sample_weight)
-
-        common_metrics = {
-            "perf_before": perf_before
+        per_test_metrics = {
+            "name": test.name
         }
+
+        clean_df_with_pred = self._clean_df.loc[test.df_with_pred.index, :]
+        clean_y_true, clean_y_pred, clean_probas = self._get_col_for_metrics(clean_df_with_pred)
+        sample_weight = self.model_accessor.get_sample_weights(clean_df_with_pred)
+        perf_before = self._metric.compute(clean_y_true, clean_y_pred, clean_probas, sample_weight)
+        per_test_metrics["metrics"] = [{
+            "name": "perf_before",
+            "value": perf_before,
+            "base_metric": self._metric.name
+        }]
+
         if test.relevant:
             perturbed_y_true, perturbed_y_pred, perturbed_probas = self._get_col_for_metrics(test.df_with_pred)
             perf_after = self._metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas, sample_weight)
@@ -151,13 +160,21 @@ class StressTestGenerator(object):
             # Altered and unaltered datasets are the same, including the prediction columns.
             # By definition, the performance is the same before and after the stress test.
             perf_after = perf_before
-            common_metrics["not_relevant_explanation"] = test.not_relevant_explanation
-        common_metrics.update({
-            "perf_after": perf_after,
-            "perf_var": (perf_before - perf_after) * (-1 if self._metric.is_greater_better() else 1)
-        })
+            per_test_metrics["not_relevant_explanation"] = test.not_relevant_explanation
 
-        extra_metrics = {}
+        per_test_metrics["metrics"] += [
+            {
+                "name": "perf_after",
+                "value": perf_after,
+                "base_metric": self._metric.name
+            },
+            {
+                "name": "perf_var",
+                "value": (perf_before - perf_after) * (-1 if self._metric.is_greater_better() else 1),
+                "base_metric": self._metric.name
+            }
+        ]
+
         if test.TEST_TYPE == DkuStressTestCenterConstants.FEATURE_PERTURBATION:
             if not test.relevant:
                 # Altered and unaltered datasets are the same, including the prediction columns.
@@ -171,34 +188,45 @@ class StressTestGenerator(object):
                 corruption_resilience = corruption_resilience_classification(
                     clean_y_pred, perturbed_y_pred
                 )
-            extra_metrics["corruption_resilience"] = corruption_resilience
+            per_test_metrics["metrics"].append({"name": "corruption_resilience", "value": corruption_resilience})
 
         elif test.TEST_TYPE == DkuStressTestCenterConstants.SUBPOPULATION_SHIFT:
-            extra_metrics["worst_subpop_accuracy"] = worst_group_accuracy(
-                test.df_with_pred[test.population], perturbed_y_true, perturbed_y_pred, sample_weight
-            )
+            worst_subpop_perf_dict = {"name": "worst_subpop_perf"}
+            try:
+                metric = self._metric
+                worst_group_perf = worst_group_performance(
+                    metric, test.df_with_pred[test.population], perturbed_y_true,
+                    perturbed_y_pred, perturbed_probas, sample_weight
+                )
+            except:
+                worst_subpop_perf_dict["warning"] = self._metric.name + " is ill-defined for " +\
+                    "some modalities. Fell back to using accuracy."
+                metric = Metric(Metric.ACCURACY)
+                worst_group_perf = worst_group_performance(
+                    metric, test.df_with_pred[test.population], perturbed_y_true,
+                    perturbed_y_pred, perturbed_probas, sample_weight
+                )
+            worst_subpop_perf_dict["base_metric"] = metric.name
+            worst_subpop_perf_dict["value"] = worst_group_perf
+            per_test_metrics["metrics"].append(worst_subpop_perf_dict)
 
-        return {
-            test.name: {
-                **common_metrics,
-                **extra_metrics
-            }
-        }
+        return per_test_metrics
 
-    def build_stress_metrics(self):
-        metrics = defaultdict(lambda: {"metrics": {}})
+    def build_results(self):
+        results = {}
 
         df = self.model_accessor.get_original_test_df(sample_fraction=self._sampling_proportion,
                                                       random_state=self._random_state)
         self._clean_df = self.model_accessor.predict_and_concatenate(df)
 
         for test_type, tests in self._tests.items():
+            results[test_type] = {"per_test": []}
             for test in tests:
                 perturbed_df = test.perturb_df(df)
                 test.df_with_pred = self.model_accessor.predict_and_concatenate(perturbed_df)
-                metrics[test_type]["metrics"].update(self.compute_test_metrics(test))
+                results[test_type]["per_test"].append(self.compute_test_metrics(test))
 
-        return metrics
+        return results
 
     def _get_true_class_proba_columns(self, test_type: str):
         target = self.model_accessor.get_target_variable()

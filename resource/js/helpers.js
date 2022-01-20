@@ -209,7 +209,7 @@ app.directive("keyValueList", function($timeout) {
             };
 
             scope.canAddListItem = function() {
-                if (!scope.keyOptions) return;
+                if (!scope.keyOptions || !scope.keys) return;
                 return scope.keys.length < scope.keyOptions.length - 1;
             };
 
