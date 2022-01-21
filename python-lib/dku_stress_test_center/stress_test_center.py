@@ -138,12 +138,11 @@ class StressTestGenerator(object):
         probas = df.filter(regex=r'^proba_', axis=1).values
         return y_true, y_pred, probas
 
-    def compute_test_metrics(self, test: StressTest):
+    def compute_test_metrics(self, test: StressTest, clean_df_with_pred: pd.DataFrame):
         per_test_metrics = {
             "name": test.name
         }
 
-        clean_df_with_pred = self._clean_df.loc[test.df_with_pred.index, :]
         clean_y_true, clean_y_pred, clean_probas = self._get_col_for_metrics(clean_df_with_pred)
         perf_before = self._metric.compute(clean_y_true, clean_y_pred, clean_probas)
         per_test_metrics["metrics"] = [{
@@ -211,22 +210,22 @@ class StressTestGenerator(object):
 
         return per_test_metrics
 
-    def predict_clean_df(self, df: pd.DataFrame):
-        self._clean_df = self.model_accessor.predict_and_concatenate(df)
-
     def build_results(self):
         results = {}
 
         df = self.model_accessor.get_original_test_df(sample_fraction=self._sampling_proportion,
                                                       random_state=self._random_state)
-        self.predict_clean_df(df)
+        self._clean_df = self.model_accessor.predict_and_concatenate(df)
 
         for test_type, tests in self._tests.items():
             results[test_type] = {"per_test": []}
             for test in tests:
                 perturbed_df = test.perturb_df(df)
+                clean_df_with_pred = self._clean_df
                 test.df_with_pred = self.model_accessor.predict_and_concatenate(perturbed_df)
-                results[test_type]["per_test"].append(self.compute_test_metrics(test))
+                if test.df_with_pred.shape[0] < clean_df_with_pred.shape[0]:
+                    clean_df_with_pred = clean_df_with_pred.loc[test.df_with_pred.index, :]
+                results[test_type]["per_test"].append(self.compute_test_metrics(test, clean_df_with_pred))
 
         return results
 
