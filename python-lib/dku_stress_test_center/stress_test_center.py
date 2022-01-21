@@ -216,13 +216,23 @@ class StressTestGenerator(object):
         df = self.model_accessor.get_original_test_df(sample_fraction=self._sampling_proportion,
                                                       random_state=self._random_state)
         self._clean_df = self.model_accessor.predict_and_concatenate(df)
+        if self._clean_df.shape[0] == 0:
+            raise ValueError(
+                "The test dataset is empty"
+            )
 
         for test_type, tests in self._tests.items():
             results[test_type] = {"per_test": []}
             for test in tests:
                 perturbed_df = test.perturb_df(df)
-                clean_df_with_pred = self._clean_df
                 test.df_with_pred = self.model_accessor.predict_and_concatenate(perturbed_df)
+                if test.df_with_pred.shape[0] == 0:
+                    raise ValueError(
+                        "The test dataset is empty after applying the stress test " +\
+                        DkuStressTestCenterConstants.FRIENDLY_NAMES[test.name]
+                    )
+
+                clean_df_with_pred = self._clean_df
                 if test.df_with_pred.shape[0] < clean_df_with_pred.shape[0]:
                     clean_df_with_pred = clean_df_with_pred.loc[test.df_with_pred.index, :]
                 results[test_type]["per_test"].append(self.compute_test_metrics(test, clean_df_with_pred))

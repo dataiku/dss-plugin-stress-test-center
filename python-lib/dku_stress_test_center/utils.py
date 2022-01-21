@@ -20,6 +20,13 @@ class DkuStressTestCenterConstants(object):
         "RebalanceFeature": lambda params: Rebalance(priors=params["priors"])
     }
 
+    FRIENDLY_NAMES = {
+        "MissingValues": "Insert missing values",
+        "Scaling": "Multiply by a coefficient",
+        "RebalanceTarget": "Shift target distribution",
+        "RebalanceFeature": "Shift feature distribution"
+    }
+
     NR_CRITICAL_SAMPLES = 5
 
     PREDICTION = "prediction"

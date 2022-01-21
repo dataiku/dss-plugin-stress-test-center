@@ -1,6 +1,10 @@
 import pytest
 import pandas as pd
 import numpy as np
+import sys
+sys.path.append("/Users/aguillemot/devenv/dip/src/main/python")
+sys.path.append("/Users/aguillemot/devenv/dataiku-api-client-python")
+sys.path.append("/Users/aguillemot/devenv/dss-plugin-stress-test-center/python-lib")
 from dku_stress_test_center.stress_test_center import StressTestGenerator, FeaturePerturbationTest, SubpopulationShiftTest
 
 @pytest.fixture
@@ -56,7 +60,7 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
     generator = stress_test_generator()
     test = stress_test()
     test.TEST_TYPE = "TARGET_SHIFT"
-    result = generator.compute_test_metrics(test)
+    result = generator.compute_test_metrics(test, generator._clean_df.loc[[1,2,5,0,3], :])
 
     clean_y_true, clean_y_pred, clean_probas = generator._metric.compute.call_args_list[0][0]
     corrup_y_true, corrup_y_pred, corrup_probas = generator._metric.compute.call_args_list[1][0]
@@ -109,7 +113,7 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
     test.TEST_TYPE = "FEATURE_PERTURBATION"
     mocker.patch("dku_stress_test_center.stress_test_center.corruption_resilience_regression", return_value=.2)
     mocker.patch("dku_stress_test_center.stress_test_center.corruption_resilience_classification", return_value=.8)
-    result = generator.compute_test_metrics(test)
+    result = generator.compute_test_metrics(test, generator._clean_df.loc[[1,2,5,0,3], :])
 
     clean_y_true, clean_y_pred, clean_probas = generator._metric.compute.call_args_list[0][0]
     corrup_y_true, corrup_y_pred, corrup_probas = generator._metric.compute.call_args_list[1][0]
@@ -158,7 +162,7 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
     test.TEST_TYPE = "SUBPOPULATION_SHIFT"
     test.population = "f3"
     mocker.patch("dku_stress_test_center.stress_test_center.worst_group_performance", return_value=.42)
-    result = generator.compute_test_metrics(test)
+    result = generator.compute_test_metrics(test, generator._clean_df.loc[[1,2,5,0,3], :])
 
     clean_y_true, clean_y_pred, clean_probas = generator._metric.compute.call_args_list[0][0]
     corrup_y_true, corrup_y_pred, corrup_probas = generator._metric.compute.call_args_list[1][0]
