@@ -30,6 +30,7 @@ class StressTest(object):
     def check_relevance(self, preprocessing: dict):
         pass
 
+
 class FeaturePerturbationTest(StressTest):
     TEST_TYPE = DkuStressTestCenterConstants.FEATURE_PERTURBATION
     TESTS = {"MissingValues", "Scaling"}
@@ -139,37 +140,45 @@ class StressTestGenerator(object):
         return y_true, y_pred, probas
 
     def compute_test_metrics(self, test: StressTest, clean_df_with_pred: pd.DataFrame):
-        per_test_metrics = {
-            "name": test.name
-        }
+        per_test_metrics = {"name": test.name, "metrics": []}
 
-        clean_y_true, clean_y_pred, clean_probas = self._get_col_for_metrics(clean_df_with_pred)
-        perf_before = self._metric.compute(clean_y_true, clean_y_pred, clean_probas)
-        per_test_metrics["metrics"] = [{
-            "name": "perf_before",
-            "value": perf_before,
-            "base_metric": self._metric.name
-        }]
+        perf_after_dict = {"name": "perf_after"}
+        perturbed_y_true, perturbed_y_pred, perturbed_probas = self._get_col_for_metrics(test.df_with_pred)
+        try:
+            metric = self._metric
+            perf_after = self._metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
+        except:
+            metric = Metric(Metric.ACCURACY)
+            perf_after_dict["warning"] = self._metric.name + " is ill-defined. "+\
+                "Fell back to using accuracy."
+            perf_after = metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
+        perf_after_dict["base_metric"] = metric.name
+        perf_after_dict["value"] = perf_after
 
         if test.relevant:
-            perturbed_y_true, perturbed_y_pred, perturbed_probas = self._get_col_for_metrics(test.df_with_pred)
-            perf_after = self._metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
+            clean_y_true, clean_y_pred, clean_probas = self._get_col_for_metrics(clean_df_with_pred)
+            try:
+                perf_before = self._metric.compute(clean_y_true, clean_y_pred, clean_probas)
+            except Exception as e:
+                raise Exception("Failed to compute the performance (%s) before for the stress test '%s': %s"
+                    % (self._metric.name, test.name, str(e))) from None
         else:
             # Altered and unaltered datasets are the same, including the prediction columns.
             # By definition, the performance is the same before and after the stress test.
-            perf_after = perf_before
+            perf_before = perf_after
             per_test_metrics["not_relevant_explanation"] = test.not_relevant_explanation
 
         per_test_metrics["metrics"] += [
             {
-                "name": "perf_after",
-                "value": perf_after,
-                "base_metric": self._metric.name
+                "name": "perf_before",
+                "value": perf_before,
+                "base_metric": metric.name
             },
+            perf_after_dict,
             {
                 "name": "perf_var",
                 "value": (perf_before - perf_after) * (-1 if self._metric.is_greater_better() else 1),
-                "base_metric": self._metric.name
+                "base_metric": metric.name
             }
         ]
 
@@ -229,7 +238,7 @@ class StressTestGenerator(object):
                 if test.df_with_pred.shape[0] == 0:
                     raise ValueError(
                         "The test dataset is empty after applying the stress test " +\
-                        DkuStressTestCenterConstants.FRIENDLY_NAMES[test.name]
+                        DkuStressTestCenterConstants.TEST_NAMES[test.name]
                     )
 
                 clean_df_with_pred = self._clean_df
