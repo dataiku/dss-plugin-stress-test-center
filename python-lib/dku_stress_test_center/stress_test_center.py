@@ -30,6 +30,9 @@ class StressTest(object):
     def check_relevance(self, preprocessing: dict):
         pass
 
+    def compute_specific_metrics(self, metric, clean_y_true, clean_y_pred, perturbed_y_true, perturbed_y_pred, perturbed_probas):
+        raise NotImplementedError()
+
 
 class FeaturePerturbationTest(StressTest):
     TEST_TYPE = DkuStressTestCenterConstants.FEATURE_PERTURBATION
@@ -70,6 +73,24 @@ class FeaturePerturbationTest(StressTest):
 
         return df
 
+    def compute_specific_metrics(self, metric, clean_y_true, clean_y_pred, perturbed_y_true, perturbed_y_pred, perturbed_probas):
+        if not self.relevant:
+            # Altered and unaltered datasets are the same, including the prediction columns.
+            # By definition, corruption resilience will hence always be 1.
+            corruption_resilience = 1
+        elif metric.pred_type == DkuStressTestCenterConstants.REGRESSION:
+            corruption_resilience = corruption_resilience_regression(
+                clean_y_pred, perturbed_y_pred, clean_y_true
+            )
+        else:
+            corruption_resilience = corruption_resilience_classification(
+                clean_y_pred, perturbed_y_pred
+            )
+        return [{
+            "value": corruption_resilience,
+            "name": "corruption_resilience"
+        }]
+
 
 class SubpopulationShiftTest(StressTest):
     TEST_TYPE = DkuStressTestCenterConstants.SUBPOPULATION_SHIFT
@@ -90,10 +111,35 @@ class SubpopulationShiftTest(StressTest):
 
         return df
 
+    def compute_specific_metrics(self, metric, clean_y_true, clean_y_pred, perturbed_y_true, perturbed_y_pred, perturbed_probas):
+        worst_subpop_perf_dict = {"name": "worst_subpop_perf"}
+        try:
+            worst_group_perf = worst_group_performance(
+                metric, self.df_with_pred[self.population], perturbed_y_true,
+                perturbed_y_pred, perturbed_probas
+            )
+        except:
+            worst_subpop_perf_dict["warning"] = metric.name + " is ill-defined for " +\
+                "some modalities. Fell back to using accuracy."
+            metric = Metric(Metric.ACCURACY)
+            worst_group_perf = worst_group_performance(
+                metric, self.df_with_pred[self.population], perturbed_y_true,
+                perturbed_y_pred, perturbed_probas
+            )
+        finally:
+            return [{
+                "base_metric": metric.name,
+                "value": worst_group_perf,
+                **worst_subpop_perf_dict
+            }]
+
 
 class TargetShiftTest(SubpopulationShiftTest):
     TEST_TYPE = DkuStressTestCenterConstants.TARGET_SHIFT
     TESTS = {"RebalanceTarget"}
+
+    def compute_specific_metrics(self, metric, clean_y_true, clean_y_pred, perturbed_y_true, perturbed_y_pred, perturbed_probas):
+        return [] 
 
 
 class StressTestGenerator(object):
@@ -140,12 +186,12 @@ class StressTestGenerator(object):
         return y_true, y_pred, probas
 
     def compute_test_metrics(self, test: StressTest, clean_df_with_pred: pd.DataFrame):
-        per_test_metrics = {"name": test.name, "metrics": []}
+        per_test_metrics = {"name": test.name}
 
         perf_after_dict = {"name": "perf_after"}
         perturbed_y_true, perturbed_y_pred, perturbed_probas = self._get_col_for_metrics(test.df_with_pred)
+        metric = self._metric
         try:
-            metric = self._metric
             perf_after = self._metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
         except:
             metric = Metric(Metric.ACCURACY)
@@ -155,8 +201,8 @@ class StressTestGenerator(object):
         perf_after_dict["base_metric"] = metric.name
         perf_after_dict["value"] = perf_after
 
+        clean_y_true, clean_y_pred, clean_probas = self._get_col_for_metrics(clean_df_with_pred)
         if test.relevant:
-            clean_y_true, clean_y_pred, clean_probas = self._get_col_for_metrics(clean_df_with_pred)
             try:
                 perf_before = self._metric.compute(clean_y_true, clean_y_pred, clean_probas)
             except Exception as e:
@@ -168,7 +214,7 @@ class StressTestGenerator(object):
             perf_before = perf_after
             per_test_metrics["not_relevant_explanation"] = test.not_relevant_explanation
 
-        per_test_metrics["metrics"] += [
+        common_metrics = [
             {
                 "name": "perf_before",
                 "value": perf_before,
@@ -177,46 +223,13 @@ class StressTestGenerator(object):
             perf_after_dict,
             {
                 "name": "perf_var",
-                "value": (perf_before - perf_after) * (-1 if self._metric.is_greater_better() else 1),
+                "value": (perf_before - perf_after) * (-1 if metric.is_greater_better() else 1),
                 "base_metric": metric.name
             }
         ]
 
-        if test.TEST_TYPE == DkuStressTestCenterConstants.FEATURE_PERTURBATION:
-            if not test.relevant:
-                # Altered and unaltered datasets are the same, including the prediction columns.
-                # By definition, corruption resilience will hence always be 1.
-                corruption_resilience = 1
-            elif self.model_accessor.get_prediction_type() == DkuStressTestCenterConstants.REGRESSION:
-                corruption_resilience = corruption_resilience_regression(
-                    clean_y_pred, perturbed_y_pred, clean_y_true
-                )
-            else:
-                corruption_resilience = corruption_resilience_classification(
-                    clean_y_pred, perturbed_y_pred
-                )
-            per_test_metrics["metrics"].append({"name": "corruption_resilience", "value": corruption_resilience})
-
-        elif test.TEST_TYPE == DkuStressTestCenterConstants.SUBPOPULATION_SHIFT:
-            worst_subpop_perf_dict = {"name": "worst_subpop_perf"}
-            try:
-                metric = self._metric
-                worst_group_perf = worst_group_performance(
-                    metric, test.df_with_pred[test.population], perturbed_y_true,
-                    perturbed_y_pred, perturbed_probas
-                )
-            except:
-                worst_subpop_perf_dict["warning"] = self._metric.name + " is ill-defined for " +\
-                    "some modalities. Fell back to using accuracy."
-                metric = Metric(Metric.ACCURACY)
-                worst_group_perf = worst_group_performance(
-                    metric, test.df_with_pred[test.population], perturbed_y_true,
-                    perturbed_y_pred, perturbed_probas
-                )
-            worst_subpop_perf_dict["base_metric"] = metric.name
-            worst_subpop_perf_dict["value"] = worst_group_perf
-            per_test_metrics["metrics"].append(worst_subpop_perf_dict)
-
+        extra_metrics = test.compute_specific_metrics(self._metric, clean_y_true, clean_y_pred, perturbed_y_true, perturbed_y_pred, perturbed_probas)
+        per_test_metrics["metrics"] = [*common_metrics, *extra_metrics]
         return per_test_metrics
 
     def build_results(self):
