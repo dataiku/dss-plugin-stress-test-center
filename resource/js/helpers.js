@@ -245,18 +245,18 @@ app.directive("helpIcon", function () {
             helpText: '@',
 
         },
-        template: `<i class="icon-info-sign icon--hoverable" ng-mouseover="showTooltip()" ng-mouseleave="showTooltip()">
+        template: `<i class="icon-info-sign icon--hoverable" ng-mouseover="toggleTooltip(true)" ng-mouseleave="toggleTooltip(false)">
             <div class="help-text__tooltip tooltip--hidden">
                 <i class="icon-info-sign"></i>
                 {{ helpText }}
             </div>
         </i>`,
         link: function(scope, elem) {
-            scope.showTooltip = function() {
+            scope.toggleTooltip = function(show) {
                 const top = elem[0].getBoundingClientRect().top;
                 const tooltip = elem.find(".help-text__tooltip");
                 tooltip.css("top", (top - 8) + "px");
-                tooltip.toggleClass("tooltip--hidden");
+                tooltip.toggleClass("tooltip--hidden", !show);
             };
         }
     }

@@ -15,8 +15,8 @@
                 type="button"
                 ng-class="{ 'dku-btn--disabled': !canRunTests() }"
                 ng-click="runAnalysis()"
-                ng-mouseover="showDisabledTooltip = !showDisabledTooltip"
-                ng-mouseleave="showDisabledTooltip = !showDisabledTooltip">
+                ng-mouseover="showDisabledTooltip = true"
+                ng-mouseleave="showDisabledTooltip = false">
             Run tests
         </button>
         <div class="details__tooltip" ng-show="!canRunTests() && showDisabledTooltip">
@@ -70,8 +70,8 @@
                             {{ uiState[test_results.name].displayName }}
                             <i class="icon-warning-sign icon--hoverable"
                                ng-show="test_results.not_relevant_explanation"
-                               ng-mouseleave="showNotRelevantWarning[test_results.name] = !showNotRelevantWarning[test_results.name]"
-                               ng-mouseover="showNotRelevantWarning[test_results.name] = !showNotRelevantWarning[test_results.name]">
+                               ng-mouseleave="showNotRelevantWarning[test_results.name] = false"
+                               ng-mouseover="showNotRelevantWarning[test_results.name] = true">
                                 <div class="details__tooltip details__tooltip--top" ng-show="showNotRelevantWarning[test_results.name]">
                                     <div>
                                         Not relevant test: {{ test_results.not_relevant_explanation }}
@@ -83,8 +83,8 @@
                             {{ metric.value | toFixedIfNeeded: 3 }}
                             <i class="icon-warning-sign icon--hoverable"
                                ng-show="metric.warning"
-                               ng-mouseleave="showMetricWarning[metric.name] = !showMetricWarning[metric.name]"
-                               ng-mouseover="showMetricWarning[metric.name] = !showMetricWarning[metric.name]">
+                               ng-mouseleave="showMetricWarning[metric.name] = false"
+                               ng-mouseover="showMetricWarning[metric.name] = true">
                                 <div class="details__tooltip details__tooltip--top" ng-show="showMetricWarning[metric.name]">
                                     <div>{{ displayWithuserFriendlyMetricName(metric.warning) }}</div>
                                 </div>
@@ -119,8 +119,8 @@
                                             ± {{ results[stressTestType].critical_samples.uncertainties[$index] | toFixedIfNeeded: 3}}
                                         </span>
                                         <i class="icon-info-sign icon--hoverable"
-                                           ng-mouseleave="showPredList[$index] = !showPredList[$index]"
-                                           ng-mouseover="showPredList[$index] = !showPredList[$index]">
+                                           ng-mouseleave="showPredList[$index] = false"
+                                           ng-mouseover="showPredList[$index] = true">
                                             <div class="details__tooltip" ng-show="showPredList[$index]">
                                                 <div ng-repeat="detail in results[stressTestType].critical_samples.predList[$index] track by $index"
                                                      ng-class="{ 'text-sb': $first }">

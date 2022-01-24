@@ -51,8 +51,8 @@
                         type="submit"
                         ng-class="{ 'dku-btn--disabled': loading.results || !canRunTests() }"
                         ng-click="runAnalysis()"
-                        ng-mouseover="showDisabledTooltip = !showDisabledTooltip"
-                        ng-mouseleave="showDisabledTooltip = !showDisabledTooltip">
+                        ng-mouseover="showDisabledTooltip = true"
+                        ng-mouseleave="showDisabledTooltip = false">
                     Run tests
                 </button>
                 <div class="details__tooltip" ng-show="!canRunTests() && showDisabledTooltip">
