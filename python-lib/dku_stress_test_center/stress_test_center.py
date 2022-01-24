@@ -17,8 +17,13 @@ class StressTest(object):
     def __init__(self, test_name: str, params: dict):
         self.shift = DkuStressTestCenterConstants.TESTS[test_name](params)
         self.name = test_name
+
         self.df_with_pred = None
         self.not_relevant_explanation = None
+        self.y_true = None
+        self.y_pred = None
+        self.probas = None
+        self.sample_weights = None
 
     def perturb_df(self, df: pd.DataFrame):
         raise NotImplementedError()
@@ -30,7 +35,7 @@ class StressTest(object):
     def check_relevance(self, preprocessing: dict):
         pass
 
-    def compute_specific_metrics(self, metric, clean_y_true, clean_y_pred, perturbed_y_true, perturbed_y_pred, perturbed_probas):
+    def compute_specific_metrics(self, metric, clean_y_true, clean_y_pred):
         raise NotImplementedError()
 
 
@@ -73,18 +78,18 @@ class FeaturePerturbationTest(StressTest):
 
         return df
 
-    def compute_specific_metrics(self, metric, clean_y_true, clean_y_pred, perturbed_y_true, perturbed_y_pred, perturbed_probas):
+    def compute_specific_metrics(self, metric, clean_y_true, clean_y_pred):
         if not self.relevant:
             # Altered and unaltered datasets are the same, including the prediction columns.
             # By definition, corruption resilience will hence always be 1.
             corruption_resilience = 1
         elif metric.pred_type == DkuStressTestCenterConstants.REGRESSION:
             corruption_resilience = corruption_resilience_regression(
-                clean_y_pred, perturbed_y_pred, clean_y_true
+                clean_y_pred, self.y_pred, clean_y_true
             )
         else:
             corruption_resilience = corruption_resilience_classification(
-                clean_y_pred, perturbed_y_pred
+                clean_y_pred, self.y_pred
             )
         return [{
             "value": corruption_resilience,
@@ -111,34 +116,33 @@ class SubpopulationShiftTest(StressTest):
 
         return df
 
-    def compute_specific_metrics(self, metric, clean_y_true, clean_y_pred, perturbed_y_true, perturbed_y_pred, perturbed_probas):
+    def compute_specific_metrics(self, metric, clean_y_true, clean_y_pred):
         worst_subpop_perf_dict = {"name": "worst_subpop_perf"}
         try:
             worst_group_perf = worst_group_performance(
-                metric, self.df_with_pred[self.population], perturbed_y_true,
-                perturbed_y_pred, perturbed_probas
+                metric, self.df_with_pred[self.population], self.y_true,
+                self.y_pred, self.probas, self.sample_weights
             )
         except:
             worst_subpop_perf_dict["warning"] = metric.name + " is ill-defined for " +\
                 "some modalities. Fell back to using accuracy."
             metric = Metric(Metric.ACCURACY)
             worst_group_perf = worst_group_performance(
-                metric, self.df_with_pred[self.population], perturbed_y_true,
-                perturbed_y_pred, perturbed_probas
+                metric, self.df_with_pred[self.population], self.y_true,
+                self.y_true, self.probas, self.sample_weights
             )
-        finally:
-            return [{
-                "base_metric": metric.name,
-                "value": worst_group_perf,
-                **worst_subpop_perf_dict
-            }]
+        return [{
+            "base_metric": metric.name,
+            "value": worst_group_perf,
+            **worst_subpop_perf_dict
+        }]
 
 
 class TargetShiftTest(SubpopulationShiftTest):
     TEST_TYPE = DkuStressTestCenterConstants.TARGET_SHIFT
     TESTS = {"RebalanceTarget"}
 
-    def compute_specific_metrics(self, metric, clean_y_true, clean_y_pred, perturbed_y_true, perturbed_y_pred, perturbed_probas):
+    def compute_specific_metrics(self, metric, clean_y_true, clean_y_pred):
         return [] 
 
 
@@ -179,32 +183,36 @@ class StressTestGenerator(object):
     def _get_col_for_metrics(self, df: pd.DataFrame):
         target = self.model_accessor.get_target_variable()
         target_map = self.model_accessor.get_target_map()
+        weight_var = self.model_accessor.get_weight_variable()
 
+        if weight_var is not None:
+            df.dropna(subset=[weight_var], inplace=True)
         y_true = df[target].replace(target_map)
         y_pred = df[DkuStressTestCenterConstants.PREDICTION].replace(target_map)
         probas = df.filter(regex=r'^proba_', axis=1).values
-        return y_true, y_pred, probas
+        sample_weights = df[weight_var] if weight_var else None
+        return y_true, y_pred, probas, sample_weights
 
     def compute_test_metrics(self, test: StressTest, clean_df_with_pred: pd.DataFrame):
         per_test_metrics = {"name": test.name}
 
         perf_after_dict = {"name": "perf_after"}
-        perturbed_y_true, perturbed_y_pred, perturbed_probas = self._get_col_for_metrics(test.df_with_pred)
+        test.y_true, test.y_pred, test.probas, test.sample_weights = self._get_col_for_metrics(test.df_with_pred)
         metric = self._metric
         try:
-            perf_after = self._metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
+            perf_after = self._metric.compute(test.y_true, test.y_pred, test.probas, test.sample_weights)
         except:
             metric = Metric(Metric.ACCURACY)
             perf_after_dict["warning"] = self._metric.name + " is ill-defined. "+\
                 "Fell back to using accuracy."
-            perf_after = metric.compute(perturbed_y_true, perturbed_y_pred, perturbed_probas)
+            perf_after = metric.compute(test.y_true, test.y_pred, test.probas, test.sample_weights)
         perf_after_dict["base_metric"] = metric.name
         perf_after_dict["value"] = perf_after
 
-        clean_y_true, clean_y_pred, clean_probas = self._get_col_for_metrics(clean_df_with_pred)
+        clean_y_true, clean_y_pred, clean_probas, clean_sample_weights = self._get_col_for_metrics(clean_df_with_pred)
         if test.relevant:
             try:
-                perf_before = self._metric.compute(clean_y_true, clean_y_pred, clean_probas)
+                perf_before = self._metric.compute(clean_y_true, clean_y_pred, clean_probas, clean_sample_weights)
             except Exception as e:
                 raise Exception("Failed to compute the performance (%s) before for the stress test '%s': %s"
                     % (self._metric.name, test.name, str(e))) from None
@@ -228,7 +236,7 @@ class StressTestGenerator(object):
             }
         ]
 
-        extra_metrics = test.compute_specific_metrics(self._metric, clean_y_true, clean_y_pred, perturbed_y_true, perturbed_y_pred, perturbed_probas)
+        extra_metrics = test.compute_specific_metrics(self._metric, clean_y_true, clean_y_pred)
         per_test_metrics["metrics"] = [*common_metrics, *extra_metrics]
         return per_test_metrics
 
