@@ -194,7 +194,7 @@ class StressTestGenerator(object):
         sample_weights = df[weight_var] if weight_var else None
         return y_true, y_pred, probas, sample_weights
 
-    def compute_test_metrics(self, test: StressTest, clean_df_with_pred: pd.DataFrame):
+    def compute_test_metrics(self, test: StressTest):
         per_test_metrics = {"name": test.name}
 
         perf_after_dict = {"name": "perf_after"}
@@ -210,12 +210,12 @@ class StressTestGenerator(object):
         perf_after_dict["base_metric"] = metric.name
         perf_after_dict["value"] = perf_after
 
-        clean_y_true, clean_y_pred, clean_probas, clean_sample_weights = self._get_col_for_metrics(clean_df_with_pred)
+        clean_y_true, clean_y_pred, clean_probas, clean_sample_weights = self._get_col_for_metrics(self._clean_df)
         if test.relevant:
             try:
-                perf_before = self._metric.compute(clean_y_true, clean_y_pred, clean_probas, clean_sample_weights)
+                perf_before = metric.compute(clean_y_true, clean_y_pred, clean_probas, clean_sample_weights)
             except Exception as e:
-                raise Exception("Failed to compute the performance (%s) before for the stress test '%s': %s"
+                raise Exception("Failed to compute the performance (%s) on the unaltered dataset."
                     % (self._metric.name, test.name, str(e))) from None
         else:
             # Altered and unaltered datasets are the same, including the prediction columns.
@@ -259,14 +259,11 @@ class StressTestGenerator(object):
                 test.df_with_pred = self.model_accessor.predict_and_concatenate(perturbed_df)
                 if test.df_with_pred.shape[0] == 0:
                     raise ValueError(
-                        "The test dataset is empty after applying the stress test " +\
-                        DkuStressTestCenterConstants.TEST_NAMES[test.name]
+                        "The test dataset is empty after applying the stress test '" +\
+                        DkuStressTestCenterConstants.TEST_NAMES[test.name] + "'"
                     )
 
-                clean_df_with_pred = self._clean_df
-                if test.df_with_pred.shape[0] < clean_df_with_pred.shape[0]:
-                    clean_df_with_pred = clean_df_with_pred.loc[test.df_with_pred.index, :]
-                results[test_type]["per_test"].append(self.compute_test_metrics(test, clean_df_with_pred))
+                results[test_type]["per_test"].append(self.compute_test_metrics(test))
 
         return results
 

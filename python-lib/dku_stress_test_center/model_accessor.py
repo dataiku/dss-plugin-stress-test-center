@@ -52,7 +52,7 @@ class ModelAccessor(object):
         return self.model_handler.get_predictor()
 
     def predict_and_concatenate(self, df):
-        df_with_pred = self.model_handler.predict_and_concatenate(df)
+        df_with_pred = self.model_handler.predict_and_concatenate(df.copy())
         return df_with_pred.dropna(subset=[DkuStressTestCenterConstants.PREDICTION])
 
     @property
