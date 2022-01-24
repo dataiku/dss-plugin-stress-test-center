@@ -77,7 +77,7 @@ def worst_group_performance(metric: Metric, subpopulation: np.array, y_true: np.
     subpopulation_values = np.unique(subpopulation)
     for subpop in subpopulation_values:
         subpop_mask = subpopulation == subpop
-        subpop_weights = sample_weights[subpop_mask] if sample_weights else None
+        subpop_weights =  None if sample_weights is None else sample_weights[subpop_mask]
         performance = metric.compute(
             y_true[subpop_mask], y_pred[subpop_mask], probas[subpop_mask], subpop_weights
         )

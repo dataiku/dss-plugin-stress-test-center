@@ -171,7 +171,7 @@ const versionId = webAppConfig['versionId'];
         $scope.displayWithuserFriendlyMetricName = function(str) {
             if (!str) return;
             const pattern = new RegExp(MetricNames.rawNames.join("|"), "g");
-            return str.replace(pattern, matched =>  MetricNames.longName(matched);
+            return str.replace(pattern, matched =>  MetricNames.longName(matched));
         };
 
         $scope.loading = {};

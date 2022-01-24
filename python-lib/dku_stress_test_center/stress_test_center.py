@@ -118,9 +118,10 @@ class SubpopulationShiftTest(StressTest):
 
     def compute_specific_metrics(self, metric, clean_y_true, clean_y_pred):
         worst_subpop_perf_dict = {"name": "worst_subpop_perf"}
+        subpopulation = self.df_with_pred.loc[self.y_true.index, self.population]
         try:
             worst_group_perf = worst_group_performance(
-                metric, self.df_with_pred[self.population], self.y_true,
+                metric, subpopulation, self.y_true,
                 self.y_pred, self.probas, self.sample_weights
             )
         except:
@@ -128,7 +129,7 @@ class SubpopulationShiftTest(StressTest):
                 "some modalities. Fell back to using accuracy."
             metric = Metric(Metric.ACCURACY)
             worst_group_perf = worst_group_performance(
-                metric, self.df_with_pred[self.population], self.y_true,
+                metric, subpopulation, self.y_true,
                 self.y_true, self.probas, self.sample_weights
             )
         return [{
@@ -186,7 +187,7 @@ class StressTestGenerator(object):
         weight_var = self.model_accessor.get_weight_variable()
 
         if weight_var is not None:
-            df.dropna(subset=[weight_var], inplace=True)
+            df = df.dropna(subset=[weight_var])
         y_true = df[target].replace(target_map)
         y_pred = df[DkuStressTestCenterConstants.PREDICTION].replace(target_map)
         probas = df.filter(regex=r'^proba_', axis=1).values
@@ -321,11 +322,11 @@ class StressTestGenerator(object):
         critical_samples = self.model_accessor.get_original_test_df(
             sample_fraction=self._sampling_proportion,
             random_state=self._random_state
-        ).loc[indexes_to_keep, :]
+        ).loc[indexes_to_keep, :].replace({pd.np.nan: ""})
 
         return {
-            "uncertainties": critical_uncertainties.tolist(),
-            "means": critical_means.tolist(),
-            "samples": critical_samples.to_dict(orient='records'),
-            "predList": columns.loc[indexes_to_keep, :].to_dict(orient='records')
+            "uncertainties": critical_uncertainties,
+            "means": critical_means,
+            "samples": critical_samples,
+            "predList": columns.loc[indexes_to_keep, :]
         }
