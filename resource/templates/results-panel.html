@@ -72,7 +72,7 @@
                                ng-show="test_results.not_relevant_explanation"
                                ng-mouseleave="showNotRelevantWarning[test_results.name] = !showNotRelevantWarning[test_results.name]"
                                ng-mouseover="showNotRelevantWarning[test_results.name] = !showNotRelevantWarning[test_results.name]">
-                                <div class="details__tooltip" ng-show="showNotRelevantWarning[test_results.name]">
+                                <div class="details__tooltip details__tooltip--top" ng-show="showNotRelevantWarning[test_results.name]">
                                     <div>
                                         Not relevant test: {{ test_results.not_relevant_explanation }}
                                     </div>
@@ -85,8 +85,8 @@
                                ng-show="metric.warning"
                                ng-mouseleave="showMetricWarning[metric.name] = !showMetricWarning[metric.name]"
                                ng-mouseover="showMetricWarning[metric.name] = !showMetricWarning[metric.name]">
-                                <div class="details__tooltip" ng-show="showMetricWarning[metric.name]">
-                                    <div>{{ metric.warning }}</div>
+                                <div class="details__tooltip details__tooltip--top" ng-show="showMetricWarning[metric.name]">
+                                    <div>{{ displayWithuserFriendlyMetricName(metric.warning) }}</div>
                                 </div>
                             </i>
                         </td>

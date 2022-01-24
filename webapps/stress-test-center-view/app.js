@@ -153,6 +153,7 @@ const versionId = webAppConfig['versionId'];
             availableMetrics: function(predType) {
                 return Object.keys(metrics).filter(_ => metrics[_].predType.includes(predType));
             },
+            rawNames: Object.keys(metrics),
             longName: metric => metrics[metric].longName || metrics[metric].shortName,
             shortName: metric => metrics[metric].shortName || metric
         }
@@ -167,8 +168,11 @@ const versionId = webAppConfig['versionId'];
 
         $scope.CORRUPTION_TYPES = CorruptionUtils.TYPES;
         $scope.perfMetric = CorruptionUtils.perfMetric;
-        $scope.userFriendlyMetricName = MetricNames.longName
-        const testContraints = CorruptionUtils.TEST_CONSTRAINTS;
+        $scope.displayWithuserFriendlyMetricName = function(str) {
+            if (!str) return;
+            const pattern = new RegExp(MetricNames.rawNames.join("|"), "g");
+            return str.replace(pattern, matched =>  MetricNames.longName(matched);
+        };
 
         $scope.loading = {};
         $scope.forms = {};
@@ -306,7 +310,7 @@ const versionId = webAppConfig['versionId'];
                 // Only display relevant tests for the current model
                 const featureNames = Object.keys(features);
                 Object.keys($scope.settings.tests).forEach(function(testName) {
-                    const constraints = testContraints[testName];
+                    const constraints = CorruptionUtils.TEST_CONSTRAINTS[testName];
                     if (constraints.allowedFeatureTypes) {
                         $scope.uiState[testName].availableColumns = featureNames.filter(
                             function(name) {
