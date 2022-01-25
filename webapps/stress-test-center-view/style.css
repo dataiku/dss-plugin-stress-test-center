@@ -511,10 +511,6 @@ transform: translate(-125%, -50%);
     background: var(--white);
 }
 
-.details__tooltip--top {
-    top: -40px;
-}
-
 .icon-warning-sign {
     color: var(--warning-orange);
 }

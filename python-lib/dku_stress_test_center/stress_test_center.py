@@ -204,7 +204,7 @@ class StressTestGenerator(object):
             perf_after = self._metric.compute(test.y_true, test.y_pred, test.probas, test.sample_weights)
         except:
             metric = Metric(Metric.ACCURACY)
-            perf_after_dict["warning"] = self._metric.name + " is ill-defined. "+\
+            per_test_metrics["warning"] = self._metric.name + " was ill-defined for the altered dataset. "+\
                 "Fell back to using accuracy."
             perf_after = metric.compute(test.y_true, test.y_pred, test.probas, test.sample_weights)
         perf_after_dict["base_metric"] = metric.name
@@ -221,7 +221,7 @@ class StressTestGenerator(object):
             # Altered and unaltered datasets are the same, including the prediction columns.
             # By definition, the performance is the same before and after the stress test.
             perf_before = perf_after
-            per_test_metrics["not_relevant_explanation"] = test.not_relevant_explanation
+            per_test_metrics["warning"] = "Not relevant test: " + test.not_relevant_explanation
 
         common_metrics = [
             {
@@ -237,7 +237,7 @@ class StressTestGenerator(object):
             }
         ]
 
-        extra_metrics = test.compute_specific_metrics(self._metric, clean_y_true, clean_y_pred)
+        extra_metrics = test.compute_specific_metrics(metric, clean_y_true, clean_y_pred)
         per_test_metrics["metrics"] = [*common_metrics, *extra_metrics]
         return per_test_metrics
 

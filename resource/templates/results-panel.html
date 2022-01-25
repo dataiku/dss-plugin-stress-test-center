@@ -69,12 +69,12 @@
                         <td class="cell elem--with-tooltip">
                             {{ uiState[test_results.name].displayName }}
                             <i class="icon-warning-sign icon--hoverable"
-                               ng-show="test_results.not_relevant_explanation"
+                               ng-show="test_results.warning"
                                ng-mouseleave="showNotRelevantWarning[test_results.name] = false"
                                ng-mouseover="showNotRelevantWarning[test_results.name] = true">
-                                <div class="details__tooltip details__tooltip--top" ng-show="showNotRelevantWarning[test_results.name]">
+                                <div class="details__tooltip" ng-show="showNotRelevantWarning[test_results.name]">
                                     <div>
-                                        Not relevant test: {{ test_results.not_relevant_explanation }}
+                                        {{ test_results.warning }}
                                     </div>
                                 </div>
                             </i>
@@ -85,7 +85,7 @@
                                ng-show="metric.warning"
                                ng-mouseleave="showMetricWarning[metric.name] = false"
                                ng-mouseover="showMetricWarning[metric.name] = true">
-                                <div class="details__tooltip details__tooltip--top" ng-show="showMetricWarning[metric.name]">
+                                <div class="details__tooltip" ng-show="showMetricWarning[metric.name]">
                                     <div>{{ displayWithuserFriendlyMetricName(metric.warning) }}</div>
                                 </div>
                             </i>
