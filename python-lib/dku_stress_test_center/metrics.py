@@ -26,7 +26,7 @@ class Metric(object):
     CUSTOM="CUSTOM"
     GREATER_IS_BETTER={ACCURACY, PRECISION, RECALL, F1, COST_MATRIX, ROC_AUC, CUMULATIVE_LIFT, EVS, R2}
 
-    def __init__(self, config: dict, name: str, pred_type: str):
+    def __init__(self, name:str, config: dict=None, pred_type: str=None):
         self.config = config
         self.name = name
         self.pred_type = pred_type

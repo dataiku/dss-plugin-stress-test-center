@@ -148,7 +148,7 @@ app.directive("customDropdown", function() {
                 } else {
                     if (scope.item === value) return;
                     if (scope.onChange) {
-                        scope.onChange(scope.item, value, elem);
+                        scope.onChange(value, scope.item, elem);
                     }
                     scope.item = value;
                 }
@@ -195,18 +195,11 @@ app.directive("keyValueList", function($timeout) {
             valueLabel: '@',
             valueRange: '@',
             step: '=',
-            defaultValue: '=',
+            defaultValue: '='
         },
         restrict: 'A',
         templateUrl:'/plugins/model-stress-test/resource/templates/key-value-list.html',
         link: function(scope) {
-            const keys = Object.keys(scope.map);
-            if (keys.length) {
-                scope.keys = keys;
-            } else {
-                scope.keys = [null];
-            }
-
             scope.step = scope.step || "any";
             [ scope.valueMin, scope.valueMax ] = scope.$eval(scope.valueRange) || [null, null];
 
@@ -216,6 +209,7 @@ app.directive("keyValueList", function($timeout) {
             };
 
             scope.canAddListItem = function() {
+                if (!scope.keyOptions || !scope.keys) return;
                 return scope.keys.length < scope.keyOptions.length - 1;
             };
 
@@ -223,7 +217,7 @@ app.directive("keyValueList", function($timeout) {
                 scope.keys.push(null);
             };
 
-            scope.dropdownChange = function(oldValue, newValue, keyElem) {
+            scope.dropdownChange = function(newValue, oldValue, keyElem) {
                 scope.map[newValue] = scope.map[oldValue] || scope.defaultValue;
                 delete scope.map[oldValue];
                 $timeout(function() {
@@ -231,6 +225,15 @@ app.directive("keyValueList", function($timeout) {
                     valueElem.focus();
                 });
             };
+
+            scope.$watch("map", function(nv, ov) {
+                const keys = Object.keys(scope.map);
+                if (keys.length) {
+                    scope.keys = keys;
+                } else {
+                    scope.keys = [null];
+                }
+            });
         }
     }
 });
