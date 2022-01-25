@@ -60,7 +60,7 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
     generator = stress_test_generator()
     test = stress_test()
     test.TEST_TYPE = "TARGET_SHIFT"
-    result = generator.compute_test_metrics(test, generator._clean_df)
+    result = generator.compute_test_metrics(test)
 
     corrup_y_true, corrup_y_pred, corrup_probas, corrup_weights = generator._metric.compute.call_args_list[0][0]
     clean_y_true, clean_y_pred, clean_probas, clean_weights = generator._metric.compute.call_args_list[1][0]
@@ -119,7 +119,7 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
     generator = stress_test_generator("f3", True)
     test = stress_test(True)
     test.TEST_TYPE = "FEATURE_PERTURBATION"
-    result = generator.compute_test_metrics(test, generator._clean_df)
+    result = generator.compute_test_metrics(test)
 
     corrup_y_true, corrup_y_pred, corrup_probas, corrup_weights = generator._metric.compute.call_args_list[0][0]
     clean_y_true, clean_y_pred, clean_probas, clean_weights = generator._metric.compute.call_args_list[1][0]
@@ -170,7 +170,7 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
     test = stress_test()
     test.TEST_TYPE = "SUBPOPULATION_SHIFT"
     test.population = "f3"
-    result = generator.compute_test_metrics(test, generator._clean_df)
+    result = generator.compute_test_metrics(test)
 
     corrup_y_true, corrup_y_pred, corrup_probas, corrup_weights = generator._metric.compute.call_args_list[0][0]
     clean_y_true, clean_y_pred, clean_probas, clean_weights = generator._metric.compute.call_args_list[1][0]
