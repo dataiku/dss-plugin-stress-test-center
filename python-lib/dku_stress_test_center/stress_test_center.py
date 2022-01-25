@@ -118,7 +118,7 @@ class SubpopulationShiftTest(StressTest):
 
     def compute_specific_metrics(self, metric, clean_y_true, clean_y_pred):
         worst_subpop_perf_dict = {"name": "worst_subpop_perf"}
-        subpopulation = self.df_with_pred.loc[self.y_true.index, self.population]
+        subpopulation = self.df_with_pred.loc[self.y_true.index, self.population].replace({pd.np.nan: ""})
         try:
             worst_group_perf = worst_group_performance(
                 metric, subpopulation, self.y_true,
@@ -215,7 +215,7 @@ class StressTestGenerator(object):
             try:
                 perf_before = metric.compute(clean_y_true, clean_y_pred, clean_probas, clean_sample_weights)
             except Exception as e:
-                raise Exception("Failed to compute the performance (%s) on the unaltered test set: %s."
+                raise Exception("Failed to compute the performance (%s) on the unaltered test set: %s"
                     % (self._metric.name, str(e))) from None
         else:
             # Altered and unaltered datasets are the same, including the prediction columns.

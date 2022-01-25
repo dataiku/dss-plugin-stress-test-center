@@ -94,8 +94,12 @@ def rebalance_shift(x, y, priors):
         if desired_count == 0:
             continue
         desired_count = min(len(rebalanced_x_indices) - offset, desired_count)
+        if type(target_class) is float and np.isnan(target_class):
+            subpopulation_indices = np.where(y.astype(str) == str(target_class))[0]
+        else:
+            subpopulation_indices = np.where(y == target_class)[0]
         rebalanced_x_indices[offset : desired_count + offset] = np.random.choice(
-            np.where(y==target_class)[0], desired_count
+            subpopulation_indices, desired_count
         )
         rebalanced_y[offset : offset + desired_count] = target_class
 
