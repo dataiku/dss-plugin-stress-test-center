@@ -215,8 +215,8 @@ class StressTestGenerator(object):
             try:
                 perf_before = metric.compute(clean_y_true, clean_y_pred, clean_probas, clean_sample_weights)
             except Exception as e:
-                raise Exception("Failed to compute the performance (%s) on the unaltered dataset."
-                    % (self._metric.name, test.name, str(e))) from None
+                raise Exception("Failed to compute the performance (%s) on the unaltered test set: %s."
+                    % (self._metric.name, str(e))) from None
         else:
             # Altered and unaltered datasets are the same, including the prediction columns.
             # By definition, the performance is the same before and after the stress test.
