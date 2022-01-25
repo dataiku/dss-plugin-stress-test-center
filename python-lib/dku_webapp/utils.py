@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import sys
 import json
 
@@ -6,12 +7,14 @@ class DKUJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.float64):
             return float(obj)
-        if isinstance(obj, np.ndarray) and obj.ndim == 1:
+        if isinstance(obj, np.int64):
+            return int(obj)
+        if isinstance(obj, (np.ndarray, pd.Series)) and obj.ndim == 1:
             return obj.tolist()
         if isinstance(obj, np.generic):
             return obj.item()
-        if isinstance(obj, np.int64):
-            return int(obj)
+        if isinstance(obj, pd.DataFrame) :
+            return obj.to_dict(orient='records')
         return json.JSONEncoder.default(self, obj)
 
 

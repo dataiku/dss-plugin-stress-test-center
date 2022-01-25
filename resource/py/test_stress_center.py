@@ -1,7 +1,9 @@
 import pytest
 import pandas as pd
 import numpy as np
+
 from dku_stress_test_center.stress_test_center import StressTestGenerator, FeaturePerturbationTest, SubpopulationShiftTest
+from dku_stress_test_center.metrics import worst_group_performance, Metric
 
 @pytest.fixture
 def stress_test_generator(mocker):
@@ -23,10 +25,11 @@ def stress_test_generator(mocker):
     })
     generator.model_accessor = mocked_accessor
 
-    def get_generator(regression=False):
+    def get_generator(weight="f2", regression=False):
         mocker.spy(generator, "_metric")
         generator._metric.name = "toto"
         generator._metric.compute.return_value = 42
+        mocked_accessor.get_weight_variable.return_value = weight
         if regression:
             generator._clean_df = generator._clean_df.drop(columns=["proba_A", "proba_B", "proba_C"])
         return generator
@@ -45,6 +48,7 @@ def stress_test(mocker):
         "proba_C": [.4, .5, .2, .5, .1],
     }, index=[1,2,5,0,3]))
     test.name = "test"
+    test.compute_specific_metrics.return_value = [{"name": "specific", "value": ".3"}]
 
     def get_mocked_test(regression=False):
         if regression:
@@ -56,23 +60,24 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
     generator = stress_test_generator()
     test = stress_test()
     test.TEST_TYPE = "TARGET_SHIFT"
-    result = generator.compute_test_metrics(test, generator._clean_df)
+    result = generator.compute_test_metrics(test)
 
-    corrup_y_true, corrup_y_pred, corrup_probas = generator._metric.compute.call_args_list[0][0]
-    clean_y_true, clean_y_pred, clean_probas = generator._metric.compute.call_args_list[1][0]
+    corrup_y_true, corrup_y_pred, corrup_probas, corrup_weights = generator._metric.compute.call_args_list[0][0]
+    clean_y_true, clean_y_pred, clean_probas, clean_weights = generator._metric.compute.call_args_list[1][0]
 
     pd.testing.assert_series_equal(
         clean_y_true, pd.Series([2, 2, 0, 1, 1, 1], name="target")
     )
     pd.testing.assert_series_equal(
         corrup_y_true, pd.Series([1, 0, 2, 2, 1], name="target", index=[1,2,5,0,3])
-        )
+    )
     pd.testing.assert_series_equal(
         clean_y_pred, pd.Series([2, 1, 0, 1, 1, 0], name="prediction")
     )
     pd.testing.assert_series_equal(
         corrup_y_pred, pd.Series([2, 2, 1, 2, 1], name="prediction", index=[1,2,5,0,3])
     )
+    
     np.testing.assert_array_equal(clean_probas, np.array([
         [.2, .2, .3, .3, .1, .9],
         [.1, .7, .5, .5, .5, .1],
@@ -83,6 +88,12 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
         [.6, .5, .5, .4, 0],
         [.4, .5, .2, .5, .1]
     ]).transpose())
+    pd.testing.assert_series_equal(
+        corrup_weights, pd.Series(["e", "e", "a", "a", "e"], name="f2", index=[1,2,5,0,3])
+    )
+    pd.testing.assert_series_equal(
+        clean_weights, pd.Series(["a", "a", "a", "e", "a", "e"], name="f2")
+    )
     assert result == {
         "metrics": [
             {
@@ -99,35 +110,40 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
                 "name": "perf_var",
                 "base_metric": "toto",
                 "value": 0
-            }
+            },
+            {"name": "specific", "value": ".3"}
         ],
         "name": "test"
     }
 
-    generator = stress_test_generator(True)
+    generator = stress_test_generator("f3", True)
     test = stress_test(True)
     test.TEST_TYPE = "FEATURE_PERTURBATION"
-    mocker.patch("dku_stress_test_center.stress_test_center.corruption_resilience_regression", return_value=.2)
-    mocker.patch("dku_stress_test_center.stress_test_center.corruption_resilience_classification", return_value=.8)
-    result = generator.compute_test_metrics(test, generator._clean_df)
+    result = generator.compute_test_metrics(test)
 
-    corrup_y_true, corrup_y_pred, corrup_probas = generator._metric.compute.call_args_list[0][0]
-    clean_y_true, clean_y_pred, clean_probas = generator._metric.compute.call_args_list[1][0]
+    corrup_y_true, corrup_y_pred, corrup_probas, corrup_weights = generator._metric.compute.call_args_list[0][0]
+    clean_y_true, clean_y_pred, clean_probas, clean_weights = generator._metric.compute.call_args_list[1][0]
 
     pd.testing.assert_series_equal(
-        clean_y_true, pd.Series([2, 2, 0, 1, 1, 1], name="target")
+        clean_y_true, pd.Series([2, 0, 1, 1], name="target", index=[1,2,4,5])
     )
     pd.testing.assert_series_equal(
         corrup_y_true, pd.Series([1, 0, 2, 2, 1], name="target", index=[1,2,5,0,3])
-        )
+    )
     pd.testing.assert_series_equal(
-        clean_y_pred, pd.Series([2, 1, 0, 1, 1, 0], name="prediction")
+        clean_y_pred, pd.Series([1, 0, 1, 0], name="prediction", index=[1,2,4,5])
     )
     pd.testing.assert_series_equal(
         corrup_y_pred, pd.Series([2, 2, 1, 2, 1], name="prediction", index=[1,2,5,0,3])
     )
-    np.testing.assert_array_equal(clean_probas, np.empty((6,0)))
+    np.testing.assert_array_equal(clean_probas, np.empty((4,0)))
     np.testing.assert_array_equal(corrup_probas, np.empty((5,0)))
+    pd.testing.assert_series_equal(
+        clean_weights, pd.Series(["b", "b", "c", "g"], name="f3", index=[1,2,4,5])
+    )
+    pd.testing.assert_series_equal(
+        corrup_weights, pd.Series(["b", "b", "b", "c", "g"], name="f3", index=[1,2,5,0,3])
+    )
     assert result == {
         "metrics": [
             {
@@ -145,30 +161,26 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
                 "base_metric": "toto",
                 "value": 0
             },
-            {
-                "name": "corruption_resilience",
-                "value": .2
-            }
+            {"name": "specific", "value": ".3"}
         ],
         "name": "test"
     }
 
-    generator = stress_test_generator()
+    generator = stress_test_generator(None)
     test = stress_test()
     test.TEST_TYPE = "SUBPOPULATION_SHIFT"
     test.population = "f3"
-    mocker.patch("dku_stress_test_center.stress_test_center.worst_group_performance", return_value=.42)
-    result = generator.compute_test_metrics(test, generator._clean_df)
+    result = generator.compute_test_metrics(test)
 
-    corrup_y_true, corrup_y_pred, corrup_probas = generator._metric.compute.call_args_list[0][0]
-    clean_y_true, clean_y_pred, clean_probas = generator._metric.compute.call_args_list[1][0]
+    corrup_y_true, corrup_y_pred, corrup_probas, corrup_weights = generator._metric.compute.call_args_list[0][0]
+    clean_y_true, clean_y_pred, clean_probas, clean_weights = generator._metric.compute.call_args_list[1][0]
 
     pd.testing.assert_series_equal(
         clean_y_true, pd.Series([2, 2, 0, 1, 1, 1], name="target")
     )
     pd.testing.assert_series_equal(
         corrup_y_true, pd.Series([1, 0, 2, 2, 1], name="target", index=[1,2,5,0,3])
-        )
+    )
     pd.testing.assert_series_equal(
         clean_y_pred, pd.Series([2, 1, 0, 1, 1, 0], name="prediction")
     )
@@ -177,6 +189,8 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
     )
     np.testing.assert_array_equal(clean_probas, np.empty((6,0)))
     np.testing.assert_array_equal(corrup_probas, np.empty((5,0)))
+    assert corrup_weights is None
+    assert clean_weights is None
     assert result == {
         "metrics": [
             {
@@ -194,11 +208,7 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
                 "base_metric": "toto",
                 "value": 0
             },
-            {
-                "name": "worst_subpop_perf",
-                "base_metric": "toto",
-                "value": .42
-            }
+            {"name": "specific", "value": ".3"}
         ],
         "name": "test"
     }
@@ -260,16 +270,14 @@ def test_get_critical_samples(mocker, stress_test_generator):
     res = generator.get_critical_samples("does_not_matter")
     np.testing.assert_array_almost_equal(res["uncertainties"], [28.290163, 22.810816, 3.214550])
     np.testing.assert_array_almost_equal(res["means"], [17.333333, 13.666666, 3.333333])
-    assert res["samples"] == [
-        {"f1": 1,"f2": 3},
-        {"f1": 0,"f2": 4},
-        {"f1": 2,"f2": 2},
-    ]
-    assert res["predList"] == [
-        {"A": 1,"B": 50, "C": 1},
-        {"A": 0,"B": 40, "C": 1},
-        {"A": 2,"B": 7, "C": 1},
-    ]
+    pd.testing.assert_frame_equal(
+        res["samples"], pd.DataFrame({"f1": [1,0,2], "f2": [3,4,2]}, index=[1,0,2])
+    )
+    predList = pd.DataFrame({"A": [1,0,2], "B": [50,40,7], "C": [1,1,1]}, index=[1,0,2])
+    predList["C"] = predList["C"].astype(float)
+    pd.testing.assert_frame_equal(
+        res["predList"], predList
+    )
 
 def test_perturb_df(mocker):
     ft_corrupt = FeaturePerturbationTest(
@@ -308,3 +316,22 @@ def test_perturb_df(mocker):
         "f3": [-6, -8, -10, -12, -14],
         "target": ["acoucou", "bcoucou", "acoucou", "bcoucou", "bcoucou"]
     }))
+
+def test_worst_subpop(mocker):
+    mocked_metric = mocker.Mock()
+    mocked_metric.compute.side_effect = lambda y_true, y_pred, probas, sample_weights: sum(y_true*y_pred + probas*(1 if sample_weights is None else sample_weights))
+    mocked_metric.is_greater_better.return_value = True
+    subpop = np.array(["a", "b", "b", "c", "c"])
+    y_true = np.array([1, 2, 3, 4, 5])
+    y_pred = np.array([50, 40, 30, 20, 10])
+    probas = np.array([.5, .2, .3, .1, .2])
+    sample_weights = np.array([4, 2, 1, 1, 4])
+    res = worst_group_performance(mocked_metric, subpop, y_true, y_pred, probas, sample_weights)
+    assert res == 52
+
+    mocked_metric.is_greater_better.return_value = False
+    res = worst_group_performance(mocked_metric, subpop, y_true, y_pred, probas, sample_weights)
+    assert res == 170.7
+
+    res = worst_group_performance(mocked_metric, subpop, y_true, y_pred, probas, None)
+    assert res == 170.5

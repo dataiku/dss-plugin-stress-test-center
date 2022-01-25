@@ -16,6 +16,8 @@ from dku_stress_test_center.stress_test_center import StressTestGenerator
 from model_metadata import get_model_handler
 from dku_webapp import DKUJSONEncoder
 
+app.json_encoder = DKUJSONEncoder
+
 logger = logging.getLogger(__name__)
 
 stressor = StressTestGenerator()

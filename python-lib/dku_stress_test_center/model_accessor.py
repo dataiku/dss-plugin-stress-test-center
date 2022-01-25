@@ -52,7 +52,7 @@ class ModelAccessor(object):
         return self.model_handler.get_predictor()
 
     def predict_and_concatenate(self, df):
-        df_with_pred = self.model_handler.predict_and_concatenate(df)
+        df_with_pred = self.model_handler.predict_and_concatenate(df.copy())
         return df_with_pred.dropna(subset=[DkuStressTestCenterConstants.PREDICTION])
 
     @property
@@ -66,3 +66,7 @@ class ModelAccessor(object):
                 return Metric.R2
             return Metric.ROC_AUC
         return initial_evaluation_metric
+
+    def get_weight_variable(self):
+        if self.model_handler.with_sample_weights():
+            return self.model_handler.get_sample_weight_variable()

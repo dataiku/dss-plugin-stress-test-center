@@ -23,7 +23,7 @@
                     item="settings.perfMetric"
                     item-name="metric"
                     label="Evaluation metric"
-                    display="userFriendlyMetricName"
+                    display="displayWithuserFriendlyMetricName"
                     class="settings__form_field">
                 </div>
                 <div class="text-tiny text-lighter">
@@ -51,8 +51,8 @@
                         type="submit"
                         ng-class="{ 'dku-btn--disabled': loading.results || !canRunTests() }"
                         ng-click="runAnalysis()"
-                        ng-mouseover="showDisabledTooltip = !showDisabledTooltip"
-                        ng-mouseleave="showDisabledTooltip = !showDisabledTooltip">
+                        ng-mouseover="showDisabledTooltip = true"
+                        ng-mouseleave="showDisabledTooltip = false">
                     Run tests
                 </button>
                 <div class="details__tooltip" ng-show="!canRunTests() && showDisabledTooltip">
