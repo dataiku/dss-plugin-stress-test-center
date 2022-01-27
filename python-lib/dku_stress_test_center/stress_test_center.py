@@ -131,7 +131,7 @@ class SubpopulationShiftTest(StressTest):
             metric = Metric(Metric.ACCURACY)
             worst_group_perf = worst_group_performance(
                 metric, subpopulation, self.y_true,
-                self.y_true, self.probas, self.sample_weights
+                self.y_pred, self.probas, self.sample_weights
             )
         return [{
             "base_metric": metric.name,
