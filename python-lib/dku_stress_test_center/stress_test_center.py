@@ -5,6 +5,7 @@ from collections import defaultdict
 from sklearn.exceptions import UndefinedMetricWarning
 
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
+from dku_webapp import MISSING_VALUE
 from dku_stress_test_center.metrics import Metric, worst_group_performance,\
     corruption_resilience_classification, corruption_resilience_regression
 
@@ -108,7 +109,7 @@ class SubpopulationShiftTest(StressTest):
     def perturb_df(self, df: pd.DataFrame):
         df = df.copy()
         X = df.loc[:, df.columns != self.population].values
-        y = df.loc[:, self.population].values
+        y = df.loc[:, self.population].replace({pd.np.nan: MISSING_VALUE}).values
 
         X, y = self.shift.transform(X, y)
         df.loc[:, df.columns != self.population] = X
@@ -118,7 +119,7 @@ class SubpopulationShiftTest(StressTest):
 
     def compute_specific_metrics(self, metric, clean_y_true, clean_y_pred):
         worst_subpop_perf_dict = {"name": "worst_subpop_perf"}
-        subpopulation = self.df_with_pred.loc[self.y_true.index, self.population].replace({pd.np.nan: ""})
+        subpopulation = self.df_with_pred.loc[self.y_true.index, self.population]
         try:
             worst_group_perf = worst_group_performance(
                 metric, subpopulation, self.y_true,

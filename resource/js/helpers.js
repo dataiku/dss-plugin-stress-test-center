@@ -122,7 +122,7 @@ app.directive("customDropdown", function() {
             }
             setValidity();
 
-            scope.display = scope.display || (item => item);
+            scope.display = scope.display || (item => item === "__dku_missing_value__" ? "" : item);
 
             scope.canBeSelected = function(item) {
                 if (!scope.notAvailableValues) return true;
@@ -160,7 +160,7 @@ app.directive("customDropdown", function() {
                     if (!(scope.items || {}).size) return "Select " + scope.itemName + "s";
                     return scope.items.size + " " + scope.itemName + (scope.items.size > 1 ? "s" : "");
                 }
-                if (!scope.item) return "Select a " + scope.itemName;
+                if (scope.item == null) return "Select a " + scope.itemName;
                 return scope.display(scope.item);
             };
 
@@ -226,7 +226,7 @@ app.directive("keyValueList", function($timeout) {
                 });
             };
 
-            scope.$watch("map", function(nv, ov) {
+            scope.$watch("map", function() {
                 const keys = Object.keys(scope.map);
                 if (keys.length) {
                     scope.keys = keys;

@@ -2,6 +2,7 @@
 import logging
 import numpy as np
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
+from dku_webapp import MISSING_VALUE
 from dku_stress_test_center.metrics import Metric
 
 logger = logging.getLogger(__name__)
@@ -31,7 +32,7 @@ class ModelAccessor(object):
     def get_target_map(self):
         return self.model_handler.get_target_map()
 
-    def get_original_test_df(self, sample_fraction, random_state):
+    def get_original_test_df(self, sample_fraction, random_state=None):
         np.random.seed(random_state)
         try:
             test_df, _ = self.model_handler.get_test_df()
@@ -40,13 +41,16 @@ class ModelAccessor(object):
                 'Cannot retrieve original test set: {}. The plugin will take the whole original dataset.'.format(e))
             test_df, _ = self.model_handler.get_full_df()
         finally:
+            if sample_fraction == 1:
+                return test_df
             return test_df.sample(frac=sample_fraction, random_state=random_state)
 
     def get_per_feature(self):
         return self.model_handler.get_per_feature()
 
-    def get_collector_data(self, feature):
-        return self.model_handler.get_collector_data()["per_feature"][feature]
+    def get_categories(self, feature):
+        column = self.get_original_test_df(1)[feature].replace({np.nan: MISSING_VALUE})
+        return column.value_counts().index
 
     def get_predictor(self):
         return self.model_handler.get_predictor()

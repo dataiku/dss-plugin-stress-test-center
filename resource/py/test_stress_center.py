@@ -125,21 +125,21 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
     clean_y_true, clean_y_pred, clean_probas, clean_weights = generator._metric.compute.call_args_list[1][0]
 
     pd.testing.assert_series_equal(
-        clean_y_true, pd.Series([2, 0, 1, 1], name="target", index=[1,2,4,5])
+        clean_y_true, pd.Series([2, 2, 0, 1, 1, 1], name="target")
     )
     pd.testing.assert_series_equal(
         corrup_y_true, pd.Series([1, 0, 2, 2, 1], name="target", index=[1,2,5,0,3])
     )
     pd.testing.assert_series_equal(
-        clean_y_pred, pd.Series([1, 0, 1, 0], name="prediction", index=[1,2,4,5])
+        clean_y_pred, pd.Series([2, 1, 0, 1, 1, 0], name="prediction")
     )
     pd.testing.assert_series_equal(
         corrup_y_pred, pd.Series([2, 2, 1, 2, 1], name="prediction", index=[1,2,5,0,3])
     )
-    np.testing.assert_array_equal(clean_probas, np.empty((4,0)))
+    np.testing.assert_array_equal(clean_probas, np.empty((6,0)))
     np.testing.assert_array_equal(corrup_probas, np.empty((5,0)))
     pd.testing.assert_series_equal(
-        clean_weights, pd.Series(["b", "b", "c", "g"], name="f3", index=[1,2,4,5])
+        clean_weights, pd.Series([pd.np.nan, "b", "b", pd.np.nan, "c", "g"], name="f3")
     )
     pd.testing.assert_series_equal(
         corrup_weights, pd.Series(["b", "b", "b", "c", "g"], name="f3", index=[1,2,5,0,3])

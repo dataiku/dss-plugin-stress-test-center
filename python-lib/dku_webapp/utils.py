@@ -9,7 +9,7 @@ class DKUJSONEncoder(json.JSONEncoder):
             return float(obj)
         if isinstance(obj, np.int64):
             return int(obj)
-        if isinstance(obj, (np.ndarray, pd.Series)) and obj.ndim == 1:
+        if isinstance(obj, (np.ndarray, pd.Series, pd.Index)) and obj.ndim == 1:
             return obj.tolist()
         if isinstance(obj, np.generic):
             return obj.item()
@@ -24,3 +24,5 @@ def safe_str(val):
     if isinstance(val, unicode):
         return val.encode("utf-8")
     return str(val)
+
+MISSING_VALUE = "__dku_missing_value__"

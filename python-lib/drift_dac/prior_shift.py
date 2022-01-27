@@ -79,7 +79,11 @@ def rebalance_shift(x, y, priors):
     else:
         class_to_initialize = class_with_null_priors[-1]
         offset = round(redistribution_coef * actual_class_counts[class_to_initialize])
-    rebalanced_x_indices = np.random.choice(np.where(y==class_to_initialize)[0], y.size)
+    if type(class_to_initialize) is float and np.isnan(class_to_initialize):
+        subpopulation_indices = np.where(y.astype(str) == str(class_to_initialize))[0]
+    else:
+        subpopulation_indices = np.where(y == class_to_initialize)[0]
+    rebalanced_x_indices = np.random.choice(subpopulation_indices, y.size)
     rebalanced_y = np.full(y.shape, class_to_initialize, dtype=y.dtype)
 
     classes_to_resample = class_with_non_null_priors + class_with_null_priors

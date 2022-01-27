@@ -81,9 +81,7 @@ def compute():
 @app.route('/<string:feature>/categories', methods=["GET"])
 def get_feature_categories(feature):
     try:
-        categories = stressor.model_accessor.get_collector_data(feature).get("category_possible_values")
-        if categories is None:
-            raise ValueError("Feature is not a categorical feature")
+        categories = stressor.model_accessor.get_categories(feature)
         return jsonify(categories)
     except:
         logger.error(traceback.format_exc())
