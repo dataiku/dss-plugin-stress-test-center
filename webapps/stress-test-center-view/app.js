@@ -10,53 +10,51 @@ const versionId = webAppConfig['versionId'];
             return string.toLowerCase();
         }
 
-        function metrics(metric, isRegression) {
-            const shortName = MetricNames.shortName(metric);
-            const longName = MetricNames.longName(metric);
-
-            const perfVarDesc = ` is the difference in the model's ` +
-                `${toLowerCaseIfNotAcronym(longName)} between the altered dataset and the ` +
-                "unaltered one.";
-
-            const resilienceDescClassif = " is the ratio of rows where the prediction is not " +
-                "altered after the corruption.";
-
-            const resilienceDescReg = " is the ratio of rows where the corruption does not " +
-                "increase the prediction error.";
-
-            const perfMetrics = [
-                {
-                    name: "perf_before",
-                    displayName: `${shortName} before`,
-                    contextual: true
-                },
-                {
-                    name: "perf_after",
-                    displayName: `${shortName} after`,
-                    contextual: true
-                },
-                {
-                    name: "perf_var",
-                    displayName: `${shortName} variation`,
-                    longName: `${longName} variation`,
-                    description: perfVarDesc
-                },
-                {
-                    name: "corruption_resilience",
-                    displayName: "Corruption resilience",
-                    description: isRegression ? resilienceDescReg : resilienceDescClassif,
-                    excludedStressTestTypes: ["TARGET_SHIFT"]
+        function perfMetricDescription(perfMetric, baseMetric, isRegression) {
+            const longName = baseMetric && toLowerCaseIfNotAcronym(MetricNames.longName(baseMetric));
+            switch(perfMetric) {
+            case "perf_var":
+                return ` is the difference in the model's ${longName} between the altered ` +
+                    "dataset and the unaltered one.";
+            case "corruption_resilience":
+                if (isRegression) {
+                    return " is the ratio of rows where the corruption does not increase " +
+                        "the prediction error.";
                 }
-            ];
+                return " is the ratio of rows where the prediction is not altered after " +
+                    "the corruption.";
+            case "worst_subpop_perf":
+                return ` is the worst-case ${longName} across all the modalities of a ` +
+                    "categorical feature.";
+            default:
+                return null;
+            }
+        }
 
-            return function(testType) {
-                return perfMetrics.filter(metric => !(metric.excludedStressTestTypes || []).includes(testType));
-            };
-        };
+        function perfMetricName(perfMetric, baseMetric, longer) {
+            if (perfMetric === "corruption_resilience") return "Corruption resilience";
+            const name = longer ? MetricNames.longName(baseMetric) : MetricNames.shortName(baseMetric);
+            switch(perfMetric) {
+                case "perf_before":
+                return `${name} before`;
+            case "perf_after":
+                return `${name} after`;
+            case "perf_var":
+                return `${name} variation`;
+            case "worst_subpop_perf":
+                return `Worst subpopulation ${toLowerCaseIfNotAcronym(name)}`;
+            default:
+                return null;
+            }
+        }
 
         return {
-            metrics,
-            types: {
+            perfMetric: {
+                name: perfMetricName,
+                description: perfMetricDescription,
+                isContextual: (perfMetric) => ["perf_before", "perf_after"].includes(perfMetric)
+            },
+            TYPES: {
                 FEATURE_PERTURBATION: {
                     displayName: "Feature corruptions",
                     description: "Each of these independent tests corrupts one or several features across randomly sampled rows."
@@ -64,13 +62,25 @@ const versionId = webAppConfig['versionId'];
                 TARGET_SHIFT: {
                     displayName: "Target distribution shift",
                     description: "This stress test resamples the test set to match the desired distribution for the target column."
+                },
+                SUBPOPULATION_SHIFT: {
+                    displayName: "Feature distribution shift",
+                    description: "This stress test resamples the test set to match the desired distribution for the selected categorical feature."
                 }
             },
-            TEST_NAMES: {
-                _dku_stress_test_uncorrupted: "No corruption",
-                Rebalance: "Shift target distribution",
-                MissingValues: "Insert missing values",
-                Scaling: "Multiply by a coefficient"
+            TEST_CONSTRAINTS: {
+                RebalanceTarget: {
+                    allowedPredictionTypes: ["BINARY_CLASSIFICATION", "MULTICLASS"]
+                },
+                RebalanceFeature: {
+                    allowedFeatureTypes: ["CATEGORY"]
+                },
+                MissingValues: {
+                    allowedFeatureTypes: ["NUMERIC", "CATEGORY", "VECTOR", "TEXT"]
+                },
+                Scaling: {
+                    allowedFeatureTypes: ["NUMERIC"]
+                }
             }
         };
     });
@@ -143,35 +153,43 @@ const versionId = webAppConfig['versionId'];
             availableMetrics: function(predType) {
                 return Object.keys(metrics).filter(_ => metrics[_].predType.includes(predType));
             },
+            rawNames: Object.keys(metrics),
             longName: metric => metrics[metric].longName || metrics[metric].shortName,
             shortName: metric => metrics[metric].shortName || metric
         }
     });
 
-    app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils, MetricNames, $filter) {
+    app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils,
+        MetricNames, $filter) {
+
         $scope.modal = {};
         $scope.removeModal = ModalService.remove($scope.modal);
         $scope.createModal = ModalService.create($scope.modal);
 
-        $scope.CORRUPTION_TYPES = CorruptionUtils.types;
-        $scope.TEST_NAMES = CorruptionUtils.TEST_NAMES;
-        $scope.userFriendlyMetricName = MetricNames.longName
+        $scope.CORRUPTION_TYPES = CorruptionUtils.TYPES;
+        $scope.perfMetric = CorruptionUtils.perfMetric;
+        $scope.displayWithuserFriendlyMetricName = function(str) {
+            if (!str) return;
+            const pattern = new RegExp(MetricNames.rawNames.join("|"), "g");
+            return str.replace(pattern, matched =>  MetricNames.longName(matched));
+        };
 
         $scope.loading = {};
         $scope.forms = {};
+
         $scope.settings = {
             tests: {
-                Rebalance: {
-                    needsTargetClasses: true,
+                RebalanceTarget: {
+                    params: { priors: {} }
+                },
+                RebalanceFeature: {
                     params: { priors: {} }
                 },
                 MissingValues: {
-                    allowedFeatureTypes: ["NUMERIC", "CATEGORY", "VECTOR", "TEXT"],
                     params: { samples_fraction: .5 },
                     selected_features: new Set()
                 },
                 Scaling: {
-                    allowedFeatureTypes: ["NUMERIC"],
                     params: {
                         samples_fraction: .5,
                         scaling_factor: 10
@@ -182,7 +200,28 @@ const versionId = webAppConfig['versionId'];
             samples: .8,
             randomSeed: 1337
         };
-        $scope.modelInfo = {};
+
+        $scope.modelInfo = {
+            featureCategories: {}
+        };
+
+        $scope.uiState = {
+            _dku_stress_test_uncorrupted: {
+                displayName: "No corruption"
+            },
+            RebalanceTarget: {
+                displayName: "Shift target distribution"
+            },
+            RebalanceFeature: {
+                displayName: "Shift feature distribution"
+            },
+            MissingValues: {
+                displayName: "Insert missing values"
+            },
+            Scaling: {
+                displayName: "Multiply by a coefficient"
+            }
+        }
 
         const featureTypesToIconClass = {
             NUMERIC: "numerical",
@@ -197,24 +236,34 @@ const versionId = webAppConfig['versionId'];
 
         $scope.canRunTests = function() {
             return $scope.forms.settings.$valid
-                && Object.values($scope.settings.tests).some(t => t.$activated);
+                && Object.values($scope.uiState).some(t => t.activated);
+        }
+
+        $scope.getFeatureCategories = function(feature) {
+            if (!$scope.modelInfo.featureCategories[feature]) {
+                $scope.loading.featureCategories = true;
+                $http.get(getWebAppBackendUrl(feature + "/categories")).then(function(response) {
+                    $scope.loading.featureCategories = false;
+                    $scope.modelInfo.featureCategories[feature] = response.data;
+                }, function(e) {
+                    $scope.loading.featureCategories = false;
+                    $scope.createModal.error(e.data);
+                });
+            }
+            $scope.settings.tests.RebalanceFeature.params.priors = {};
         }
 
         $scope.runAnalysis = function () {
             if (!$scope.canRunTests()) return;
             const requestParams = Object.assign({}, $scope.settings);
             requestParams.tests = {};
-            angular.forEach($scope.settings.tests, function(v, k) {
-                if (!v.$activated) return;
-                requestParams.tests[k] = Object.assign({}, v);
-                if (v.selected_features) { // test is a sample perturbation
-                    requestParams.tests[k].selected_features = Array.from(v.selected_features);
+            angular.forEach($scope.settings.tests, function(testParams, testName) {
+                if (!$scope.uiState[testName].activated) return;
+                requestParams.tests[testName] = Object.assign({}, testParams);
+                if (testParams.selected_features) { // test is a sample perturbation
+                    requestParams.tests[testName].selected_features = Array.from(testParams.selected_features);
                 }
             });
-
-            $scope.perfMetrics = CorruptionUtils.metrics(
-                requestParams.perfMetric,  $scope.modelInfo.predType === 'REGRESSION'
-            );
 
             $scope.loading.results = true;
             $http.post(getWebAppBackendUrl("stress-tests-config"), requestParams).then(function() {
@@ -222,9 +271,10 @@ const versionId = webAppConfig['versionId'];
                     angular.forEach(response.data, function(result) {
                         if (result.critical_samples) {
                             result.critical_samples.predList = result.critical_samples.predList.map(function(predList) {
-                                predList = Object.entries(predList).map(function(pred) {
-                                    const [testName, result] = pred;
-                                    return `${$scope.TEST_NAMES[testName]}: ${$filter("toFixedIfNeeded")(result, 3)}`;
+                                predList = Object.entries(predList).map(function(entry) {
+                                    const [testName, result] = entry;
+                                    const displayName = $scope.uiState[testName].displayName;
+                                    return `${displayName}: ${$filter("toFixedIfNeeded")(result, 3)}`;
                                 });
                                 predList.unshift($scope.modelInfo.predType === 'REGRESSION' ? "Predicted values" : "True class probas");
                                 return predList;
@@ -253,29 +303,24 @@ const versionId = webAppConfig['versionId'];
 
                 $scope.settings.perfMetric = response.data["metric"];
                 $scope.METRIC_NAMES = MetricNames.availableMetrics($scope.modelInfo.predType);
-                $scope.TEST_ORDER =  ["FEATURE_PERTURBATION"];
-                if ($scope.modelInfo.predType !== 'REGRESSION') {
-                    $scope.TEST_ORDER.unshift("TARGET_SHIFT")
-                }
+                $scope.TEST_ORDER =  ["TARGET_SHIFT", "SUBPOPULATION_SHIFT", "FEATURE_PERTURBATION"];
 
                 features = response.data["features"];
 
                 // Only display relevant tests for the current model
                 const featureNames = Object.keys(features);
                 Object.keys($scope.settings.tests).forEach(function(testName) {
-                    const testConfig = $scope.settings.tests[testName];
-                    if (testConfig.allowedFeatureTypes) {
-                        testConfig.availableColumns = featureNames.filter(function(name) {
-                            return testConfig.allowedFeatureTypes.includes(features[name]);
-                        });
-                        if (!testConfig.availableColumns.length) {
-                            delete $scope.settings.tests[testName];
-                        }
+                    const constraints = CorruptionUtils.TEST_CONSTRAINTS[testName];
+                    if (constraints.allowedFeatureTypes) {
+                        $scope.uiState[testName].availableColumns = featureNames.filter(
+                            function(name) {
+                                return constraints.allowedFeatureTypes.includes(features[name]);
+                            });
+                        $scope.uiState[testName].available = $scope.uiState[testName].availableColumns.length;
                     }
-                    if (testConfig.needsTargetClasses) {
-                        if ($scope.modelInfo.predType === 'REGRESSION') {
-                            delete $scope.settings.tests[testName];
-                        }
+
+                    if (constraints.allowedPredictionTypes) {
+                        $scope.uiState[testName].available = constraints.allowedPredictionTypes.includes($scope.modelInfo.predType)
                     }
                 });
         }, function(e) {

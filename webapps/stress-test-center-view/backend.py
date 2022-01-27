@@ -16,6 +16,8 @@ from dku_stress_test_center.stress_test_center import StressTestGenerator
 from model_metadata import get_model_handler
 from dku_webapp import DKUJSONEncoder
 
+app.json_encoder = DKUJSONEncoder
+
 logger = logging.getLogger(__name__)
 
 stressor = StressTestGenerator()
@@ -61,7 +63,7 @@ def set_stress_tests_config():
 def compute():
     try:
         # Compute the performance drop metrics
-        results = stressor.build_stress_metrics()
+        results = stressor.build_results()
  
         # Compute the critical samples
         if DkuStressTestCenterConstants.FEATURE_PERTURBATION in results:
@@ -75,3 +77,12 @@ def compute():
     except:
         logger.error("When trying to call compute endpoint: {}.".format(traceback.format_exc()))
         return "{}. Check backend log for more details.".format(traceback.format_exc()), 500
+
+@app.route('/<string:feature>/categories', methods=["GET"])
+def get_feature_categories(feature):
+    try:
+        categories = stressor.model_accessor.get_categories(feature)
+        return jsonify(categories)
+    except:
+        logger.error(traceback.format_exc())
+        return traceback.format_exc(), 500

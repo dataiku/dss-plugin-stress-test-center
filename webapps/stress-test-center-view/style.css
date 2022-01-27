@@ -280,6 +280,10 @@ transform: translate(-125%, -50%);
     padding: 16px;
 }
 
+.webapp-subsection + .webapp-subsection {
+    padding-top: 0;
+}
+
 .webapp-subsection__delimiter_title {
     text-transform: uppercase;
     font-weight: 500;
@@ -316,7 +320,6 @@ transform: translate(-125%, -50%);
 .settings-section__header {
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 8px;
 }
 
 .settings-subsection__header {
@@ -352,11 +355,11 @@ transform: translate(-125%, -50%);
 }
 
 .key-value-labels__key, .key-value-element__key {
-    flex: 1 0 auto;
+    width: calc(100% - 125px);
 }
 
 .key-value-labels__value, .key-value-element__value {
-    flex: 0 1 75px;
+    flex: 0 0 75px;
 }
 
 .key-value-list {
@@ -472,13 +475,14 @@ transform: translate(-125%, -50%);
 .help-text__tooltip {
     font-family: var(--font-family);
     max-width: 400px;
-    position: absolute;
-    left: 316px;
+    position: fixed;
+    left: 328px;
     padding: 8px;
     font-size: 13px;
     color: #144C71;
     box-shadow: 0px 8px 10px rgba(0, 0, 0, 0.14), 0px 3px 14px rgba(0, 0, 0, 0.12), 0px 5px 5px rgba(0, 0, 0, 0.2);
     background: var(--white);
+    z-index: 3000;
 }
 
 .help-text__tooltip .icon-info-sign {
@@ -498,7 +502,7 @@ transform: translate(-125%, -50%);
     font-family: var(--font-family);
     max-width: 400px;
     position: absolute;
-    top: 32px;
+    top: 40px;
     right: 0px;
     padding: 4px;
     font-size: 11px;

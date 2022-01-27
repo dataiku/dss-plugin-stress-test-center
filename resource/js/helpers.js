@@ -122,7 +122,7 @@ app.directive("customDropdown", function() {
             }
             setValidity();
 
-            scope.display = scope.display || (item => item);
+            scope.display = scope.display || (item => item === "__dku_missing_value__" ? "" : item);
 
             scope.canBeSelected = function(item) {
                 if (!scope.notAvailableValues) return true;
@@ -148,7 +148,7 @@ app.directive("customDropdown", function() {
                 } else {
                     if (scope.item === value) return;
                     if (scope.onChange) {
-                        scope.onChange(scope.item, value, elem);
+                        scope.onChange(value, scope.item, elem);
                     }
                     scope.item = value;
                 }
@@ -160,7 +160,7 @@ app.directive("customDropdown", function() {
                     if (!(scope.items || {}).size) return "Select " + scope.itemName + "s";
                     return scope.items.size + " " + scope.itemName + (scope.items.size > 1 ? "s" : "");
                 }
-                if (!scope.item) return "Select a " + scope.itemName;
+                if (scope.item == null) return "Select a " + scope.itemName;
                 return scope.display(scope.item);
             };
 
@@ -195,18 +195,11 @@ app.directive("keyValueList", function($timeout) {
             valueLabel: '@',
             valueRange: '@',
             step: '=',
-            defaultValue: '=',
+            defaultValue: '='
         },
         restrict: 'A',
         templateUrl:'/plugins/model-stress-test/resource/templates/key-value-list.html',
         link: function(scope) {
-            const keys = Object.keys(scope.map);
-            if (keys.length) {
-                scope.keys = keys;
-            } else {
-                scope.keys = [null];
-            }
-
             scope.step = scope.step || "any";
             [ scope.valueMin, scope.valueMax ] = scope.$eval(scope.valueRange) || [null, null];
 
@@ -216,6 +209,7 @@ app.directive("keyValueList", function($timeout) {
             };
 
             scope.canAddListItem = function() {
+                if (!scope.keyOptions || !scope.keys) return;
                 return scope.keys.length < scope.keyOptions.length - 1;
             };
 
@@ -223,7 +217,7 @@ app.directive("keyValueList", function($timeout) {
                 scope.keys.push(null);
             };
 
-            scope.dropdownChange = function(oldValue, newValue, keyElem) {
+            scope.dropdownChange = function(newValue, oldValue, keyElem) {
                 scope.map[newValue] = scope.map[oldValue] || scope.defaultValue;
                 delete scope.map[oldValue];
                 $timeout(function() {
@@ -231,6 +225,15 @@ app.directive("keyValueList", function($timeout) {
                     valueElem.focus();
                 });
             };
+
+            scope.$watch("map", function() {
+                const keys = Object.keys(scope.map);
+                if (keys.length) {
+                    scope.keys = keys;
+                } else {
+                    scope.keys = [null];
+                }
+            });
         }
     }
 });
@@ -242,18 +245,18 @@ app.directive("helpIcon", function () {
             helpText: '@',
 
         },
-        template: `<i class="icon-info-sign icon--hoverable" ng-mouseover="showTooltip()" ng-mouseleave="showTooltip()">
+        template: `<i class="icon-info-sign icon--hoverable" ng-mouseover="toggleTooltip(true)" ng-mouseleave="toggleTooltip(false)">
             <div class="help-text__tooltip tooltip--hidden">
                 <i class="icon-info-sign"></i>
                 {{ helpText }}
             </div>
         </i>`,
         link: function(scope, elem) {
-            scope.showTooltip = function() {
+            scope.toggleTooltip = function(show) {
                 const top = elem[0].getBoundingClientRect().top;
                 const tooltip = elem.find(".help-text__tooltip");
                 tooltip.css("top", (top - 8) + "px");
-                tooltip.toggleClass("tooltip--hidden");
+                tooltip.toggleClass("tooltip--hidden", !show);
             };
         }
     }

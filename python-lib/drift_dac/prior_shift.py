@@ -6,6 +6,7 @@ from collections import Counter
 
 __all__ = ['Rebalance']
 
+# This class is used both for rebalancing the distribution of target classes and feature categories
 class Rebalance(Shift):
     """ Sample data to match a given distribution of classes.
     Args:
@@ -19,9 +20,9 @@ class Rebalance(Shift):
     def __init__(self, priors):
         super(Rebalance, self).__init__()
         if min(priors.values()) < 0:
-            raise ValueError("Class frequencies cannot be negative")
+            raise ValueError("Frequencies cannot be negative")
         if sum(priors.values()) > 1:
-            raise ValueError("The sum of the desired class frequencies exceeds 1")
+            raise ValueError("The sum of the desired frequencies exceeds 1")
         self.priors = priors
         self.name = 'rebalance_shift'
         for target_class, proba in priors.items():
@@ -47,7 +48,7 @@ def rebalance_shift(x, y, priors):
     # Check current target distribution has all the classes in desired distribution
     if positive_priors.keys() - actual_class_counts.keys():
         raise ValueError(
-            "One of the classes to resample is absent from the actual target distribution"
+            "One of the modalities to resample is absent from the actual distribution"
         )
 
     # If prior distribution is incomplete (sum < 1), we redistribute onto the unmapped classes
@@ -60,7 +61,7 @@ def rebalance_shift(x, y, priors):
         # Redistribution can only be done if current distribution has some unmapped classes left
         unmapped_classes = actual_class_counts.keys() - priors.keys()
         if not unmapped_classes:
-            raise ValueError("The desired prior distribution is incomplete")
+            raise ValueError("The desired distribution is incomplete")
 
         nr_samples_from_unmapped_classes = sum(actual_class_counts[target_class]
                                             for target_class in unmapped_classes)
@@ -78,7 +79,11 @@ def rebalance_shift(x, y, priors):
     else:
         class_to_initialize = class_with_null_priors[-1]
         offset = round(redistribution_coef * actual_class_counts[class_to_initialize])
-    rebalanced_x_indices = np.random.choice(np.where(y==class_to_initialize)[0], y.size)
+    if type(class_to_initialize) is float and np.isnan(class_to_initialize):
+        subpopulation_indices = np.where(y.astype(str) == str(class_to_initialize))[0]
+    else:
+        subpopulation_indices = np.where(y == class_to_initialize)[0]
+    rebalanced_x_indices = np.random.choice(subpopulation_indices, y.size)
     rebalanced_y = np.full(y.shape, class_to_initialize, dtype=y.dtype)
 
     classes_to_resample = class_with_non_null_priors + class_with_null_priors
@@ -93,8 +98,12 @@ def rebalance_shift(x, y, priors):
         if desired_count == 0:
             continue
         desired_count = min(len(rebalanced_x_indices) - offset, desired_count)
+        if type(target_class) is float and np.isnan(target_class):
+            subpopulation_indices = np.where(y.astype(str) == str(target_class))[0]
+        else:
+            subpopulation_indices = np.where(y == target_class)[0]
         rebalanced_x_indices[offset : desired_count + offset] = np.random.choice(
-            np.where(y==target_class)[0], desired_count
+            subpopulation_indices, desired_count
         )
         rebalanced_y[offset : offset + desired_count] = target_class
 
