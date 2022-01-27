@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.0.3 - 2022-01-27
+- New test in webapp: feature distribution shift
+- Support of sample weights in metric computations
+- Webapp: Fix the case where the target has missing values
+- UI fixes on tooltips & dropdowns
+
 ## Version 1.0.2 - 2022-01-12
 - UI fixes (empty section in result page, enabling submission of settings form when pressing enter)
 
