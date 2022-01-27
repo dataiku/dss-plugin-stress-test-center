@@ -53,7 +53,14 @@ class ModelAccessor(object):
 
     def predict_and_concatenate(self, df):
         df_with_pred = self.model_handler.predict_and_concatenate(df.copy())
-        return df_with_pred.dropna(subset=[DkuStressTestCenterConstants.PREDICTION])
+        cols_to_remove_nas_from = [
+            DkuStressTestCenterConstants.PREDICTION,
+            self.get_target_variable()
+        ]
+        weight_var = self.get_weight_variable()
+        if weight_var is not None:
+            cols_to_remove_nas_from.append(weight_var)
+        return df_with_pred.dropna(subset=cols_to_remove_nas_from)
 
     @property
     def metrics(self):

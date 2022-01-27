@@ -186,8 +186,6 @@ class StressTestGenerator(object):
         target_map = self.model_accessor.get_target_map()
         weight_var = self.model_accessor.get_weight_variable()
 
-        if weight_var is not None:
-            df = df.dropna(subset=[weight_var])
         y_true = df[target].replace(target_map)
         y_pred = df[DkuStressTestCenterConstants.PREDICTION].replace(target_map)
         probas = df.filter(regex=r'^proba_', axis=1).values
