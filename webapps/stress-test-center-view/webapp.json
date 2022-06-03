@@ -6,16 +6,19 @@
     },
     "baseType": "STANDARD",
     "hasBackend": "true",
+    "useContextualCodeEnv": true,
     "standardWebAppLibraries": ["dataiku", "font_awesome"],
     "roles": [
         {
             "type": "SAVED_MODEL",
+            "predictionTypes": ["BINARY_CLASSIFICATION", "MULTICLASS", "REGRESSION"],
             "contentType": "prediction",
             "targetParamsKey": "modelId",
             "pathParamsKey": "versionId"
         },
          {
           "type": "ANALYSIS",
+          "predictionTypes": ["BINARY_CLASSIFICATION", "MULTICLASS", "REGRESSION"],
           "contentType": "prediction",
           "targetParamsKey": "trainedModelFullModelId"
         }
