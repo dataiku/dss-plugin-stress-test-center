@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.0.4 - 2022-06-09
+- Webapp: Only display model view for binary, multiclass & regression tasks
+- Webapp: Use contextual code env
+
 ## Version 1.0.3 - 2022-01-27
 - New test in webapp: feature distribution shift
 - Support of sample weights in metric computations
