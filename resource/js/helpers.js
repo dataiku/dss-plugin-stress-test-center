@@ -26,6 +26,7 @@ app.service("ModalService", function($compile, $http) {
             }
 
             angular.element("body").append(element);
+            element.focus();
         });
     };
     return {
