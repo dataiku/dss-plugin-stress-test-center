@@ -1,6 +1,6 @@
 {
     "id": "model-stress-test",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "meta": {
         "label": "Model stress test",
         "category": "Machine Learning",

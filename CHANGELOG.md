@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.0.5 - 2022-07
+- Webapp: Only display model view for tasks using a Python backend
+- Webapp: Make the model view py2 compatible
+- Webapp: Use a better ModalService
+- Webapp: Use a simpler way to load the models from DSS
+
 ## Version 1.0.4 - 2022-06-09
 - Webapp: Only display model view for binary, multiclass & regression tasks
 - Webapp: Use contextual code env
