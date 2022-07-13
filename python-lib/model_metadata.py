@@ -10,5 +10,5 @@ def get_model_handler(model, version_id=None):
         return PredictionModelInformationHandler(params.split_desc, params.core_params, params.model_folder, params.model_folder)
     except Exception as e:
         if "ordinal not in range(128)" in safe_str(e):
-            raise Exception("Model stress test only supports models built with Python 3. This one was built with Python 2.") from None
+            raise Exception("Model stress test only supports models built with Python 3. This one was built with Python 2.")
         raise e
