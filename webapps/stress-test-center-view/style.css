@@ -712,7 +712,7 @@ table {
     font-size: 14px;
 }
 
-.dku-modal-body-error {
+.dku-modal-body--error {
     color: var(--error-red);
 }
 
@@ -726,7 +726,7 @@ table {
     max-width: 80%;
 }
 
-.modal-background {
+.dku-modal-background {
     display: flex;
     justify-content: center;
     align-items: center;
