@@ -162,9 +162,9 @@ const versionId = webAppConfig['versionId'];
     app.controller('VizController', function($scope, $http, ModalService, CorruptionUtils,
         MetricNames, $filter) {
 
-        $scope.modal = {};
-        $scope.removeModal = ModalService.remove($scope.modal);
-        $scope.createModal = ModalService.create($scope.modal);
+        $scope.$on("closeModal", function() {
+            angular.element(".webapp-main").focus();
+        });
 
         $scope.CORRUPTION_TYPES = CorruptionUtils.TYPES;
         $scope.perfMetric = CorruptionUtils.perfMetric;
@@ -247,7 +247,7 @@ const versionId = webAppConfig['versionId'];
                     $scope.modelInfo.featureCategories[feature] = response.data;
                 }, function(e) {
                     $scope.loading.featureCategories = false;
-                    $scope.createModal.error(e.data);
+                    ModalService.createBackendErrorModal($scope, e.data);
                 });
             }
             $scope.settings.tests.RebalanceFeature.params.priors = {};
@@ -285,11 +285,11 @@ const versionId = webAppConfig['versionId'];
                     $scope.loading.results = false;
                 }, function(e) {
                     $scope.loading.results = false;
-                    $scope.createModal.error(e.data);
+                    ModalService.createBackendErrorModal($scope, e.data);
                 });
             }, function(e) {
                 $scope.loading.results = false;
-                $scope.createModal.error(e.data);
+                ModalService.createBackendErrorModal($scope, e.data);
             });
         }
 
@@ -325,7 +325,7 @@ const versionId = webAppConfig['versionId'];
                 });
         }, function(e) {
             $scope.loading.modelInfo = false;
-            $scope.createModal.error(e.data);
+            ModalService.createBackendErrorModal($scope, e.data);
         });
     })}
 )();

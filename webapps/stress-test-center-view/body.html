@@ -13,12 +13,6 @@
       ng-click="$broadcast('closeDropdowns', $event.target)"
       ng-keyup="$broadcast('closeDropdowns')"
       tabindex="0">
-    <div ng-if="modal.type"
-         class="modal-background"
-         tabindex="0"
-         ng-keyup="$event.keyCode == 27 && removeModal()"
-         ng-click="removeModal($event)">
-    </div>
 
     <div class="webapp-main">
         <form name="forms.settings" ng-include="'/plugins/model-stress-test/resource/templates/settings-panel.html'"
