@@ -1,6 +1,7 @@
 import numpy as np
 from math import ceil
 import copy
+from dku_webapp import safe_str
 from drift_dac.perturbation_shared_utils import Shift, PerturbationConstants
 from collections import Counter
 
@@ -44,9 +45,9 @@ def rebalance_shift(x, y, priors):
     actual_class_counts = Counter(y)
     nr_samples = len(y)
 
-    positive_priors = +Counter(priors)
+    positive_priors = Counter() + Counter(priors)
     # Check current target distribution has all the classes in desired distribution
-    if positive_priors.keys() - actual_class_counts.keys():
+    if set(positive_priors.keys()) - set(actual_class_counts.keys()):
         raise ValueError(
             "One of the modalities to resample is absent from the actual distribution"
         )
@@ -59,13 +60,13 @@ def rebalance_shift(x, y, priors):
         redistribution_coef = 0
     else:
         # Redistribution can only be done if current distribution has some unmapped classes left
-        unmapped_classes = actual_class_counts.keys() - priors.keys()
+        unmapped_classes = set(actual_class_counts.keys()) - set(priors.keys())
         if not unmapped_classes:
             raise ValueError("The desired distribution is incomplete")
 
         nr_samples_from_unmapped_classes = sum(actual_class_counts[target_class]
                                             for target_class in unmapped_classes)
-        redistribution_coef = nr_samples_to_redistribute / nr_samples_from_unmapped_classes
+        redistribution_coef = nr_samples_to_redistribute / float(nr_samples_from_unmapped_classes)
 
     class_with_non_null_priors = [
         target_class for target_class in actual_class_counts if priors.get(target_class, 0) != 0
@@ -80,7 +81,7 @@ def rebalance_shift(x, y, priors):
         class_to_initialize = class_with_null_priors[-1]
         offset = round(redistribution_coef * actual_class_counts[class_to_initialize])
     if type(class_to_initialize) is float and np.isnan(class_to_initialize):
-        subpopulation_indices = np.where(y.astype(str) == str(class_to_initialize))[0]
+        subpopulation_indices = np.where(y.apply(safe_str) == safe_str(class_to_initialize))[0]
     else:
         subpopulation_indices = np.where(y == class_to_initialize)[0]
     rebalanced_x_indices = np.random.choice(subpopulation_indices, y.size)
@@ -99,9 +100,10 @@ def rebalance_shift(x, y, priors):
             continue
         desired_count = min(len(rebalanced_x_indices) - offset, desired_count)
         if type(target_class) is float and np.isnan(target_class):
-            subpopulation_indices = np.where(y.astype(str) == str(target_class))[0]
+            subpopulation_indices = np.where(y.astype(safe_str) == safe_str(target_class))[0]
         else:
             subpopulation_indices = np.where(y == target_class)[0]
+        desired_count, offset = int(desired_count), int(offset)
         rebalanced_x_indices[offset : desired_count + offset] = np.random.choice(
             subpopulation_indices, desired_count
         )

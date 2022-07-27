@@ -26,7 +26,7 @@ class Metric(object):
     CUSTOM="CUSTOM"
     GREATER_IS_BETTER={ACCURACY, PRECISION, RECALL, F1, COST_MATRIX, ROC_AUC, CUMULATIVE_LIFT, EVS, R2}
 
-    def __init__(self, name:str, config: dict=None, pred_type: str=None):
+    def __init__(self, name, config=None, pred_type=None):
         self.config = config
         self.name = name
         self.pred_type = pred_type
@@ -34,7 +34,7 @@ class Metric(object):
     def is_greater_better(self):
         return self.name in self.GREATER_IS_BETTER
 
-    def compute(self, y_true: np.array, y_pred: np.array, probas: np.array, sample_weight: np.array):
+    def compute(self, y_true, y_pred, probas, sample_weight):
         if self.pred_type == DkuStressTestCenterConstants.MULTICLASS:
             extra_params = {
                 "average": 'macro',
@@ -51,7 +51,7 @@ class Metric(object):
             self.PRECISION: lambda y_true, y_pred, probas:\
                 precision_score(y_true, y_pred, sample_weight=sample_weight, **extra_params),
             self.COST_MATRIX: lambda y_true, y_pred, probas:\
-                make_cost_matrix_score(self.config)(y_true, y_pred, sample_weight=sample_weight) / len(y_true),
+                make_cost_matrix_score(self.config)(y_true, y_pred, sample_weight=sample_weight) / float(len(y_true)),
             self.CUMULATIVE_LIFT: lambda y_true, y_pred, probas:\
                 make_lift_score(self.config)(y_true, probas, sample_weight=sample_weight),
             self.LOG_LOSS: lambda y_true, y_pred, probas: log_loss(y_true, probas, sample_weight=sample_weight),
@@ -71,8 +71,8 @@ class Metric(object):
         return perf_metric(y_true, y_pred, probas)
 
 
-def worst_group_performance(metric: Metric, subpopulation: np.array, y_true: np.array,
-                            y_pred: np.array, probas: np.array, sample_weights: np.array):
+def worst_group_performance(metric, subpopulation, y_true,
+                            y_pred, probas, sample_weights):
     performances = []
     subpopulation_values = np.unique(subpopulation)
     for subpop in subpopulation_values:
@@ -85,12 +85,12 @@ def worst_group_performance(metric: Metric, subpopulation: np.array, y_true: np.
     return min(performances) if metric.is_greater_better() else max(performances)
 
 
-def corruption_resilience_classification(clean_y_pred: np.array, perturbed_y_pred: np.array):
-    return (clean_y_pred == perturbed_y_pred).sum() / len(clean_y_pred)
+def corruption_resilience_classification(clean_y_pred, perturbed_y_pred):
+    return (clean_y_pred == perturbed_y_pred).sum() / float(len(clean_y_pred))
 
 
-def corruption_resilience_regression(clean_y_pred: np.array, perturbed_y_pred: np.array,
-                                 clean_y_true: np.array):
+def corruption_resilience_regression(clean_y_pred, perturbed_y_pred,
+                                 clean_y_true):
     clean_abs_error = np.abs(clean_y_pred - clean_y_true)
     perturbed_abs_error = np.abs(perturbed_y_pred - clean_y_true)
-    return np.count_nonzero(perturbed_abs_error <= clean_abs_error) / len(clean_y_true)
+    return np.count_nonzero(perturbed_abs_error <= clean_abs_error) / float(len(clean_y_true))

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import numpy as np
 import logging
 import traceback
@@ -13,7 +12,6 @@ from dataiku.doctor.posttraining.model_information_handler import PredictionMode
 from dku_stress_test_center.metrics import Metric
 from dku_stress_test_center.model_accessor import ModelAccessor
 from dku_stress_test_center.stress_test_center import StressTestGenerator
-from model_metadata import get_model_handler
 from dku_webapp import DKUJSONEncoder
 
 app.json_encoder = DKUJSONEncoder
@@ -30,9 +28,10 @@ def get_model_info():
         if fmi is None:
             model = Model(get_webapp_config()["modelId"])
             version_id = get_webapp_config().get("versionId")
-            original_model_handler = get_model_handler(model, version_id)
-        else:
-            original_model_handler = PredictionModelInformationHandler.from_full_model_id(fmi)
+            fmi = "S-{project_key}-{model_id}-{version_id}".format(
+                project_key=model.projet_key, model_id=model.get_id(), version_id=version_id
+            )
+        original_model_handler = PredictionModelInformationHandler.from_full_model_id(fmi)
         stressor.model_accessor = ModelAccessor(original_model_handler)
 
         return jsonify(
