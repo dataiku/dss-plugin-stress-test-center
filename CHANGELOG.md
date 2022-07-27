@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.0.5 - 2022-07
+## Version 1.0.5 - 2022-07-27
 - Webapp: Only display model view for tasks using a Python backend
 - Webapp: Make the model view py2 compatible
 - Webapp: Use a better ModalService
