@@ -1,5 +1,8 @@
 # Changelog
 
+## Hotfix 1.0.6 - 2022-08-10
+- Webapp: Fix typo
+
 ## Version 1.0.5 - 2022-07-27
 - Webapp: Only display model view for tasks using a Python backend
 - Webapp: Make the model view py2 compatible
