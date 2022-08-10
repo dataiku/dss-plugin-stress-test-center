@@ -29,7 +29,7 @@ def get_model_info():
             model = Model(get_webapp_config()["modelId"])
             version_id = get_webapp_config().get("versionId")
             fmi = "S-{project_key}-{model_id}-{version_id}".format(
-                project_key=model.projet_key, model_id=model.get_id(), version_id=version_id
+                project_key=model.project_key, model_id=model.get_id(), version_id=version_id
             )
         original_model_handler = PredictionModelInformationHandler.from_full_model_id(fmi)
         stressor.model_accessor = ModelAccessor(original_model_handler)
