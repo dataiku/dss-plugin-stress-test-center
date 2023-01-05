@@ -249,7 +249,7 @@ class StressTestGenerator(object):
 
         target_map = self.model_accessor.get_target_map()
         target = self.model_accessor.get_target_variable()
-        df = df[df[target].isin(target_map.keys())]
+        df = df[df[target].isin(target_map)]
         
         self._clean_df = self.model_accessor.predict_and_concatenate(df)
         if self._clean_df.shape[0] == 0:
