@@ -4,7 +4,6 @@ import numpy as np
 from dku_stress_test_center.utils import DkuStressTestCenterConstants
 from dku_webapp import MISSING_VALUE
 from dku_stress_test_center.metrics import Metric
-from functools import lru_cache
 
 logger = logging.getLogger(__name__)
 
@@ -19,20 +18,17 @@ class ModelAccessor(object):
         """
         return self.model_handler.get_prediction_type()
 
-    @lru_cache
     def get_target_variable(self):
         """
         Return the name of the target variable
         """
         return self.model_handler.get_target_variable()
 
-    @lru_cache
     def get_target_classes(self):
         if self.get_prediction_type() == DkuStressTestCenterConstants.REGRESSION:
             return []
         return list(self.get_target_map().keys())
 
-    @lru_cache
     def get_target_map(self):
         return self.model_handler.get_target_map()
 
@@ -82,7 +78,6 @@ class ModelAccessor(object):
             return Metric.ROC_AUC
         return initial_evaluation_metric
 
-    @lru_cache
     def get_weight_variable(self):
         if self.model_handler.with_sample_weights():
             return self.model_handler.get_sample_weight_variable()
