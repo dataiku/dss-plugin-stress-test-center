@@ -1,0 +1,29 @@
+{
+    "meta": {
+        "label": "Stress test center",
+        "description": "Put your model through a battery of tests and see how it handles the unexpected",
+        "icon": "icon-stethoscope"
+    },
+    "baseType": "STANDARD",
+    "hasBackend": "true",
+    "useContextualCodeEnv": true,
+    "standardWebAppLibraries": ["dataiku", "font_awesome"],
+    "roles": [
+        {
+            "type": "SAVED_MODEL",
+            "predictionTypes": ["BINARY_CLASSIFICATION", "MULTICLASS", "REGRESSION"],
+            "backendTypes": ["PY_MEMORY"],
+            "contentType": "prediction",
+            "targetParamsKey": "modelId",
+            "pathParamsKey": "versionId"
+        },
+         {
+          "type": "ANALYSIS",
+          "predictionTypes": ["BINARY_CLASSIFICATION", "MULTICLASS", "REGRESSION"],
+          "backendTypes": ["PY_MEMORY"],
+          "contentType": "prediction",
+          "targetParamsKey": "trainedModelFullModelId"
+        }
+    ],
+    "params":[]
+}

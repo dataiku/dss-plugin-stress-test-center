@@ -1,0 +1,26 @@
+<script src="/plugins/model-stress-test/resource/spin.min.js" type="text/javascript"></script>
+<script src="/plugins/model-stress-test/resource/angular.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var app = angular.module("StressTestCenter", []);
+</script>
+<script src="/plugins/model-stress-test/resource/js/helpers.js" type="text/javascript"></script>
+<link rel="stylesheet" href="/static/public/styles/1.0.0/typography.css"/>
+<link rel="stylesheet" href="/static/public/styles/1.0.0/fonts.css"/>
+
+<body ng-app = "StressTestCenter"
+      ng-controller = "VizController"
+      class="webapp"
+      ng-click="$broadcast('closeDropdowns', $event.target)"
+      ng-keyup="$broadcast('closeDropdowns')"
+      tabindex="0">
+
+    <div class="webapp-main">
+        <form name="forms.settings" ng-include="'/plugins/model-stress-test/resource/templates/settings-panel.html'"
+             class="webapp-panel webapp-panel__settings"></form>
+
+        <div ng-include="'/plugins/model-stress-test/resource/templates/results-panel.html'"
+             class="webapp-panel webapp-panel__results"></div>
+    </div>
+</body>
+
+

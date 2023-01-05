@@ -1,0 +1,47 @@
+{
+  "actions": [
+    {
+      "ts": 1669647271302,
+      "action": "INSTALL",
+      "user": "api:5QM8BDXOgzFqRkK9"
+    },
+    {
+      "ts": 1669647612075,
+      "action": "UPGRADE",
+      "user": "api:5QM8BDXOgzFqRkK9"
+    },
+    {
+      "ts": 1669648176648,
+      "action": "UPGRADE",
+      "user": "api:CYoKa7DYTegfZPlW"
+    },
+    {
+      "ts": 1669648553852,
+      "action": "UPGRADE",
+      "user": "admin"
+    },
+    {
+      "ts": 1669649535517,
+      "action": "UPGRADE",
+      "user": "admin"
+    },
+    {
+      "ts": 1669650180546,
+      "action": "UPGRADE",
+      "user": "admin"
+    },
+    {
+      "ts": 1669650391743,
+      "action": "UPGRADE",
+      "user": "admin"
+    },
+    {
+      "ts": 1669650559436,
+      "action": "UPGRADE",
+      "user": "admin"
+    }
+  ],
+  "gitState": {
+    "enabled": false
+  }
+}

@@ -1,0 +1,235 @@
+<div ng-if="loading.modelInfo" class="spinner-div">
+    <spinner></spinner>
+</div>
+
+<div class="settings-section" ng-if="!loading.modelInfo">
+    <div class="webapp-subsection grand-title flex settings-section__header">
+        Stress tests
+        <help-icon
+            class="small-title text-sb"
+            help-text="Select and configure stress tests to simulate likely real-world data degradations and variations.">
+        </help-icon>
+    </div>
+    <div class="webapp-subsection">
+        <div class="webapp-subsection__delimiter_title">
+            General settings
+        </div>
+        <div class="settings__form">
+            <div class="control-group settings__form_field">
+                <div custom-dropdown
+                    id="general"
+                    form="forms.settings"
+                    possible-values="METRIC_NAMES"
+                    item="settings.perfMetric"
+                    item-name="metric"
+                    label="Evaluation metric"
+                    display="displayWithuserFriendlyMetricName"
+                    class="settings__form_field">
+                </div>
+                <div class="text-tiny text-lighter">
+                    Choose the metric to assess the model's performance
+                </div>
+            </div>
+            <div class="control-group settings__form_field">
+                <label for="samples" class="label-text">Ratio of samples for the stress tests</label>
+                <input type="number" id="samples" ng-model="settings.samples" step="0.01" min="0.01" max="1" required>
+                <div class="text-tiny text-lighter">
+                    Set the ratio of rows from the model's test dataset to run the selected tests
+                </div>
+            </div>
+            <div class="control-group settings__form_field">
+                <label for="randomSeed" class="label-text">Random seed</label>
+                <input type="number" id="randomSeed"
+                    ng-model="settings.randomSeed"
+                    step="1" required>
+                <div class="text-tiny text-lighter">
+                    Using a fixed random seed allows for reproducible results
+                </div>
+            </div>
+            <div class="dku-btn-container--right-align settings__form_field elem--with-tooltip">
+                <button class="dku-btn dku-btn-primary"
+                        type="submit"
+                        ng-class="{ 'dku-btn--disabled': loading.results || !canRunTests() }"
+                        ng-click="runAnalysis()"
+                        ng-mouseover="showDisabledTooltip = true"
+                        ng-mouseleave="showDisabledTooltip = false">
+                    Run tests
+                </button>
+                <div class="details__tooltip" ng-show="!canRunTests() && showDisabledTooltip">
+                    Some stress tests settings are invalid or incomplete
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="settings-section" ng-if="!loading.modelInfo && uiState.RebalanceTarget.available">
+    <div class="webapp-subsection">
+        <div class="webapp-subsection__delimiter_title">
+            {{ CORRUPTION_TYPES.TARGET_SHIFT.displayName }}
+        </div>
+        <div class="text-lighter webapp-subsection__delimiter_text">
+            {{ CORRUPTION_TYPES.TARGET_SHIFT.description }}
+        </div>
+    </div>
+    <div class="webapp-subsection">
+        <div class="flex small-title text-sb settings-subsection__header">
+            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !uiState.RebalanceTarget.activated}">
+                <label class="switch">
+                    <input type="checkbox" ng-model="uiState.RebalanceTarget.activated">
+                    <div class="slider round"></div>
+                </label>
+                <div>{{ uiState.RebalanceTarget.displayName }}</div>
+            </label>
+            <help-icon help-text="Resample data to match a given target distribution"></help-icon>
+        </div>
+        <div class="settings__form"
+            ng-if="uiState.RebalanceTarget.activated">
+            <div key-value-list
+                map="settings.tests.RebalanceTarget.params.priors"
+                key-options="modelInfo.targetClasses"
+                key-label="Target class"
+                key-item-label="class"
+                value-label="Proportion"
+                value-range="[0,1]"
+                step=".01"
+                default-value=".5"
+                form="forms.settings"
+                class="settings__form_field">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="settings-section" ng-if="!loading.modelInfo && uiState.RebalanceFeature.available">
+    <div class="webapp-subsection">
+        <div class="webapp-subsection__delimiter_title">
+            {{ CORRUPTION_TYPES.SUBPOPULATION_SHIFT.displayName }}
+        </div>
+        <div class="text-lighter webapp-subsection__delimiter_text">
+            {{ CORRUPTION_TYPES.SUBPOPULATION_SHIFT.description }}
+        </div>
+    </div>
+    <div class="webapp-subsection">
+        <div class="flex small-title text-sb settings-subsection__header">
+            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !uiState.RebalanceFeature.activated}">
+                <label class="switch">
+                    <input type="checkbox" ng-model="uiState.RebalanceFeature.activated">
+                    <div class="slider round"></div>
+                </label>
+                <div>{{ uiState.RebalanceFeature.displayName }}</div>
+            </label>
+            <help-icon help-text="Resample data to match a given feature distribution"></help-icon>
+        </div>
+        <div class="settings__form"
+            ng-if="uiState.RebalanceFeature.activated">
+            <div class="control-group settings__form_field">
+                <div custom-dropdown
+                    id="rebelance-feature"
+                    form="forms.settings"
+                    possible-values="uiState.RebalanceFeature.availableColumns"
+                    item="settings.tests.RebalanceFeature.population"
+                    item-name="feature"
+                    item-image="featureToTypeIcon"
+                    label="Feature"
+                    on-change="getFeatureCategories"
+                    class="settings__form_field">
+                </div>
+            </div>
+            <div ng-if="loading.featureCategories" class="spinner-div">
+                <spinner></spinner>
+            </div>
+            <div key-value-list
+                ng-if="!loading.featureCategories && modelInfo.featureCategories[settings.tests.RebalanceFeature.population]"
+                map="settings.tests.RebalanceFeature.params.priors"
+                key-options="modelInfo.featureCategories[settings.tests.RebalanceFeature.population]"
+                key-label="Feature category"
+                key-item-label="category"
+                value-label="Proportion"
+                value-range="[0,1]"
+                step=".01"
+                default-value=".5"
+                form="forms.settings"
+                class="settings__form_field">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="settings-section" ng-if="!loading.modelInfo">
+    <div class="webapp-subsection">
+        <div class="webapp-subsection__delimiter_title">
+            {{ CORRUPTION_TYPES.FEATURE_PERTURBATION.displayName }}
+        </div>
+        <div class="text-lighter webapp-subsection__delimiter_text">
+            {{ CORRUPTION_TYPES.FEATURE_PERTURBATION.description }}
+        </div>
+    </div>
+    <div ng-if="uiState.MissingValues.available" class="webapp-subsection">
+        <div class="flex small-title text-sb settings-subsection__header">
+            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !uiState.MissingValues.activated}">
+                <label class="switch">
+                    <input type="checkbox" ng-model="uiState.MissingValues.activated">
+                    <div class="slider round"></div>
+                </label>
+                <div>{{ uiState.MissingValues.displayName }}</div>
+            </label>
+            <help-icon help-text="Randomly inserts missing values in one or several feature columns"></help-icon>
+        </div>
+        <div class="settings__form"
+            ng-if="uiState.MissingValues.activated">
+            <div custom-dropdown
+                id="missing"
+                form="forms.settings"
+                possible-values="uiState.MissingValues.availableColumns"
+                items="settings.tests.MissingValues.selected_features"
+                item-name="feature"
+                item-image="featureToTypeIcon"
+                label="Corrupted features"
+                class="settings__form_field">
+            </div>
+            <div class="control-group settings__form_field">
+                <label for="missingValuesSamples" class="label-text">Ratio of corrupted samples</label>
+                <input type="number" id="missingValuesSamples"
+                    ng-model="settings.tests.MissingValues.params.samples_fraction"
+                    placeholder="0.5" step="0.01" min="0.01" max="1" required>
+            </div>
+        </div>
+    </div>
+    <div ng-if="uiState.Scaling.available" class="webapp-subsection">
+        <div class="flex small-title text-sb settings-subsection__header">
+            <label class="flex settings-subsection-header__title" ng-class="{'text-disabled': !uiState.Scaling.activated}">
+                <label class="switch">
+                    <input type="checkbox" ng-model="uiState.Scaling.activated">
+                    <div class="slider round"></div>
+                </label>
+                <div>{{ uiState.Scaling.displayName }}</div>
+            </label>
+            <help-icon help-text="Multiplies one or several numerical features by a specified coefficient"></help-icon>
+        </div>
+        <div class="settings__form"
+            ng-if="uiState.Scaling.activated">
+            <div custom-dropdown
+                id="scaling"
+                form="forms.settings"
+                possible-values="uiState.Scaling.availableColumns"
+                items="settings.tests.Scaling.selected_features"
+                item-name="feature"
+                item-image="featureToTypeIcon"
+                label="Corrupted features"
+                class="settings__form_field">
+            </div>
+            <div class="control-group settings__form_field">
+                <label for="scalingFactor" class="label-text">Coefficient</label>
+                <input type="number" id="scalingFactor" step="any"
+                    ng-model="settings.tests.Scaling.params.scaling_factor" required>
+            </div>
+            <div class="control-group settings__form_field">
+                <label for="scalingSamples" class="label-text">Ratio of corrupted samples</label>
+                <input type="number" id="scalingSamples"
+                    ng-model="settings.tests.Scaling.params.samples_fraction"
+                    placeholder="0.5" step="0.01" min="0.01" max="1" required>
+            </div>
+        </div>
+    </div>
+</div>

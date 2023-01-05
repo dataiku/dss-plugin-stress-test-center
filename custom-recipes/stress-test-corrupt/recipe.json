@@ -1,0 +1,65 @@
+{
+    "meta": {
+        "label": "Corrupt dataset",
+        "description": "Apply feature corruptions on a dataset",
+        "icon": "icon-bug"
+    },
+    "selectableFromDataset": "input_dataset",
+    "kind": "PYTHON",
+    "inputRoles": [
+        {
+            "name": "input_dataset",
+            "label": "Input dataset",
+            "description": "The dataset to corrupt" ,
+            "arity": "UNARY",
+            "required": true,
+            "acceptsDataset": true
+        }
+    ],
+    "outputRoles": [
+        {
+            "name": "corrupted_dataset",
+            "label": "Corrupted dataset",
+            "description": "The dataset after feature corruption",
+            "arity": "UNARY",
+            "required": true,
+            "acceptsDataset": true
+        }
+    ],
+    "params": [
+        {
+            "name": "stress_test",
+            "label": "Feature corruption",
+            "type": "SELECT",
+            "selectChoices": [
+                { "value": "MissingValues", "label": "Insert missing values"},
+                { "value": "Scaling", "label": "Multiply by a coefficient"}
+            ],
+            "mandatory": true
+        },
+        {
+            "name": "selected_features",
+            "label": "Corrupted features",
+            "type": "COLUMNS",
+            "description": "Features where the corruption will be applied",
+            "mandatory": true,
+            "columnRole": "input_dataset"
+        },
+        {
+            "name": "samples_fraction",
+            "label": "Ratio of samples to corrupt",
+            "type": "DOUBLE",
+            "defaultValue": 0.5,
+            "mandatory": true
+        },
+        {
+            "name": "scaling_factor",
+            "label": "Coefficient",
+            "type": "DOUBLE",
+            "defaultValue": 10,
+            "mandatory": true,
+            "visibilityCondition": "model.stress_test == 'Scaling'"
+        }
+    ],
+    "resourceKeys": []
+}

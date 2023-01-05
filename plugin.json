@@ -1,0 +1,17 @@
+{
+    "id": "model-stress-test",
+    "version": "1.0.6",
+    "meta": {
+        "label": "Model stress test",
+        "category": "Machine Learning",
+        "description": "Put your model through a battery of tests and see how it handles the unexpected",
+        "author": "Dataiku (Agathe Guillemot & Simona Maggio)",
+        "icon": "icon-stethoscope",
+        "licenseInfo": "Apache Software License",
+        "url": "https://www.dataiku.com/product/plugins/model-stress-test/",
+        "tags": [
+            "Machine Learning"
+        ],
+        "supportLevel": "NOT_SUPPORTED"
+    }
+}
