@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.0.7 - 2023-04-19
+- Webapp: Fix issue when at least one class is not present in the target mapping of the modeling task
+
 ## Hotfix 1.0.6 - 2022-08-10
 - Webapp: Fix typo
 
