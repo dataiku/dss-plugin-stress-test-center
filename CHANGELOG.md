@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.1.7 - 2023-05-26
+## Version 1.1.0 - 2023-05-26
 - Remove code env
 
 ## Version 1.0.7 - 2023-04-19
