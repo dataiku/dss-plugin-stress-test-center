@@ -69,6 +69,10 @@ input:focus-visible {
     border: 0;
 }
 
+.mright16 {
+    margin-right: 16px;
+}
+
 /** SPINNER **/
 
 .spinner-container {
@@ -351,11 +355,14 @@ transform: translate(-125%, -50%);
 /* Custom key value list */
 .key-value-labels {
     justify-content: space-between;
-    margin-right: 16px;
 }
 
 .key-value-labels__key, .key-value-element__key {
-    width: calc(100% - 125px);
+    width: calc(100% - 120px);
+}
+
+.key-value-element--no-delete .key-value-labels__key, .key-value-element--no-delete .key-value-element__key {
+    width: calc(100% - 104px);
 }
 
 .key-value-labels__value, .key-value-element__value {
@@ -380,7 +387,7 @@ transform: translate(-125%, -50%);
 
 .icon-trash {
     color: var(--error-red);
-    margin-left: 8px;
+    margin-left: 4px;
 }
 
 .icon-trash:hover {
