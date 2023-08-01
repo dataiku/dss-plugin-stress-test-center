@@ -221,7 +221,7 @@ const versionId = webAppConfig['versionId'];
             Scaling: {
                 displayName: "Multiply by a coefficient"
             }
-        }
+        };
 
         const featureTypesToIconClass = {
             NUMERIC: "numerical",
@@ -232,12 +232,14 @@ const versionId = webAppConfig['versionId'];
 
         $scope.featureToTypeIcon = function(feature) {
             return featureTypesToIconClass[features[feature]];
-        }
+        };
 
         $scope.canRunTests = function() {
             return $scope.forms.settings.$valid
+                && (!$scope.uiState.RebalanceFeature.activated || !angular.equals($scope.settings.tests.RebalanceFeature.params.priors, {}))
+                && (!$scope.uiState.RebalanceTarget.activated || !angular.equals($scope.settings.tests.RebalanceTarget.params.priors, {}))
                 && Object.values($scope.uiState).some(t => t.activated);
-        }
+        };
 
         $scope.getFeatureCategories = function(feature) {
             if (!$scope.modelInfo.featureCategories[feature]) {
@@ -251,7 +253,7 @@ const versionId = webAppConfig['versionId'];
                 });
             }
             $scope.settings.tests.RebalanceFeature.params.priors = {};
-        }
+        };
 
         $scope.runAnalysis = function () {
             if (!$scope.canRunTests()) return;
@@ -291,7 +293,7 @@ const versionId = webAppConfig['versionId'];
                 $scope.loading.results = false;
                 ModalService.createBackendErrorModal($scope, e.data);
             });
-        }
+        };
 
         let features;
         $scope.loading.modelInfo = true;

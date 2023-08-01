@@ -1,11 +1,11 @@
 <div class="control-group">
     <div class="key-value-list">
-        <div class="key-value-labels flex">
+        <div class="key-value-labels flex" ng-class="{mright16: keys.length !== 1}">
             <div class="key-value-labels__key">{{ keyLabel }}</div>
             <div class="key-value-labels__value">{{ valueLabel }}</div>
         </div>
         <div>
-            <div class="flex key-value-element" ng-repeat="key in keys track by $index">
+            <div class="flex key-value-element" ng-class="{'key-value-element--no-delete': keys.length === 1}" ng-repeat="key in keys track by $index">
                 <div custom-dropdown
                     item="keys[$index]"
                     possible-values="keyOptions"
@@ -22,12 +22,12 @@
                     step="{{ step }}"
                     class="key-value-element__value" required>
                 </input>
-                <i class="icon-trash" ng-click="deleteListItem($index)" ng-class="{'icon--hidden': $first && $last}"></i>
+                <i class="icon-trash" ng-click="deleteListItem($index)" ng-if="keys.length !== 1"></i>
             </div>
         </div>
     </div>
     <button type="button" class="dku-btn dku-btn--txt" ng-if="canAddListItem()" ng-click="addListItem()">
-        <i class="icon-plus-sign"></i>
+        <i class="icon-plus"></i>
         &nbsp;<span>Add a {{ keyItemLabel }}</span>
     </button>
 </div>
