@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.1.1 - 2023-08-01
+- Fix model view always raising an error when running tests on a regression model
+- Ensure Run button properly disabled
+
 ## Version 1.1.0 - 2023-05-26
 - Remove code env
 
