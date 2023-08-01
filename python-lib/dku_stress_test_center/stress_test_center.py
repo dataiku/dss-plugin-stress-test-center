@@ -247,9 +247,10 @@ class StressTestGenerator(object):
         df = self.model_accessor.get_original_test_df(sample_fraction=self._sampling_proportion,
                                                       random_state=self._random_state)
 
-        target_map = self.model_accessor.get_target_map()
-        target = self.model_accessor.get_target_variable()
-        df = df[df[target].isin(target_map)]
+        if self.model_accessor.get_prediction_type() != DkuStressTestCenterConstants.REGRESSION:
+            target_map = self.model_accessor.get_target_map()
+            target = self.model_accessor.get_target_variable()
+            df = df[df[target].isin(target_map)]
         
         self._clean_df = self.model_accessor.predict_and_concatenate(df)
         if self._clean_df.shape[0] == 0:
