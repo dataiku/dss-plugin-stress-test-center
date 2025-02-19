@@ -42,7 +42,7 @@ class MissingValues(Shift):
             X (numpy.ndarray): feature data.
             y (numpy.ndarray): target data.
         """
-        if X.dtype <= np.int and (self.value_to_put_in is None or isinstance(self.value_to_put_in, float)):
+        if X.dtype <= int and (self.value_to_put_in is None or isinstance(self.value_to_put_in, float)):
             Xt = X.astype(float)
         else:
             Xt = copy.deepcopy(X)
@@ -92,7 +92,7 @@ class Scaling(Shift):
             X (numpy.ndarray): feature data.
             y (numpy.ndarray): target data.
         """
-        if X.dtype <= np.int and isinstance(self.scaling_factor, float):
+        if X.dtype <= int and isinstance(self.scaling_factor, float):
             Xt = X.astype(float)
         else:
             Xt = copy.deepcopy(X)
