@@ -55,7 +55,7 @@ class FeaturePerturbationTest(StressTest):
                 self.not_relevant_explanation = "The scaling factor is set to 1."
         elif type(self.shift) is MissingValues:
             for feature in self.features:
-                if preprocessing[feature].get("missing_handling", "") == "DROP_ROW":
+                if preprocessing[feature].get("missing_handling") == "DROP_ROW":
                     self.not_relevant_explanation = ("The feature '{}' drops ".format(feature) +\
                         "the rows with missing values and does not predict them.")
         else:
