@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
+import numpy as np
 import warnings
 from collections import defaultdict
 from sklearn.exceptions import UndefinedMetricWarning
@@ -54,7 +55,7 @@ class FeaturePerturbationTest(StressTest):
                 self.not_relevant_explanation = "The scaling factor is set to 1."
         elif type(self.shift) is MissingValues:
             for feature in self.features:
-                if preprocessing[feature]["missing_handling"] == "DROP_ROW":
+                if preprocessing[feature].get("missing_handling") == "DROP_ROW":
                     self.not_relevant_explanation = ("The feature '{}' drops ".format(feature) +\
                         "the rows with missing values and does not predict them.")
         else:
@@ -109,7 +110,7 @@ class SubpopulationShiftTest(StressTest):
     def perturb_df(self, df):
         df = df.copy()
         X = df.loc[:, df.columns != self.population].values
-        y = df.loc[:, self.population].replace({pd.np.nan: MISSING_VALUE}).values
+        y = df.loc[:, self.population].replace({np.nan: MISSING_VALUE}).values
 
         X, y = self.shift.transform(X, y)
         df.loc[:, df.columns != self.population] = X
@@ -325,7 +326,7 @@ class StressTestGenerator(object):
         critical_samples = self.model_accessor.get_original_test_df(
             sample_fraction=self._sampling_proportion,
             random_state=self._random_state
-        ).loc[indexes_to_keep, :].replace({pd.np.nan: ""})
+        ).loc[indexes_to_keep, :].replace({np.nan: ""})
 
         return {
             "uncertainties": critical_uncertainties,

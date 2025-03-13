@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.1.2 - 2025-03-13
+- Fix issue when a missing handling method is not set
+- Fix issues with deprecated methods
+
 ## Version 1.1.1 - 2023-08-01
 - Fix model view always raising an error when running tests on a regression model
 - Ensure Run button properly disabled

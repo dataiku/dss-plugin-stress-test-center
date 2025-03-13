@@ -139,7 +139,7 @@ def test_compute_test_metrics(mocker, stress_test_generator, stress_test):
     np.testing.assert_array_equal(clean_probas, np.empty((6,0)))
     np.testing.assert_array_equal(corrup_probas, np.empty((5,0)))
     pd.testing.assert_series_equal(
-        clean_weights, pd.Series([pd.np.nan, "b", "b", pd.np.nan, "c", "g"], name="f3")
+        clean_weights, pd.Series([np.nan, "b", "b", np.nan, "c", "g"], name="f3")
     )
     pd.testing.assert_series_equal(
         corrup_weights, pd.Series(["b", "b", "b", "c", "g"], name="f3", index=[1,2,5,0,3])
