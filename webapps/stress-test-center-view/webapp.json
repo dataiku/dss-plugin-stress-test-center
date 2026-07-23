@@ -7,7 +7,7 @@
     "baseType": "STANDARD",
     "hasBackend": "true",
     "useContextualCodeEnv": true,
-    "standardWebAppLibraries": ["dataiku", "font_awesome"],
+    "standardWebAppLibraries": ["dataiku", "font_awesome", "jquery"],
     "roles": [
         {
             "type": "SAVED_MODEL",

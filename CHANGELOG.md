@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.1.3 - 2026-07-23
+- Webapp: Add `jquery` explicitly to `standardWebAppLibraries` fixing the plugin with DSS 13.5.4+
+
 ## Version 1.1.2 - 2025-03-13
 - Fix issue when a missing handling method is not set
 - Fix issues with deprecated methods
