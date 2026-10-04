@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.1.4 - Documentation update - 2026-10-04
+
+- Update documentation links to the DSS reference documentation.
+
 ## Version 1.1.3 - 2026-07-23
 - Webapp: Add `jquery` explicitly to `standardWebAppLibraries` fixing the plugin with DSS 13.5.4+
 
